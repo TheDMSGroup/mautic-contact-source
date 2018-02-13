@@ -56,9 +56,9 @@ if ($tmpl == 'index') {
                     'MauticCoreBundle:Helper:tableheader.html.php',
                     [
                         'sessionVar' => 'contactserver',
-                        'orderBy'    => 'f.type',
-                        'text'       => 'mautic.contactserver.thead.type',
-                        'class'      => 'visible-md visible-lg col-contactserver-type',
+                        'orderBy'    => 'f.token',
+                        'text'       => 'mautic.contactserver.thead.token',
+                        'class'      => 'visible-md visible-lg col-contactserver-token',
                     ]
                 );
 
@@ -123,7 +123,7 @@ if ($tmpl == 'index') {
                         <?php $color    = ($category) ? '#'.$category->getColor() : 'inherit'; ?>
                         <span style="white-space: nowrap;"><span class="label label-default pa-4" style="border: 1px solid #d5d5d5; background: <?php echo $color; ?>;"> </span> <span><?php echo $catName; ?></span></span>
                     </td>
-                    <td class="visible-md visible-lg"><?php echo $view['translator']->trans('mautic.contactserver.type.'.$item->getType()); ?></td>
+                    <td class="visible-md visible-lg"><?php echo $item->getToken(); ?></td>
                     <td class="visible-md visible-lg"><?php echo $item->getId(); ?></td>
                 </tr>
             <?php endforeach; ?>

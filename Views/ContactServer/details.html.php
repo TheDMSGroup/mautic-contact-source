@@ -41,8 +41,6 @@ $view['slots']->set(
     )
 );
 
-$website = $item->getWebsite();
-
 ?>
 <!-- start: box layout -->
 <div class="box-layout">

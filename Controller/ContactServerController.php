@@ -157,12 +157,6 @@ class ContactServerController extends FormController
             $args['viewParameters']['events'] = $model->getEngagements($item);
             $args['viewParameters']['dateRangeForm'] = $dateRangeForm->createView();
 
-            if ('link' == $item->getType()) {
-                $args['viewParameters']['trackables'] = $this->getModel('page.trackable')->getTrackableList(
-                    'contactserver',
-                    $item->getId()
-                );
-            }
         }
 
         return $args;

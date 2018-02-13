@@ -16,9 +16,6 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
 /**
  * Class ContactServerException
  *
- * This form of exception indicates that we may re-try the send at a later date or time.
- * Also can indicate a Stat type for logging.
- *
  * @package MauticPlugin\MauticContactServerBundle\Exception
  */
 class ContactServerException extends \Exception
