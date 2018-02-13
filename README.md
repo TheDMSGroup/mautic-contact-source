@@ -3,6 +3,8 @@
 
 Creates API endpoints for receiving contacts from third parties.
 
+Can optionally be used in tandem with it's sibling, the [Mautic Contact Client](https://github.com/TheDMSGroup/mautic-contact-client) plugin.
+
 ## Todo
 - [ ] Campaigns: A whitelist of campaigns can be selected for the third party to post into.
 - [ ] Campaign Limits: Limit the number of contacts accepted to a campaign within defined time frames.
