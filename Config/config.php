@@ -105,6 +105,13 @@ return [
                 'id'        => 'mautic_contactserver_root',
                 'iconClass' => 'fa-cloud-download',
                 'priority'  => 65,
+                'checks'    => [
+                    'integration' => [
+                        'Server' => [
+                            'enabled' => true,
+                        ],
+                    ],
+                ],
             ],
         ],
     ],
