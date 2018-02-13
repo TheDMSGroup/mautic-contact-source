@@ -41,6 +41,8 @@ $view['slots']->set(
     )
 );
 
+$token = $item->getToken();
+
 ?>
 <!-- start: box layout -->
 <div class="box-layout">
@@ -182,12 +184,12 @@ $view['slots']->set(
     <!-- right section -->
     <div class="col-md-3 bg-white bdr-l height-auto">
         <!-- form HTML -->
-        <?php if ($website): ?>
+        <?php if ($token): ?>
             <div class="pa-md">
                 <div class="panel bg-info bg-light-lg bdr-w-0 mb-0">
                     <div class="panel-body">
-                        <h5 class="fw-sb mb-sm"><?php echo $view['translator']->trans('mautic.contactserver.form.website'); ?></h5>
-                        <p class="mb-sm"><a href="<?php echo $website; ?>" target="_blank"><?php echo $website; ?></a></p>
+                        <h5 class="fw-sb mb-sm"><?php echo $view['translator']->trans('mautic.contactserver.form.token'); ?></h5>
+                        <p class="mb-sm"><?php echo $token; ?></p>
                     </div>
                 </div>
             </div>
