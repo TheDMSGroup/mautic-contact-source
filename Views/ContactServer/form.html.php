@@ -40,38 +40,8 @@ echo $view['form']->start($form);
                     </a>
                 </li>
                 <li>
-                    <a href="#duplicate" role="tab" data-toggle="tab" class="contactserver-tab">
-                        <?php echo $view['translator']->trans('mautic.contactserver.form.group.duplicate'); ?>
-                    </a>
-                </li>
-                <li>
-                    <a href="#exclusive" role="tab" data-toggle="tab" class="contactserver-tab">
-                        <?php echo $view['translator']->trans('mautic.contactserver.form.group.exclusive'); ?>
-                    </a>
-                </li>
-                <li>
-                    <a href="#filter" role="tab" data-toggle="tab" class="contactserver-tab">
-                        <?php echo $view['translator']->trans('mautic.contactserver.form.group.filter'); ?>
-                    </a>
-                </li>
-                <li>
-                    <a href="#limits" role="tab" data-toggle="tab" class="contactserver-tab">
-                        <?php echo $view['translator']->trans('mautic.contactserver.form.group.limits'); ?>
-                    </a>
-                </li>
-                <li id="payload-tab" class="hide">
-                    <a href="#payload" role="tab" data-toggle="tab" class="contactserver-tab">
-                        <?php echo $view['translator']->trans('mautic.contactserver.form.group.payload'); ?>
-                    </a>
-                </li>
-                <li>
-                    <a href="#attribution" role="tab" data-toggle="tab" class="contactserver-tab">
-                        <?php echo $view['translator']->trans('mautic.contactserver.form.group.attribution'); ?>
-                    </a>
-                </li>
-                <li>
-                    <a href="#schedule" role="tab" data-toggle="tab" class="contactserver-tab">
-                        <?php echo $view['translator']->trans('mautic.contactserver.form.group.schedule'); ?>
+                    <a href="#campaigns" role="tab" data-toggle="tab" class="contactserver-tab">
+                        <?php echo $view['translator']->trans('mautic.contactserver.form.group.campaigns'); ?>
                     </a>
                 </li>
             </ul>
@@ -86,10 +56,10 @@ echo $view['form']->start($form);
                                 <?php echo $view['form']->row($form['name']); ?>
                             </div>
                             <div class="col-md-2">
-                                <?php echo $view['form']->row($form['type']); ?>
+                                <?php echo $view['form']->row($form['documentation']); ?>
                             </div>
                             <div class="col-md-5">
-                                <?php echo $view['form']->row($form['website']); ?>
+                                <?php echo $view['form']->row($form['token']); ?>
                             </div>
                         </div>
                         <div class="row">
@@ -100,110 +70,12 @@ echo $view['form']->start($form);
                     </div>
                 </div>
             </div>
-            <div class="tab-pane fade bdr-rds-0 bdr-w-0" id="attribution">
+            <div class="tab-pane fade bdr-rds-0 bdr-w-0" id="campaigns">
                 <div class="pa-md">
                     <div class="form-group mb-0">
                         <div class="row">
                             <div class="col-sm-6">
-                                <?php echo $view['form']->row($form['attribution_default']); ?>
-                                <?php echo $view['form']->row($form['attribution_settings']); ?>
-                            </div>
-                        </div>
-                        <hr class="mnr-md mnl-md">
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade bdr-rds-0 bdr-w-0" id="duplicate">
-                <div class="pa-md">
-                    <div class="form-group mb-0">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <?php echo $view['form']->row($form['duplicate']); ?>
-                            </div>
-                        </div>
-                        <hr class="mnr-md mnl-md">
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade bdr-rds-0 bdr-w-0" id="exclusive">
-                <div class="pa-md">
-                    <div class="form-group mb-0">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <?php echo $view['form']->row($form['exclusive']); ?>
-                            </div>
-                        </div>
-                        <hr class="mnr-md mnl-md">
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade bdr-rds-0 bdr-w-0" id="filter">
-                <div class="pa-md">
-                    <div class="form-group mb-0">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <?php echo $view['form']->row($form['filter']); ?>
-                            </div>
-                        </div>
-                        <hr class="mnr-md mnl-md">
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade bdr-rds-0 bdr-w-0" id="limits">
-                <div class="pa-md">
-                    <div class="form-group mb-0">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <?php echo $view['form']->row($form['limits']); ?>
-                            </div>
-                        </div>
-                        <hr class="mnr-md mnl-md">
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade bdr-rds-0 bdr-w-0" id="payload">
-                <div class="pa-md">
-                    <div class="form-group mb-0">
-                        <div class="row api_payload hide">
-                            <div class="col-md-12">
-                                <div id="api_payload_buttons" class="toolbar-form-buttons pull-right hide">
-                                    <div class="btn-group hidden-xs">
-                                        <button type="button" class="btn btn-default" id="api_payload_test" data-toggle="button" aria-pressed="false" autocomplete="off">
-                                            <i class="fa fa-check-circle text-success"></i>
-                                            <?php echo $view['translator']->trans('mautic.contactserver.form.test'); ?>
-                                        </button>
-                                        <button type="button" class="btn btn-default btn-nospin" id="api_payload_advanced" data-toggle="button" aria-pressed="false" autocomplete="off">
-                                            <i class="fa fa-low-vision"></i>
-                                            <?php echo $view['translator']->trans('mautic.contactserver.form.advanced'); ?>
-                                        </button>
-                                    </div>
-                                </div>
-                                <?php echo $view['form']->row($form['api_payload']); ?>
-                                <div id="api_payload_test_result" class="hide">
-                                    <hr/>
-                                    <strong><?php echo $view['translator']->trans('mautic.contactserver.form.test_results'); ?></strong>
-                                    <div id="api_payload_test_result_yaml">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row file_payload hide">
-                            <div class="col-md-12">
-                                <?php echo $view['form']->row($form['file_payload']); ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade bdr-rds-0 bdr-w-0" id="schedule">
-                <div class="pa-md">
-                    <div class="form-group mb-0">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <?php echo $view['form']->row($form['schedule_timezone']); ?>
-                                <?php echo $view['form']->row($form['schedule_hours']); ?>
-                                <div id="contactserver_schedule_hours_widget"></div>
-                                <?php echo $view['form']->row($form['schedule_exclusions']); ?>
+                                <?php echo $view['form']->row($form['campaign_settings']); ?>
                             </div>
                         </div>
                         <hr class="mnr-md mnl-md">

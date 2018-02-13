@@ -70,38 +70,10 @@ class ContactServerType extends AbstractType
         );
 
         $builder->add(
-            'api_payload',
-            'textarea',
+            'documentation',
+            'boolean',
             [
-                'label'      => 'mautic.contactserver.form.api_payload',
-                'label_attr' => ['class' => 'control-label api-payload'],
-                'attr'       => [
-                    'class'        => 'form-control api-payload',
-                    'rows'         => 12,
-                ],
-                'required' => false,
-            ]
-        );
-
-        $builder->add(
-            'file_payload',
-            'textarea',
-            [
-                'label'      => 'mautic.contactserver.form.file_payload',
-                'label_attr' => ['class' => 'control-label file-payload'],
-                'attr'       => [
-                    'class'        => 'form-control file-payload',
-                    'rows'         => 12,
-                ],
-                'required' => false,
-            ]
-        );
-
-        $builder->add(
-            'website',
-            'url',
-            [
-                'label'      => 'mautic.contactserver.form.website',
+                'label'      => 'mautic.contactserver.form.documentation',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => [
                     'class'   => 'form-control',
@@ -112,131 +84,14 @@ class ContactServerType extends AbstractType
         );
 
         $builder->add(
-            'attribution_default',
-            'number',
-            [
-                'label'      => 'mautic.contactserver.form.attribution.default',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'    => 'form-control',
-                    'preaddon' => 'fa fa-money',
-                    'tooltip' => 'mautic.contactserver.form.attribution.default.tooltip',
-                ],
-                'required' => false,
-            ]
-        );
-
-        $builder->add(
-            'attribution_settings',
+            'campaign_settings',
             'textarea',
             [
-                'label'      => 'mautic.contactserver.form.attribution.settings',
+                'label'      => 'mautic.contactserver.form.campaign.settings',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => [
                     'class'        => 'form-control',
                     'rows'         => 12,
-                ],
-                'required' => false,
-            ]
-        );
-
-        $builder->add(
-            'duplicate',
-            'textarea',
-            [
-                'label'      => 'mautic.contactserver.form.duplicate',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'        => 'form-control',
-                    'rows'         => 12,
-                ],
-                'required' => false,
-            ]
-        );
-
-        $builder->add(
-            'exclusive',
-            'textarea',
-            [
-                'label'      => 'mautic.contactserver.form.exclusive',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'        => 'form-control',
-                    'rows'         => 12,
-                ],
-                'required' => false,
-            ]
-        );
-
-        $builder->add(
-            'filter',
-            'textarea',
-            [
-                'label'      => 'mautic.contactserver.form.filter',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'        => 'form-control',
-                    'rows'         => 12,
-                ],
-                'required' => false,
-            ]
-        );
-
-        $builder->add(
-            'limits',
-            'textarea',
-            [
-                'label'      => 'mautic.contactserver.form.limits',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'        => 'form-control',
-                    'rows'         => 12,
-                ],
-                'required' => false,
-            ]
-        );
-
-        $builder->add(
-            'schedule_timezone',
-            'timezone',
-            [
-                'label'      => 'mautic.contactserver.form.schedule_timezone',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'   => 'form-control',
-                    'tooltip'      => 'mautic.contactserver.form.schedule_timezone.tooltip',
-                ],
-                'multiple'    => false,
-                'empty_value' => 'mautic.user.user.form.defaulttimezone',
-                'required'    => false,
-            ]
-        );
-
-        $builder->add(
-            'schedule_hours',
-            'textarea',
-            [
-                'label'      => 'mautic.contactserver.form.schedule_hours',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'        => 'form-control',
-                    'rows'         => 12,
-                    'tooltip'      => 'mautic.contactserver.form.schedule_hours.tooltip',
-                ],
-                'required' => false,
-            ]
-        );
-
-        $builder->add(
-            'schedule_exclusions',
-            'textarea',
-            [
-                'label'      => 'mautic.contactserver.form.schedule_exclusions',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'        => 'form-control',
-                    'rows'         => 12,
-                    'tooltip'      => 'mautic.contactserver.form.schedule_exclusions.tooltip',
                 ],
                 'required' => false,
             ]
@@ -304,21 +159,30 @@ class ContactServerType extends AbstractType
         );
 
         $builder->add(
-            'type',
-            'button_group',
+            'documentation',
+            'yesno_button_group',
             [
-                'label' => 'mautic.contactserver.form.type',
-                'label_attr' => ['class' => 'control-label contactserver-type'],
-                'choices' => [
-                    'mautic.contactserver.form.type.api' => 'api',
-                    'mautic.contactserver.form.type.file' => 'file',
-                ],
+                'label' => 'mautic.contactserver.form.documentation',
+                'label_attr' => ['class' => 'control-label'],
                 'choices_as_values' => true,
                 'required' => true,
                 'attr'       => [
                     'class'       => 'form-control',
-                    'tooltip'     => 'mautic.contactserver.form.type.tooltip',
-                    'onchange'    => 'Mautic.contactserverTypeChange(this);'
+                    'tooltip'     => 'mautic.contactserver.form.documentation.tooltip',
+                ],
+            ]
+        );
+
+        $builder->add(
+            'token',
+            'text',
+            [
+                'label' => 'mautic.contactserver.form.token',
+                'label_attr' => ['class' => 'control-label'],
+                'required' => false,
+                'attr'       => [
+                    'class'       => 'form-control',
+                    'tooltip'     => 'mautic.contactserver.form.token.tooltip',
                 ],
             ]
         );
