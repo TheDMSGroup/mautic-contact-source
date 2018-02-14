@@ -32,6 +32,9 @@ class ContactServer extends FormEntity
     private $description;
 
     /** @var string */
+    private $description_public;
+
+    /** @var string */
     private $name;
 
     /** @var */
@@ -55,7 +58,8 @@ class ContactServer extends FormEntity
     /**
      * ContactServer constructor.
      */
-    public function __construct(){
+    public function __construct()
+    {
         if (!$this->token) {
             $this->token = sha1(uniqid());
         }
@@ -124,6 +128,7 @@ class ContactServer extends FormEntity
             ->addProperties(
                 [
                     'description',
+                    'description_public',
                     'token',
                     'documentation',
                     'publishUp',
@@ -211,7 +216,7 @@ class ContactServer extends FormEntity
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getId()
     {
@@ -219,7 +224,7 @@ class ContactServer extends FormEntity
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getDescription()
     {
@@ -227,7 +232,7 @@ class ContactServer extends FormEntity
     }
 
     /**
-     * @param mixed $description
+     * @param string $description
      *
      * @return ContactServer
      */
@@ -236,6 +241,28 @@ class ContactServer extends FormEntity
         $this->isChanged('description', $description);
 
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescriptionPublic()
+    {
+        return $this->description_public;
+    }
+
+    /**
+     * @param string $description_public
+     *
+     * @return ContactServer
+     */
+    public function setDescriptionPublic($description_public)
+    {
+        $this->isChanged('descriptionPublic', $description_public);
+
+        $this->description_public = $description_public;
 
         return $this;
     }

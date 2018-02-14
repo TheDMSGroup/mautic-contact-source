@@ -62,9 +62,23 @@ class ContactServerType extends AbstractType
             'description',
             'textarea',
             [
-                'label'      => 'mautic.core.description',
+                'label'      => 'mautic.contactserver.form.description',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => ['class' => 'form-control editor'],
+                'required'   => false,
+            ]
+        );
+
+        $builder->add(
+            'description_public',
+            'textarea',
+            [
+                'label'      => 'mautic.contactserver.form.description_public',
+                'label_attr' => ['class' => 'control-label'],
+                'attr'       => [
+                    'class'   => 'form-control editor',
+                    'tooltip' => 'mautic.contactserver.form.description_public.tooltip',
+                ],
                 'required'   => false,
             ]
         );

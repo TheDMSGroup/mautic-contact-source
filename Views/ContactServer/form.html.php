@@ -67,6 +67,11 @@ echo $view['form']->start($form);
                                 <?php echo $view['form']->row($form['description']); ?>
                             </div>
                         </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <?php echo $view['form']->row($form['description_public']); ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
