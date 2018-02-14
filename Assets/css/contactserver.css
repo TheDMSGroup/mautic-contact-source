@@ -1,0 +1,177 @@
+/* ContactClient API Payload / Filter - QueryBuilder */
+.query-builder .rules-group-container {
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+.query-builder .rules-group-header {
+    margin-bottom: 11px;
+}
+
+.query-builder .rule-container {
+    border: 1px solid transparent;
+    background-color: rgba(0, 0, 0, .04);
+}
+
+.query-builder .rule-value-container {
+    border-left: 0;
+    padding-left: 0;
+}
+
+.query-builder .rule-value-container input[type=number],
+.query-builder .rule-value-container input[type=text],
+.query-builder .rule-value-container select {
+    padding: 6px 12px;
+}
+
+.query-builder .rule-value-container .selectize-input .item {
+    display: inline-block;
+    margin: -5px 7px -4px -7px;
+    font-weight: 600;
+    white-space: nowrap;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: #ffffff;
+    background-color: #2a84c5;
+    border-color: #2a84c5;
+    padding: 3px 5px;
+    font-size: 13px;
+    line-height: 1.356;
+    border-radius: 4px;
+}
+
+/* ContactClient API Payload - JSON Editor */
+.contactserver_jsoneditor h3 {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 0 0 5px 0;
+}
+
+.contactserver_jsoneditor .btn-md i.fa {
+    font-size: 15px;
+}
+
+.contactserver_jsoneditor i.fa-caret-right,
+.contactserver_jsoneditor i.fa-caret-down {
+    font-size: 20px;
+}
+.contactserver_jsoneditor i.fa-caret-square-o-right,
+.contactserver_jsoneditor i.fa-caret-square-o-down {
+    font-size: 16px;
+}
+
+.contactserver_jsoneditor .btn-group.btn-left {
+    margin-bottom: 8px;
+}
+
+/* Hidden nav items in this group cause border radius to look strange */
+.contactserver_jsoneditor .btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle),
+.contactserver_jsoneditor .btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle),
+.contactserver_jsoneditor .btn-group.btn-left .btn {
+    border-radius: 3px;
+}
+
+.contactserver_jsoneditor .btn-group.btn-right .btn {
+    margin-left: 8px;
+    border-radius: 3px;
+}
+
+.contactserver_jsoneditor .btn-group .btn-secondary {
+    background: transparent;
+}
+
+.contactserver_jsoneditor .btn-group .btn-secondary.active {
+    background: transparent;
+}
+
+/* Show the expandable headers as clickable */
+.contactserver_jsoneditor > div > h3 span {
+    cursor: pointer;
+}
+
+/* Hide the root definition as it'd be a duplicate label in this case. */
+.contactserver_jsoneditor > div > h3 {
+    display: none;
+}
+
+.contactserver_jsoneditor > div > .well {
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.contactserver_jsoneditor .well {
+    background: rgba(145, 145, 145, .1);
+    border: 1px solid rgba(45, 45, 45, .1);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+/* Prevent faulty glyphicon load */
+.contactserver_jsoneditor .glyphicon {
+    font-family: "Courier New", monospace;
+}
+
+/* Positioning tooltips in tables */
+.contactserver_jsoneditor td > div > .glyphicon-info-sign.pull-right {
+    position: absolute !important;
+    top: 50px;
+    margin: 0 0 0 -16px;
+    height: 0;
+}
+
+.contactserver_jsoneditor td > div > .glyphicon-info-sign.pull-right:before {
+    opacity: 0;
+    width: 60px;
+}
+
+/* Styling tooltips */
+.contactserver_jsoneditor .glyphicon-info-sign.pull-right {
+    float: none !important;
+    margin-left: 5px;
+}
+
+.contactserver_jsoneditor .glyphicon-info-sign:before {
+    content: "\f059";
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+.contactserver_jsoneditor .glyphicon-info-sign span {
+    font-family: "Open Sans", Helvetica, Arial, sans-serif !important;
+    z-index: 1000;
+    transform: translateX(0.5rem) translateY(-0.5rem) !important;
+}
+
+/* Table styles */
+.contactserver_jsoneditor table.table-bordered {
+    min-width: 100%;
+    border: 0;
+}
+
+.contactserver_jsoneditor table.table-bordered,
+.contactserver_jsoneditor table.table-bordered > thead > tr > th,
+.contactserver_jsoneditor table.table-bordered > tbody > tr > th,
+.contactserver_jsoneditor table.table-bordered > tbody > tr > td,
+.contactserver_jsoneditor table.table-bordered > tfoot > tr > td,
+.contactserver_jsoneditor table.table-bordered > tfoot > tr > th {
+    border-left: 0;
+    border-right: 0;
+    padding: 4px 4px;
+}
+
+.contactserver_jsoneditor table .form-group {
+    margin-bottom: 0;
+}

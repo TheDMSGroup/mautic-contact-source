@@ -22,3 +22,7 @@ If you have success/issues with other versions please report.
 1. Install by running `composer require thedmsgroup/mautic-contact-server-bundle` or by unpacking this repository's contents into a folder named `/plugins/MauticContactServerBundle`
 2. Go to `/s/plugins` and click `Install/Upgrade Plugins`.
 3. After a refresh you will find "Servers" in the main menu.
+
+## Uses these fine libraries:
+
+* [JSON Editor](https://github.com/json-editor/json-editor)

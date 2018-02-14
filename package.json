@@ -1,0 +1,31 @@
+{
+    "name": "MauticContactClientBundle",
+    "description": "Create custom integrations without writing code.",
+    "license": "GPL-3.0-only",
+    "authors": [
+        {
+            "name": "Heath Dutton",
+            "email": "heathdutton@gmail.com"
+        }
+    ],
+    "repository": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/thedmsgroup/mautic-contact-clients"
+        }
+    ],
+    "devDependencies": {
+        "grunt": "^0.4.5",
+        "grunt-autoprefixer": "^1.0.1",
+        "grunt-contrib-copy": "^0.5.0",
+        "grunt-contrib-cssmin": "^0.10.0",
+        "grunt-contrib-uglify": "^3.3.0",
+        "grunt-contrib-watch": "^1.0.0",
+        "grunt-remove": "^0.1.0",
+        "load-grunt-tasks": "^0.6.0",
+        "time-grunt": "^1.0.0"
+    },
+    "dependencies": {
+        "grunt-cli": "^1.2.0"
+    }
+}
