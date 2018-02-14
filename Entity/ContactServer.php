@@ -184,7 +184,7 @@ class ContactServer extends FormEntity
      */
     public function setCampaignSettings($campaign_settings)
     {
-        $this->isChanged('campaign_settings', $campaign_settings);
+        $this->isChanged('campaignSettings', $campaign_settings);
 
         $this->campaign_settings = $campaign_settings;
 
