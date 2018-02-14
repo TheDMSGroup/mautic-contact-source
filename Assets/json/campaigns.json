@@ -98,27 +98,39 @@
           ]
         },
         "utmSource": {
-          "title": "Override UTM Source",
+          "title": "UTM Source",
           "type": "string",
           "propertyOrder": 20,
           "options": {
-            "infoText": "Optionally override the UTM Source sent by the contact server. Leave blank to not override this field value. Override occurs after limits are evaluated below."
+            "infoText": "Optionally override the UTM Source field of each contact when first saved. Leave blank to allow the server to post any value. Override occurs after limits are evaluated below."
           }
         },
         "attribution": {
           "comment": "Using type 'string' here so that a null value can be saved.",
-          "title": "Override Revenue/Cost",
+          "title": "Revenue/Cost",
           "type": "string",
           "propertyOrder": 30,
           "options": {
-            "infoText": "Optionally override the attribution field of each contact when first saved. Leave blank to not override this field. Positive numbers equate to revenue, negative numbers to cost."
+            "infoText": "Optionally override the attribution field of each contact when first saved. Leave blank to allow the server to post any value. Positive numbers equate to revenue, negative numbers to cost."
+          }
+        },
+        "scrubRate": {
+          "title": "Scrub Rate",
+          "type": "integer",
+          "propertyOrder": 40,
+          "format": "range",
+          "default": 0,
+          "maximum": 100,
+          "step": 1,
+          "options": {
+            "infoText": "The percentage of contacts that will be randomly predetermined as 'rejected'. Disabled by default at 0%"
           }
         },
         "limits": {
           "title": "Limits",
           "type": "array",
           "format": "table",
-          "propertyOrder": 40,
+          "propertyOrder": 50,
           "uniqueItems": true,
           "options": {
             "disable_collapse": true
@@ -165,7 +177,7 @@
                 },
                 {
                   "value": 3,
-                  "title": "contacts where the UTM Source is"
+                  "title": "contacts where the original UTM Source is"
                 }
               ],
               "title": "{{item.title}}",
