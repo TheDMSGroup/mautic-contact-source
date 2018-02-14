@@ -208,37 +208,47 @@ JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
                     }
                 });
             }
-            mQuery(this).addClass('chosen-checked');
-        });
+        }).addClass('chosen-checked');
     }
     // Improve the range slider with bootstrap sliders.
     if (schema.format === 'range') {
         // Get the element based on schema path.
         mQuery('input[type=\'range\'][name=\'' + path.replace('root.', 'root[').split('.').join('][') + ']\']:not(.slider-checked)').each(function () {
-            var min = parseInt(mQuery(this).attr('min')),
+            var $slider = mQuery(this),
+                min = parseInt(mQuery(this).attr('min')),
                 max = parseInt(mQuery(this).attr('max')),
                 step = parseInt(mQuery(this).attr('step')),
-                value = parseInt(mQuery(this).val());
+                value = parseInt(mQuery(this).val()),
+                options = {
+                    'min': min,
+                    'max': max,
+                    'value': value,
+                    'step': step
+                },
+                changed = false;
             if (min === 0 && max === 100) {
-                new Slider(mQuery(this)[0], {
-                    'formatter': function(val){
-                        return val + '%';
-                    },
-                    'min': min,
-                    'max': max,
-                    'value': value,
-                    'step': step
-                });
-            } else {
-                new Slider(mQuery(this)[0], {
-                    'min': min,
-                    'max': max,
-                    'value': value,
-                    'step': step
-                });
+                options.formatter = function (val) {
+                    return val + '%';
+                };
             }
-            mQuery(this).addClass('slider-checked');
-        });
+            var slider = new Slider(mQuery(this)[0], options);
+            slider.on('change', function (o) {
+                if (!changed) {
+                    if ('createEvent' in document) {
+                        // changed = true;
+                        var event = document.createEvent('HTMLEvents');
+                        event.initEvent('change', false, true);
+                        $slider[0].dispatchEvent(event);
+                    }
+                    else {
+                        $slider[0].fireEvent('onchange');
+                    }
+                }
+                else {
+                    changed = false;
+                }
+            });
+        }).addClass('slider-checked');
     }
 
     return errors;
