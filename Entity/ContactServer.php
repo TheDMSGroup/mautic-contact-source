@@ -53,6 +53,15 @@ class ContactServer extends FormEntity
     private $publishDown;
 
     /**
+     * ContactServer constructor.
+     */
+    public function __construct(){
+        if (!$this->token) {
+            $this->token = sha1(uniqid());
+        }
+    }
+
+    /**
      * @param ClassMetadata $metadata
      */
     public static function loadValidatorMetadata(ClassMetadata $metadata)
@@ -140,6 +149,8 @@ class ContactServer extends FormEntity
      */
     public function setToken($token)
     {
+        $token = trim($token);
+
         $this->isChanged('token', $token);
 
         $this->token = $token;

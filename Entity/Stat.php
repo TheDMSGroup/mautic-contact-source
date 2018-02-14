@@ -30,6 +30,7 @@ class Stat
     const TYPE_SUCCESS = 'success';
     const TYPE_REJECT = 'reject';
     const TYPE_ERROR = 'error';
+    const TYPE_SCRUB = 'scrub';
 
     /** @var int $id */
     private $id;
