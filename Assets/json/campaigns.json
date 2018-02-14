@@ -25,6 +25,7 @@
     "campaigns": {
       "headerTemplate": "Campaign ID {{self.campaign}}",
       "type": "object",
+      "format": "grid",
       "options": {
         "collapsed": false,
         "disable_collapse": true
@@ -37,7 +38,7 @@
           "type": "integer",
           "format": "select",
           "options": {
-            "infoText": "Which campaign do you wish to allow this server to feed contacts into?"
+            "infoText": "Select a campaign to allow this server to post contacts into. This is a whitelist of campaigns. If no campaigns are selected the server will not be able to send you any contacts."
           },
           "enumSource": [
             {
@@ -96,10 +97,28 @@
             }
           ]
         },
+        "utmSource": {
+          "title": "Override UTM Source",
+          "type": "string",
+          "propertyOrder": 20,
+          "options": {
+            "infoText": "Optionally override the UTM Source sent by the contact server. Leave blank to not override this field value. Override occurs after limits are evaluated below."
+          }
+        },
+        "attribution": {
+          "comment": "Using type 'string' here so that a null value can be saved.",
+          "title": "Override Revenue/Cost",
+          "type": "string",
+          "propertyOrder": 30,
+          "options": {
+            "infoText": "Optionally override the attribution field of each contact when first saved. Leave blank to not override this field. Positive numbers equate to revenue, negative numbers to cost."
+          }
+        },
         "limits": {
           "title": "Limits",
           "type": "array",
           "format": "table",
+          "propertyOrder": 40,
           "uniqueItems": true,
           "options": {
             "disable_collapse": true
@@ -107,35 +126,6 @@
           "items": {
             "title": "Limit",
             "$ref": "#/definitions/limit"
-          }
-        },
-        "overrides": {
-          "title": "Overrides",
-          "type": "object",
-          "propertyOrder": 10,
-          "options": {
-            "infoText": "Optionally override fields when the contact is being saved for the first time.",
-            "collapsed": false,
-            "disable_collapse": true
-          },
-          "properties": {
-            "utmSource": {
-              "title": "UTM Source",
-              "type": "string",
-              "propertyOrder": 10,
-              "options": {
-                "infoText": "Optionally override the UTM Source sent by the contact server. Leave blank to not override this field value."
-              }
-            },
-            "attribution": {
-              "comment": "Using type 'string' here so that a null value can be saved.",
-              "title": "Revenue/Cost",
-              "type": "string",
-              "propertyOrder": 20,
-              "options": {
-                "infoText": "Optionally override the attribution field of each contact when first saved. Leave blank to not override this field. Positive numbers equate to revenue, negative numbers to cost."
-              }
-            }
           }
         }
       }
@@ -174,10 +164,6 @@
                   "title": "total contacts"
                 },
                 {
-                  "value": 2,
-                  "title": "contacts where the category is"
-                },
-                {
                   "value": 3,
                   "title": "contacts where the UTM Source is"
                 }
@@ -188,7 +174,7 @@
           ]
         },
         "value": {
-          "title": "Value",
+          "title": "UTM Source",
           "type": "string",
           "propertyOrder": 30,
           "options": {
@@ -199,6 +185,7 @@
           "title": "Duration",
           "propertyOrder": 40,
           "type": "string",
+          "format": "select",
           "options": {
             "infoText": "Specify how long this limit should last, before expiring and allowing the contact to go to other clients within the scope."
           },
@@ -207,40 +194,52 @@
             {
               "source": [
                 {
+                  "value": "PT1I",
+                  "title": "per minute"
+                },
+                {
+                  "value": "PT10I",
+                  "title": "per 10 minutes"
+                },
+                {
+                  "value": "PT30I",
+                  "title": "per 30 minutes"
+                },
+                {
                   "value": "PT1H",
-                  "title": "per Hour"
+                  "title": "per hour"
                 },
                 {
                   "value": "PT6H",
-                  "title": "per 6 Hours"
+                  "title": "per 6 hours"
                 },
                 {
                   "value": "PT12H",
-                  "title": "per 12 Hours"
+                  "title": "per 12 hours"
                 },
                 {
                   "value": "P1D",
-                  "title": "per Day"
+                  "title": "per day"
                 },
                 {
                   "value": "P2D",
-                  "title": "per 2 Days"
+                  "title": "per 2 days"
                 },
                 {
                   "value": "P3D",
-                  "title": "per 3 Days"
+                  "title": "per 3 days"
                 },
                 {
                   "value": "P4D",
-                  "title": "per 4 Days"
+                  "title": "per 4 days"
                 },
                 {
                   "value": "P5D",
-                  "title": "per 5 Days"
+                  "title": "per 5 days"
                 },
                 {
                   "value": "P6D",
-                  "title": "per 6 Days"
+                  "title": "per 6 days"
                 },
                 {
                   "value": "P1W",
@@ -256,7 +255,7 @@
                 },
                 {
                   "value": "P30D",
-                  "title": "per 30 Days"
+                  "title": "per 30 days"
                 }
               ],
               "title": "{{item.title}}",
