@@ -74,7 +74,7 @@ echo $view['form']->start($form);
                 <div class="pa-md">
                     <div class="form-group mb-0">
                         <div class="row">
-                            <div class="col-sm-6">
+                            <div class="col-md-12">
                                 <?php echo $view['form']->row($form['campaign_settings']); ?>
                             </div>
                         </div>
