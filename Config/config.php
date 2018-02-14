@@ -36,17 +36,16 @@ return [
         'api' => [
             'mautic_contactserver_contact' => [
                 'path'       => '/server/{serverId}/{campaignId}',
-                'controller' => 'MauticContactServerBundle:Api\ContactApiController:postContact',
+                'controller' => 'MauticContactServerBundle:Api\Api:postContact',
                 'method'     => 'POST',
                 'defaults'   => [
-                    'channel' => 'email',
                 ],
             ],
         ],
         'public' => [
             'mautic_contactserver_documentation' => [
                 'path'       => '/server/{serverId}/{campaignId}',
-                'controller' => 'MauticContactServerBundle:Public\DocumentationController:getDocumentation',
+                'controller' => 'MauticContactServerBundle:Public:getDocumentation',
                 'method'     => 'GET',
                 'defaults'   => [
                     'campaignId' => 'all',

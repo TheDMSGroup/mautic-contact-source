@@ -19,7 +19,7 @@ use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 /**
  * Class ContactServerApiController.
  */
-class ContactApiController extends CommonApiController
+class ApiController extends CommonApiController
 {
     public function initialize(FilterControllerEvent $event)
     {
