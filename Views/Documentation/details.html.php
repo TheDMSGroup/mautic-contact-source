@@ -25,5 +25,6 @@
 </head>
 <body>
 <?php echo $content ?? null; ?>
+<?php // @todo - Documentation screen to go here. ?>
 </body>
 </html>

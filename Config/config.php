@@ -33,16 +33,18 @@ return [
                 ],
             ],
         ],
-        'api' => [
+        'public' => [
             'mautic_contactserver_contact' => [
                 'path'       => '/server/{serverId}/{campaignId}',
-                'controller' => 'MauticContactServerBundle:Api\Api:postContact',
+                'controller' => 'MauticContactServerBundle:Api\Api:addContact',
                 'method'     => 'POST',
                 'defaults'   => [
+                    'campaignId' => 'all',
                 ],
+                'arguments'  => [
+                    'translator'
+                ]
             ],
-        ],
-        'public' => [
             'mautic_contactserver_documentation' => [
                 'path'       => '/server/{serverId}/{campaignId}',
                 'controller' => 'MauticContactServerBundle:Public:getDocumentation',
@@ -110,8 +112,34 @@ return [
                     'mautic.lead.model.lead',
                 ],
             ],
+            'mautic.contactserver.model.campaign_settings' => [
+                'class'     => 'MauticPlugin\MauticContactServerBundle\Model\CampaignSettings',
+                'arguments' => [
+                    'mautic.contactserver.model.contactserver',
+                ],
+            ],
             'mautic.contactserver.model.cache' => [
                 'class'     => 'MauticPlugin\MauticContactServerBundle\Model\Cache',
+            ],
+            'mautic.contactserver.model.contact' => [
+                'class'     => 'MauticPlugin\MauticContactServerBundle\Model\ContactModel',
+                'arguments' => [
+                    'request_stack',
+                    'mautic.helper.cookie',
+                    'mautic.helper.ip_lookup',
+                    'mautic.helper.paths',
+                    'mautic.helper.integration',
+                    'mautic.lead.model.field',
+                    'mautic.lead.model.list',
+                    'form.factory',
+                    'mautic.lead.model.company',
+                    'mautic.category.model.category',
+                    'mautic.channel.helper.channel_list',
+                    '%mautic.track_contact_by_ip%',
+                    'mautic.helper.core_parameters',
+                    'mautic.validator.email',
+                    'mautic.user.provider',
+                ],
             ],
         ],
     ],

@@ -198,29 +198,6 @@ class Cache extends AbstractCommonModel
     }
 
     /**
-     * Given a contact, evaluate exclusivity rules of all cache entries against it.
-     *
-     * @throws ContactServerException
-     * @throws \Exception
-     */
-    public function evaluateExclusive()
-    {
-        $exclusive = $this->getRepository()->findExclusive(
-            $this->contact,
-            $this->contactServer
-        );
-        if ($exclusive) {
-            throw new ContactServerException(
-                'Skipping exclusive. A contact matching this has been accepted by a competing server: '.
-                json_encode($exclusive),
-                0,
-                null,
-                Stat::TYPE_EXCLUSIVE
-            );
-        }
-    }
-
-    /**
      * Using the duplicate rules, evaluate if the current contact matches any entry in the cache.
      *
      * @throws ContactServerException

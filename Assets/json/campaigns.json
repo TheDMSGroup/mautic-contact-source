@@ -7,7 +7,7 @@
     "disable_collapse": true
   },
   "properties": {
-    "rules": {
+    "campaigns": {
       "title": "Campaigns",
       "type": "array",
       "format": "grid",
@@ -17,22 +17,21 @@
       },
       "items": {
         "title": "Campaign",
-        "$ref": "#/definitions/campaigns"
+        "$ref": "#/definitions/campaign"
       }
     }
   },
   "definitions": {
-    "campaigns": {
-      "headerTemplate": "Campaign ID {{self.campaign}}",
+    "campaign": {
+      "headerTemplate": "Campaign ID {{self.campaignId}}",
       "type": "object",
       "format": "grid",
       "options": {
         "collapsed": false,
-        "disable_collapse": true,
-        "grid_columns": "3"
+        "disable_collapse": true
       },
       "properties": {
-        "campaign": {
+        "campaignId": {
           "title": "Campaign",
           "propertyOrder": 10,
           "default": 1,
