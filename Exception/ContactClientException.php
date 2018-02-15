@@ -29,21 +29,29 @@ class ContactServerException extends \Exception
     /** @var string */
     private $statType;
 
+    /** @var string */
+    private $field;
+
     /**
      * ContactServerException constructor.
      * @param string $message
      * @param int $code
      * @param \Exception|null $previous
      * @param null $statType
+     * @param null $field
      */
     public function __construct(
         $message = 'Contact Server error',
         $code = 0,
         \Exception $previous = null,
-        $statType = null
+        $statType = null,
+        $field = null
     ) {
         if ($statType) {
             $this->setStatType($statType);
+        }
+        if ($field) {
+            $this->setField($field);
         }
         parent::__construct($message, $code, $previous);
     }
@@ -84,6 +92,26 @@ class ContactServerException extends \Exception
     public function setStatType($statType)
     {
         $this->statType = $statType;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getField()
+    {
+        return $this->field;
+    }
+
+    /**
+     * @param string $field
+     *
+     * @return ContactServerException
+     */
+    public function setField($field)
+    {
+        $this->field = $field;
 
         return $this;
     }

@@ -30,7 +30,9 @@ class Stat
     const TYPE_SUCCESS = 'success';
     const TYPE_REJECT = 'reject';
     const TYPE_ERROR = 'error';
+    // Added for Server plugin:
     const TYPE_SCRUB = 'scrub';
+    const TYPE_INVALID = 'invalid';
 
     /** @var int $id */
     private $id;
