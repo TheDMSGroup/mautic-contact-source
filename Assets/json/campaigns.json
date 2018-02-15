@@ -28,7 +28,8 @@
       "format": "grid",
       "options": {
         "collapsed": false,
-        "disable_collapse": true
+        "disable_collapse": true,
+        "grid_columns": "3"
       },
       "properties": {
         "campaign": {
@@ -38,6 +39,7 @@
           "type": "integer",
           "format": "select",
           "options": {
+            "grid_columns": 1,
             "infoText": "Select a campaign to allow this server to post contacts into. This is a whitelist of campaigns. If no campaigns are selected the server will not be able to send you any contacts."
           },
           "enumSource": [
@@ -57,39 +59,39 @@
                 },
                 {
                   "value": 4,
-                  "title": "Campaign 3"
+                  "title": "Campaign 4"
                 },
                 {
                   "value": 5,
-                  "title": "Campaign 3"
+                  "title": "Campaign 5"
                 },
                 {
                   "value": 6,
-                  "title": "Campaign 3"
+                  "title": "Campaign 6"
                 },
                 {
                   "value": 7,
-                  "title": "Campaign 3"
+                  "title": "Campaign 7"
                 },
                 {
                   "value": 8,
-                  "title": "Campaign 3"
+                  "title": "Campaign 8"
                 },
                 {
                   "value": 9,
-                  "title": "Campaign 3"
+                  "title": "Campaign 9"
                 },
                 {
                   "value": 10,
-                  "title": "Campaign 3"
+                  "title": "Campaign 10"
                 },
                 {
                   "value": 11,
-                  "title": "Campaign 3"
+                  "title": "Campaign 11"
                 },
                 {
                   "value": 12,
-                  "title": "Campaign 3"
+                  "title": "Campaign 12"
                 }
               ],
               "title": "{{item.title}}",
@@ -102,6 +104,7 @@
           "type": "string",
           "propertyOrder": 20,
           "options": {
+            "grid_columns": 1,
             "infoText": "Optionally override the UTM Source field of each contact when first saved. Leave blank to allow the server to post any value. Override occurs after limits are evaluated below."
           }
         },
@@ -111,18 +114,31 @@
           "type": "string",
           "propertyOrder": 30,
           "options": {
+            "grid_columns": 1,
             "infoText": "Optionally override the attribution field of each contact when first saved. Leave blank to allow the server to post any value. Positive numbers equate to revenue, negative numbers to cost."
+          }
+        },
+        "realTime": {
+          "title": "Real Time",
+          "type": "boolean",
+          "format": "checkbox",
+          "propertyOrder": 40,
+          "default": false,
+          "options": {
+            "grid_columns": 1,
+            "infoText": "We will attempt to synchronously process contacts through the entire workflow at the time of posting. This will ignore any delays configured. Warning: Performance will be impacted by the latency of all third-party integrations combined."
           }
         },
         "scrubRate": {
           "title": "Scrub Rate",
           "type": "integer",
-          "propertyOrder": 40,
+          "propertyOrder": 50,
           "format": "range",
           "default": 0,
           "maximum": 100,
           "step": 1,
           "options": {
+            "grid_columns": 1,
             "infoText": "The percentage of contacts that will be randomly predetermined as 'rejected'. Disabled by default at 0%"
           }
         },
@@ -130,9 +146,10 @@
           "title": "Limits",
           "type": "array",
           "format": "table",
-          "propertyOrder": 50,
+          "propertyOrder": 60,
           "uniqueItems": true,
           "options": {
+            "grid_columns": 12,
             "disable_collapse": true
           },
           "items": {
@@ -158,6 +175,7 @@
           "propertyOrder": 10,
           "default": 10000,
           "options": {
+            "grid_columns": 1,
             "infoText": "The maximum number of acceptable contacts for this limit."
           }
         },
@@ -166,6 +184,7 @@
           "propertyOrder": 20,
           "default": 1,
           "options": {
+            "grid_columns": 2,
             "infoText": "How wide do you want this duplicate check to reach?"
           },
           "enumSource": [
@@ -190,6 +209,7 @@
           "type": "string",
           "propertyOrder": 30,
           "options": {
+            "grid_columns": 1,
             "infoText": "Only applicable if scope is not set to total."
           }
         },
@@ -199,6 +219,7 @@
           "type": "string",
           "format": "select",
           "options": {
+            "grid_columns": 2,
             "infoText": "Specify how long this limit should last, before expiring and allowing the contact to go to other clients within the scope."
           },
           "default": "P30D",
