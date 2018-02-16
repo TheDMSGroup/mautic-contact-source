@@ -12,8 +12,6 @@
 namespace MauticPlugin\MauticContactServerBundle\Model;
 
 use Mautic\CoreBundle\Model\AbstractCommonModel;
-// use MauticPlugin\MauticContactServerBundle\Entity\CacheRepository;
-use MauticPlugin\MauticContactServerBundle\Entity\CacheRepository;
 use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use MauticPlugin\MauticContactServerBundle\Entity\Cache as CacheEntity;
@@ -45,45 +43,10 @@ class Cache extends AbstractCommonModel
     public function create()
     {
         $entities = [];
-        $exclusive = $this->getExclusiveRules();
-        if (count($exclusive)) {
-            // Create an entry for *each* exclusivity rule as they will end up with different dates of exclusivity
-            // expiration. Any of these entries will suffice for duplicate checking and limit checking.
-            foreach ($exclusive as $rule) {
-                if (!isset($entity)) {
-                    $entity = $this->new();
-                } else {
-                    // No need to re-run all the getters and setters.
-                    $entity = clone $entity;
-                }
-                // Each entry may have different exclusion expiration.
-                $expireDate = new \DateTime();
-                $expireDate->add(new \DateInterval($rule['duration']));
-                $entity->setExclusiveExpireDate($expireDate);
-                $entity->setExclusivePattern($rule['matching']);
-                $entity->setExclusiveScope($rule['scope']);
-                $entities[] = $entity;
-            }
-        } else {
-            // A single entry will suffice for all duplicate checking and limit checking.
-            $entities[] = $this->new();
-        }
+        $entities[] = $this->new();
         if (count($entities)) {
             $this->getRepository()->saveEntities($entities);
         }
-    }
-
-    /**
-     * Given the Contact and Contact Server, discern which exclusivity entries need to be cached.
-     *
-     * @throws \Exception
-     */
-    public function getExclusiveRules()
-    {
-        $jsonHelper = new JSONHelper();
-        $exclusive = $jsonHelper->decodeObject($this->contactServer->getExclusive(), 'Exclusive');
-
-        return $this->mergeRules($exclusive);
     }
 
     /**
