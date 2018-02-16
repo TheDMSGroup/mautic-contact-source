@@ -12,15 +12,12 @@
 namespace MauticPlugin\MauticContactServerBundle\Controller\Api;
 
 use FOS\RestBundle\Util\Codes;
-//use Mautic\CoreBundle\Controller\CommonController;
 use Mautic\ApiBundle\Controller\CommonApiController;
 use Mautic\CoreBundle\Helper\InputHelper;
-use Mautic\LeadBundle\Model\LeadModel;
 use MauticPlugin\MauticContactServerBundle\Model\Cache;
 use MauticPlugin\MauticContactServerBundle\Model\CampaignSettings;
 use MauticPlugin\MauticContactServerBundle\Model\ContactModel;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use MauticPlugin\MauticContactServerBundle\Entity\Stat;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Model\ListModel as LeadListModel;

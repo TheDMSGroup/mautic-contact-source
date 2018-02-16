@@ -25,4 +25,5 @@ If you have success/issues with other versions please report.
 
 ## Uses these fine libraries:
 
+* [Bootstrap Slider](https://github.com/seiyria/bootstrap-slider)
 * [JSON Editor](https://github.com/json-editor/json-editor)
