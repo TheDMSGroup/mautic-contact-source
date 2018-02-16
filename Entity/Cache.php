@@ -108,7 +108,7 @@ class Cache
 
         $builder->addNullableField('country', 'string');
 
-        $builder->addNamedField('utmSource', 'string', 'utm_source');
+        $builder->addNamedField('utmSource', 'string', 'utm_source', true);
 
         $builder->addNamedField('contactServer', 'integer', 'contactserver_id');
 
