@@ -35,22 +35,26 @@ return [
         ],
         'public' => [
             'mautic_contactserver_contact' => [
-                'path'       => '/server/{serverId}/{campaignId}',
-                'controller' => 'MauticContactServerBundle:Api\Api:addContact',
-                'method'     => 'POST',
+                'path'       => '/server/{serverId}/{object}/{campaignId}/{action}',
+                'controller' => 'MauticContactServerBundle:Api\Api:contact',
+                'method'     => ['POST', 'PUT'],
                 'defaults'   => [
-                    'campaignId' => 'all',
+                    'action' => 'add',
+                    'campaignId' => '',
+                    'object' => 'campaign',
                 ],
                 'arguments'  => [
                     'translator'
                 ]
             ],
             'mautic_contactserver_documentation' => [
-                'path'       => '/server/{serverId}/{campaignId}',
+                'path'       => '/server/{serverId}/{object}/{campaignId}/{action}',
                 'controller' => 'MauticContactServerBundle:Public:getDocumentation',
                 'method'     => 'GET',
                 'defaults'   => [
-                    'campaignId' => 'all',
+                    'action' => 'add',
+                    'campaignId' => '',
+                    'object' => 'campaign'
                 ],
             ],
         ],

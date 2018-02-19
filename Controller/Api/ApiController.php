@@ -74,7 +74,7 @@ class ApiController extends CommonApiController
      * @param null $campaignId
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function addContactAction(Request $request, $serverId = null, $campaignId = null)
+    public function contactAction(Request $request, $serverId = null, $campaignId = null)
     {
 
         $response = [];
