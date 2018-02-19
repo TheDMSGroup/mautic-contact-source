@@ -47,13 +47,18 @@ class CampaignEventModel extends OriginalCampaignEventModel
      * @return array|int
      * @throws \Doctrine\ORM\ORMException
      */
-    public function triggerStartingEvents(
+    public function triggerContactStartingEvents(
         Campaign $campaign,
         &$totalEventCount,
         array $contacts
     ) {
-        $contactEvents = [];
+        defined('MAUTIC_CAMPAIGN_SYSTEM_TRIGGERED') or define('MAUTIC_CAMPAIGN_SYSTEM_TRIGGERED', 1);
 
+        /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
+        $session = $this->dispatcher->getContainer()->get('session');
+
+        $contactEvents = [];
+        $contactClientEvents = [];
         $decisionChildren = [];
         $campaignId = $campaign->getId();
 
@@ -105,7 +110,7 @@ class CampaignEventModel extends OriginalCampaignEventModel
             // Set lead in case this is triggered by the system
             $this->leadModel->setSystemCurrentLead($contact);
 
-            foreach ($events as &$event) {
+            foreach ($events as $event) {
                 ++$rootEvaluatedCount;
 
                 if ($event['eventType'] == 'decision') {
@@ -200,18 +205,29 @@ class CampaignEventModel extends OriginalCampaignEventModel
                         ++$rootExecutedCount;
                     }
                 }
-                // unset($event);
+                // Break if a valid client is found at root.
+                if ($session->get('contactclient_valid')) {
+                    break;
+                }
             }
-            $contactEvents[$contact->getId()] = $events;
+            // Process stack of triggers for the recent contact added during executeEvents.
+            // @todo - Break if a valid client is found in triggers.
+            $this->triggerConditions($campaign, $evaluatedEventCount, $executedEventCount, $totalEventCount);
+
+            // Event array is not all-inclusive. Only contains parents.
+            // $contactEvents[$contact->getId()] = $events;
+
+            $contactClientEvents[$contact->getId()] = $session->get('contactclient_events', []);
+            $session->set('contactclient_events', []);
+            $session->set('contactclient_valid', null);
+
+            unset($event);
         }
 
         unset($contacts);
 
         // Free some memory
         gc_collect_cycles();
-
-        // Process trigger conditions (perhaps optional for contact servers in the future?)
-        $this->triggerConditions($campaign, $evaluatedEventCount, $executedEventCount, $totalEventCount);
 
         return [
             'events' => $totalStartingEvents,
@@ -220,6 +236,7 @@ class CampaignEventModel extends OriginalCampaignEventModel
             'totalEvaluated' => $evaluatedEventCount,
             'totalExecuted' => $executedEventCount,
             'contactEvents' => $contactEvents,
+            'contactClientEvents' => $contactClientEvents,
         ];
     }
 

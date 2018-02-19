@@ -15,7 +15,8 @@ use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\CampaignBundle\Model\CampaignModel as OriginalCampaignModel;
 use Mautic\CampaignBundle\Entity\Lead as CampaignContact;
-
+use Mautic\CampaignBundle\CampaignEvents;
+use Mautic\CampaignBundle\Event\CampaignLeadChangeEvent;
 
 /**
  * Class CampaignModel
@@ -69,7 +70,7 @@ class CampaignModel extends OriginalCampaignModel
             if (!$realTime) {
                 // Only trigger events if not in realtime where events would be followed directly.
                 if ($saved && $this->dispatcher->hasListeners(CampaignEvents::CAMPAIGN_ON_LEADCHANGE)) {
-                    $event = new Events\CampaignLeadChangeEvent($campaign, $contact, 'added');
+                    $event = new CampaignLeadChangeEvent($campaign, $contact, 'added');
                     $this->dispatcher->dispatch(CampaignEvents::CAMPAIGN_ON_LEADCHANGE, $event);
                     unset($event);
                 }
