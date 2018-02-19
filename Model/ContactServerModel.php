@@ -283,7 +283,7 @@ class ContactServerModel extends FormModel
 
         // Add attribution to the chart.
         // @todo - This should really be in it's own chart in the future.
-        $q = $query->prepareTimeDataQuery('contactserver_stats', 'date_added', ['type' => Stat::TYPE_SUCCESS]);
+        $q = $query->prepareTimeDataQuery('contactserver_stats', 'date_added', ['type' => Stat::TYPE_ACCEPT]);
         if (!$canViewOthers) {
             $this->limitQueryToCreator($q);
         }
