@@ -14,13 +14,15 @@ namespace MauticPlugin\MauticContactServerBundle\Controller\Api;
 use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
 use Mautic\CampaignBundle\Entity\Campaign;
-use Mautic\CampaignBundle\Model\CampaignModel;
+// use Mautic\CampaignBundle\Model\CampaignModel;
 use Mautic\CoreBundle\Helper\InputHelper;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
 use MauticPlugin\MauticContactServerBundle\Entity\Stat;
 use MauticPlugin\MauticContactServerBundle\Exception\ContactServerException;
 use MauticPlugin\MauticContactServerBundle\Model\Cache;
+use MauticPlugin\MauticContactServerBundle\Model\CampaignEventModel;
+use MauticPlugin\MauticContactServerBundle\Model\CampaignModel;
 use MauticPlugin\MauticContactServerBundle\Model\CampaignSettings;
 use MauticPlugin\MauticContactServerBundle\Model\ContactModel;
 use Symfony\Component\HttpFoundation\Request;
@@ -248,7 +250,7 @@ class ApiController extends CommonApiController
             // $leadListModel->addLead($this->contact, [LeadList $list], true, !$this->realTime, -1);
 
             // Add the contact directly to the campaign without duplicate checking.
-            $this->getCampaignModel()->addLeads($this->campaign, [$this->contact], false, true, -1);
+            $this->getCampaignModel()->addContact($this->campaign, $this->contact, false, $this->realTime);
             $this->status = Stat::TYPE_QUEUED;
 
             // Create cache entry if all was successful for duplicate checking and limits.
@@ -260,9 +262,15 @@ class ApiController extends CommonApiController
             }
 
             // @todo - Sync (real time): If this Server+Campaign is set to synchronous (and wasn't scrub), push the contact through the campaign now.
-            // if ($this->realTime && !$this->scrub) {
-            // @todo - Sync (real time): Evaluate the result of the campaign workflow and return status.
-            // }
+            if ($this->realTime && !$this->scrub) {
+                // Step through the campaign model events.
+                $totalEventCount = 0;
+                /** @var CampaignEventModel $campaignEventModel */
+                $campaignEventModel = $this->get('mautic.contactserver.model.campaign_event');
+                $campaignResult = $campaignEventModel->triggerStartingEvents($this->campaign, $totalEventCount, [$this->contact]);
+
+                // @todo - Sync (real time): Evaluate the result of the campaign workflow and return status.
+            }
 
         } catch (\Exception $e) {
             $field = null;
@@ -301,13 +309,15 @@ class ApiController extends CommonApiController
     }
 
     /**
+     * Get our customized Campaign model.
+     *
      * @return CampaignModel
      */
     private function getCampaignModel()
     {
         if (!$this->campaignModel) {
             /** @var CampaignModel */
-            $this->campaignModel = $this->get('mautic.campaign.model.campaign');
+            $this->campaignModel = $this->get('mautic.contactserver.model.campaign');
         }
 
         return $this->campaignModel;
