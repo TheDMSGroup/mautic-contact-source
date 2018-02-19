@@ -3,7 +3,8 @@
 
 Creates API endpoints for receiving contacts from third parties.
 
-Can optionally be used in tandem with it's sibling, the [Mautic Contact Client](https://github.com/TheDMSGroup/mautic-contact-client) plugin.
+Designed for use by performance marketers who enhance/exchange contacts in mass quantities.
+Can optionally be used in tandem with it's sibling [Mautic Contact Client](https://github.com/TheDMSGroup/mautic-contact-client).
 
 ## Todo
 - [ ] Campaigns: A whitelist of campaigns can be selected for the third party to post into.
@@ -19,9 +20,9 @@ Can optionally be used in tandem with it's sibling, the [Mautic Contact Client](
 Currently being tested with Mautic `2.12.x`.
 If you have success/issues with other versions please report.
 
-1. Install by running `composer require thedmsgroup/mautic-contact-server-bundle` or by unpacking this repository's contents into a folder named `/plugins/MauticContactServerBundle`
-2. Go to `/s/plugins` and click `Install/Upgrade Plugins`.
-3. After a refresh you will find "Servers" in the main menu.
+1. Install by running `composer require thedmsgroup/mautic-contact-server-bundle`
+2. Go to `/s/plugins/reload`
+3. After a refresh you will find "Servers" in the main menu, you can dive in and create your first one.
 
 ## Uses these fine libraries:
 
