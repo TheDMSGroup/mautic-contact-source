@@ -12,14 +12,15 @@
 namespace MauticPlugin\MauticContactServerBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
-use Symfony\Component\HttpFoundation\Response;
 
 class PublicController extends CommonController
 {
     // @todo - Add documentation autogenerator.
-    public function getDocumentationAction(){
+    public function getDocumentationAction($serverId = null, $campaignId = null){
 
         // @todo - Check Server existence and published status.
+
+        // @todo - Check if documentation is turned on, if not 403.
 
         // @todo - Get list of assigned and published Campaigns.
 

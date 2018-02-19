@@ -28,7 +28,6 @@ class ContactModel extends OriginalContactModel
     /**
      * This is a copy of the function found in Mautic\LeadBundle\Model\LeadModel
      * With some exclusions for the sake of performance.
-     * DO NOT persist by default.
      *
      * @param array $fields
      * @param array $data
@@ -53,7 +52,7 @@ class ContactModel extends OriginalContactModel
         $fields = array_flip($fields);
         $fieldData = [];
 
-        // Servers will not be able to set this on creation: Companies and their links.
+        // Servers will not be able to set this on creation: Companies and their linkages.
 
         foreach ($fields as $leadField => $importField) {
             // Prevent overwriting existing data with empty data
