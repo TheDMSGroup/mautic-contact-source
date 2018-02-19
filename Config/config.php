@@ -122,6 +122,27 @@ return [
                     'mautic.contactserver.model.contactserver',
                 ],
             ],
+            'mautic.contactserver.model.campaign_event' => [
+                'class'     => 'MauticPlugin\MauticContactServerBundle\Model\CampaignEventModel',
+                'arguments' => [
+                    'mautic.helper.ip_lookup',
+                    'mautic.helper.core_parameters',
+                    'mautic.lead.model.lead',
+                    'mautic.campaign.model.campaign',
+                    'mautic.user.model.user',
+                    'mautic.core.model.notification',
+                    'mautic.factory',
+                ],
+            ],
+            'mautic.contactserver.model.campaign' => [
+                'class'     => 'MauticPlugin\MauticContactServerBundle\Model\CampaignModel',
+                'arguments' => [
+                    'mautic.helper.core_parameters',
+                    'mautic.lead.model.lead',
+                    'mautic.lead.model.list',
+                    'mautic.form.model.form',
+                ],
+            ],
             'mautic.contactserver.model.cache' => [
                 'class'     => 'MauticPlugin\MauticContactServerBundle\Model\Cache',
             ],

@@ -14,13 +14,15 @@ namespace MauticPlugin\MauticContactServerBundle\Controller\Api;
 use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
 use Mautic\CampaignBundle\Entity\Campaign;
-use Mautic\CampaignBundle\Model\CampaignModel;
+// use Mautic\CampaignBundle\Model\CampaignModel;
 use Mautic\CoreBundle\Helper\InputHelper;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
 use MauticPlugin\MauticContactServerBundle\Entity\Stat;
 use MauticPlugin\MauticContactServerBundle\Exception\ContactServerException;
 use MauticPlugin\MauticContactServerBundle\Model\Cache;
+use MauticPlugin\MauticContactServerBundle\Model\CampaignEventModel;
+use MauticPlugin\MauticContactServerBundle\Model\CampaignModel;
 use MauticPlugin\MauticContactServerBundle\Model\CampaignSettings;
 use MauticPlugin\MauticContactServerBundle\Model\ContactModel;
 use Symfony\Component\HttpFoundation\Request;
@@ -85,7 +87,7 @@ class ApiController extends CommonApiController
 
         try {
             // Basic field pre-validation.
-            $fieldData = $request->request->all();
+            $fieldData = InputHelper::clean($request->request->all());
             unset($fieldData['token']);
             if (!count($fieldData)) {
                 throw new ContactServerException(
@@ -221,7 +223,7 @@ class ApiController extends CommonApiController
             // (This would best be done by cron, and cached somewhere as a list like campaign_required_fields)
             // (presuppose the overridden fields, if any)
 
-            // @todo - Evaluate Server+Campaign limits using the Cache (method doesn't yet exist for either contact/client).
+            // @todo - Evaluate Server & Campaign limits using the Cache (method doesn't yet exist for either contact/client).
             // $this->getCacheModel()->evaluateLimits();
 
             // @todo - Evaluate Server duplicates against the cache. This is different than contact duplicates,
@@ -235,12 +237,11 @@ class ApiController extends CommonApiController
                 $this->status = Stat::TYPE_SCRUB;
             }
 
-            // Save the new contact.
+            // Save the new contact since it is valid by this point.
             $this->getContactModel()->saveEntity($this->contact);
             $this->status = Stat::TYPE_SAVED;
             $data = $this->contact->getUpdatedFields();
             $data['id'] = $this->contact->getId();
-            $this->valid = true;
 
             // @todo - Optionally allow a segment to be targeted instead of a campaign in the future? No problem...
             // /** @var \Mautic\LeadBundle\Model\ListModel $leadListModel */
@@ -248,21 +249,44 @@ class ApiController extends CommonApiController
             // $leadListModel->addLead($this->contact, [LeadList $list], true, !$this->realTime, -1);
 
             // Add the contact directly to the campaign without duplicate checking.
-            $this->getCampaignModel()->addLeads($this->campaign, [$this->contact], false, true, -1);
+            $this->getCampaignModel()->addContact($this->campaign, $this->contact, false, $this->realTime);
             $this->status = Stat::TYPE_QUEUED;
 
             // Create cache entry if all was successful for duplicate checking and limits.
             $this->getCacheModel()->create();
 
-            // @todo - Async (not real time): Accept the contact by return status.
+            // Asynchronous (not real time): Accept the contact by return status.
             if (!$this->realTime && !$this->scrub) {
                 $this->status = Stat::TYPE_ACCEPT;
+                $this->valid = true;
             }
 
-            // @todo - Sync (real time): If this Server+Campaign is set to synchronous (and wasn't scrub), push the contact through the campaign now.
-            // if ($this->realTime && !$this->scrub) {
-            // @todo - Sync (real time): Evaluate the result of the campaign workflow and return status.
-            // }
+            // Synchronous (real time): If this Server & Campaign is set to synchronous (and wasn't scrub), push the contact through the campaign now.
+            $events = [];
+            if ($this->realTime && !$this->scrub) {
+                // Step through the campaign model events.
+                $totalEventCount = 0;
+                /** @var CampaignEventModel $campaignEventModel */
+                $campaignEventModel = $this->get('mautic.contactserver.model.campaign_event');
+                $campaignResult = $campaignEventModel->triggerContactStartingEvents($this->campaign, $totalEventCount, [$this->contact]);
+
+                // Sync (real-time): Evaluate the result of the campaign workflow and return status.
+                if (
+                    $campaignResult
+                    && !empty($campaignResult['contactClientEvents'])
+                    && !empty($campaignResult['contactClientEvents'][$this->contact->getId()])
+                ) {
+                    $events = $campaignResult['contactClientEvents'][$this->contact->getId()];
+                    foreach ($campaignResult['contactClientEvents'][$this->contact->getId()] as $event) {
+                        if (isset($event['valid']) && $event['valid']) {
+                            // One valid Contact Client was found to accept the lead.
+                            $this->status = Stat::TYPE_ACCEPT;
+                            $this->valid = true;
+                            break;
+                        }
+                    }
+                }
+            }
 
         } catch (\Exception $e) {
             $field = null;
@@ -291,6 +315,14 @@ class ApiController extends CommonApiController
             $response['errors'] = $this->errors;
         }
 
+        /**
+         * Optionally include the status of the contact client events.
+         * @deprecated
+         */
+        if (!empty($events) && $request->headers->get('events')) {
+            $response['events'] = $events;
+        }
+
         $view = $this->view($response, Codes::HTTP_OK);
 
         // By default we'll always respond with JSON.
@@ -301,13 +333,15 @@ class ApiController extends CommonApiController
     }
 
     /**
+     * Get our customized Campaign model.
+     *
      * @return CampaignModel
      */
     private function getCampaignModel()
     {
         if (!$this->campaignModel) {
             /** @var CampaignModel */
-            $this->campaignModel = $this->get('mautic.campaign.model.campaign');
+            $this->campaignModel = $this->get('mautic.contactserver.model.campaign');
         }
 
         return $this->campaignModel;
@@ -322,25 +356,52 @@ class ApiController extends CommonApiController
      */
     private function import($fieldData = [])
     {
-
-        $fieldKeys = array_keys($fieldData);
-        $fieldValues = array_values($fieldData);
-        $fieldMap = array_combine($fieldKeys, $fieldKeys);
-
-        // Pre-filter keys and values to follow the "import" method's pattern.
-        $fieldKeys = array_map('trim', $fieldKeys);
+        // Pre-filter input to follow the "import" method's pattern.
+        $fieldKeys = array_map('trim', array_keys($fieldData));
         if (!array_filter($fieldKeys)) {
             return null;
         }
-        $fieldValues = array_map('trim', $fieldValues);
+        $fieldValues = array_map('trim', array_values($fieldData));
         if (!array_filter($fieldValues)) {
             return null;
         }
-        $data = array_combine($fieldKeys, $fieldValues);
+        $fieldData = array_combine($fieldKeys, $fieldValues);
+        $fieldMap = array_combine($fieldKeys, $fieldKeys);
 
+        // Filter out disallowed fields to prevent errors with queries down the line.
+        /** @var \Mautic\LeadBundle\Model\FieldModel $fieldModel */
+        $fieldModel = $this->get('mautic.lead.model.field');
+        $allowedFields = $fieldModel->getFieldList(true, true, ['isPublished' => true]);
+        // Flatten the array.
+        $allowedFields = iterator_to_array(new \RecursiveIteratorIterator(new \RecursiveArrayIterator($allowedFields)));
+
+        $disallowedFields = array_diff(array_keys($fieldData), array_keys($allowedFields));
+        foreach ($disallowedFields as $key) {
+            // Help them out with a suggestion.
+            $closest = null;
+            $shortest = -1;
+            foreach (array_keys($allowedFields) as $allowedKey) {
+                $lev = levenshtein($key, $allowedKey);
+                if ($lev <= $shortest || $shortest < 0) {
+                    $closest  = $allowedKey;
+                    $shortest = $lev;
+                }
+            }
+            unset($fieldData[$key]);
+            unset($fieldMap[$key]);
+            $msg = 'This field is not currently supported and was ignored.';
+            if ($closest && isset($allowedKey)) {
+                $msg .= ' Did you mean \''.$closest.'\' (' . $allowedFields[$closest] . ')?';
+            }
+            $this->errors[$key] = $msg;
+        }
+
+        if (!count($fieldData)) {
+            return null;
+        }
         return $this->getContactModel()->import(
             $fieldMap,
-            $data
+            $fieldData
         // @todo - get some default values for these.
         // $owner,
         // $list,
