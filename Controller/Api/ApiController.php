@@ -276,14 +276,23 @@ class ApiController extends CommonApiController
                     && !empty($campaignResult['contactClientEvents'])
                     && !empty($campaignResult['contactClientEvents'][$this->contact->getId()])
                 ) {
+                    $clientFound = false;
                     $events = $campaignResult['contactClientEvents'][$this->contact->getId()];
                     foreach ($campaignResult['contactClientEvents'][$this->contact->getId()] as $event) {
-                        if (isset($event['valid']) && $event['valid']) {
-                            // One valid Contact Client was found to accept the lead.
-                            $this->status = Stat::TYPE_ACCEPT;
-                            $this->valid = true;
-                            break;
+                        if ($event['integration'] == 'Client') {
+                            $clientFound = true;
+                            if (isset($event['valid']) && $event['valid']) {
+                                // One valid Contact Client was found to accept the lead.
+                                $this->status = Stat::TYPE_ACCEPT;
+                                $this->valid = true;
+                                break;
+                            }
                         }
+                    }
+                    if ($clientFound && !$this->valid) {
+                        // If one or more clients were found, but none accepted.
+                        // This should be considered a rejected contact.
+                        $this->status = Stat::TYPE_REJECT;
                     }
                 }
             }

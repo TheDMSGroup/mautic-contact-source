@@ -30,7 +30,7 @@ class Stat
     const TYPE_INVALID = 'invalid';
     // const TYPE_LIMITS = 'limited';
     const TYPE_QUEUED = 'queued';
-    // const TYPE_REJECT = 'rejected';
+    const TYPE_REJECT = 'rejected';
     const TYPE_SCRUB = 'scrubbed';
     const TYPE_SAVED = 'saved';
 
