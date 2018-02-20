@@ -1,6 +1,6 @@
 {
     "name": "MauticContactSourceBundle",
-    "description": "Creates API endpoints for receiving contacts from third parties.",
+    "description": "Creates API endpoints for receiving contacts from external sources.",
     "license": "GPL-3.0-only",
     "authors": [
         {
