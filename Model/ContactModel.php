@@ -15,6 +15,8 @@ use Mautic\LeadBundle\Model\LeadModel as OriginalContactModel;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\LeadEventLog as ContactEventLog;
 use Mautic\CoreBundle\Helper\InputHelper;
+use Mautic\CoreBundle\Entity\IpAddress;
+use Mautic\CoreBundle\Helper\DateTimeHelper;
 
 /**
  * Class ContactModel
