@@ -9,17 +9,17 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Event;
+namespace MauticPlugin\MauticContactSourceBundle\Event;
 
 use Mautic\CoreBundle\Helper\Chart\ChartQuery;
 use Mautic\CoreBundle\Helper\DateTimeHelper;
-use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
- * Class ContactServerTimelineEvent.
+ * Class ContactSourceTimelineEvent.
  */
-class ContactServerTimelineEvent extends Event
+class ContactSourceTimelineEvent extends Event
 {
     /**
      * Container with all filtered events.
@@ -51,11 +51,11 @@ class ContactServerTimelineEvent extends Event
     protected $orderBy = null;
 
     /**
-     * ContactServer entity for the contactServer the timeline is being generated for.
+     * ContactSource entity for the contactSource the timeline is being generated for.
      *
-     * @var ContactServer
+     * @var ContactSource
      */
-    protected $contactServer;
+    protected $contactSource;
 
     /**
      * @var int
@@ -127,9 +127,9 @@ class ContactServerTimelineEvent extends Event
     ];
 
     /**
-     * ContactServerTimelineEvent constructor.
+     * ContactSourceTimelineEvent constructor.
      *
-     * @param ContactServer|null $contactServer
+     * @param ContactSource|null $contactSource
      * @param array $filters
      * @param array|null $orderBy
      * @param int $page
@@ -138,7 +138,7 @@ class ContactServerTimelineEvent extends Event
      * @param string|null $siteDomain
      */
     public function __construct(
-        ContactServer $contactServer = null,
+        ContactSource $contactSource = null,
         array $filters = [],
         array $orderBy = null,
         $page = 1,
@@ -146,7 +146,7 @@ class ContactServerTimelineEvent extends Event
         $forTimeline = true,
         $siteDomain = null
     ) {
-        $this->contactServer = $contactServer;
+        $this->contactSource = $contactSource;
         $this->filters = !empty($filters)
             ? $filters
             :
@@ -317,7 +317,7 @@ class ContactServerTimelineEvent extends Event
                 $this->prepareDetailsForAPI($detailValues);
             }
 
-            if ('contactServer_id' === $key) {
+            if ('contactSource_id' === $key) {
                 // Don't include this as it should be included in parent as contactId
                 unset($details[$key]);
                 continue;
@@ -493,30 +493,30 @@ class ContactServerTimelineEvent extends Event
     public function getEventLimit()
     {
         return [
-            'contactServerId' => ($this->contactServer instanceof ContactServer) ? $this->contactServer->getId() : null,
+            'contactSourceId' => ($this->contactSource instanceof ContactSource) ? $this->contactSource->getId() : null,
             'limit' => $this->limit,
             'start' => (1 >= $this->page) ? 0 : ($this->page - 1) * $this->limit,
         ];
     }
 
     /**
-     * Fetches the contactServer being acted on.
+     * Fetches the contactSource being acted on.
      *
-     * @return ContactServer
+     * @return ContactSource
      */
-    public function getContactServer()
+    public function getContactSource()
     {
-        return $this->contactServer;
+        return $this->contactSource;
     }
 
     /**
-     * Returns the contactServer ID if any.
+     * Returns the contactSource ID if any.
      *
      * @return int|null
      */
-    public function getContactServerId()
+    public function getContactSourceId()
     {
-        return ($this->contactServer instanceof ContactServer) ? $this->contactServer->getId() : null;
+        return ($this->contactSource instanceof ContactSource) ? $this->contactSource->getId() : null;
     }
 
     /**

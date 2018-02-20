@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Model;
+namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use Mautic\CampaignBundle\CampaignEvents;
 use Mautic\CampaignBundle\Entity\Campaign;
@@ -20,7 +20,7 @@ use Mautic\CampaignBundle\Model\EventModel as OriginalCampaignEventModel;
 /**
  * Class CampaignEventModel
  *
- * Method of triggering campaign events with one or more leads at run-time for real-time servers.
+ * Method of triggering campaign events with one or more leads at run-time for real-time sources.
  * Overrides some default behavior to reduce query count for small batches.
  */
 class CampaignEventModel extends OriginalCampaignEventModel
@@ -31,7 +31,7 @@ class CampaignEventModel extends OriginalCampaignEventModel
      *
      * Changes from the original:
      * - No cron/console debug output or logging.
-     * - Takes an array of loaded contact entities to reduce queries (future proofing for batch server support).
+     * - Takes an array of loaded contact entities to reduce queries (future proofing for batch source support).
      * - No batchSleep, since we need real-time speed here.
      * - Does not clear/detach contacts.
      * - No limit or max event count (intentionally at the mercy of the campaign events).

@@ -9,30 +9,30 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Controller;
+namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
 use Mautic\CoreBundle\Controller\FormController;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class ContactServerController
- * @package MauticPlugin\MauticContactServerBundle\Controller
+ * Class ContactSourceController
+ * @package MauticPlugin\MauticContactSourceBundle\Controller
  */
-class ContactServerController extends FormController
+class ContactSourceController extends FormController
 {
-    use ContactServerDetailsTrait;
+    use ContactSourceDetailsTrait;
 
     public function __construct()
     {
         $this->setStandardParameters(
-            'contactserver',
-            'plugin:contactserver:items',
-            'mautic_contactserver',
-            'mautic_contactserver',
-            'mautic.contactserver',
-            'MauticContactServerBundle:ContactServer',
+            'contactsource',
+            'plugin:contactsource:items',
+            'mautic_contactsource',
+            'mautic_contactsource',
+            'mautic.contactsource',
+            'MauticContactSourceBundle:ContactSource',
             null,
-            'contactserver'
+            'contactsource'
         );
     }
 
@@ -71,7 +71,7 @@ class ContactServerController extends FormController
     }
 
     /**
-     * Displays details on a ContactServer.
+     * Displays details on a ContactSource.
      *
      * @param $objectId
      *
@@ -79,7 +79,7 @@ class ContactServerController extends FormController
      */
     public function viewAction($objectId)
     {
-        return parent::viewStandard($objectId, 'contactserver', 'plugin.contactserver');
+        return parent::viewStandard($objectId, 'contactsource', 'plugin.contactsource');
     }
 
     /**
@@ -124,7 +124,7 @@ class ContactServerController extends FormController
     public function customizeViewArguments($args, $view)
     {
         if ($view == 'view') {
-            /** @var \MauticPlugin\MauticContactServerBundle\Entity\ContactServer $item */
+            /** @var \MauticPlugin\MauticContactSourceBundle\Entity\ContactSource $item */
             $item = $args['viewParameters']['item'];
 
             // For line graphs in the view
@@ -134,7 +134,7 @@ class ContactServerController extends FormController
                 $dateRangeValues,
                 [
                     'action' => $this->generateUrl(
-                        'mautic_contactserver_action',
+                        'mautic_contactsource_action',
                         [
                             'objectAction' => 'view',
                             'objectId' => $item->getId(),
@@ -143,8 +143,8 @@ class ContactServerController extends FormController
                 ]
             );
 
-            /** @var \MauticPlugin\MauticContactServerBundle\Model\ContactServerModel $model */
-            $model = $this->getModel('contactserver');
+            /** @var \MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel $model */
+            $model = $this->getModel('contactsource');
             $stats = $model->getStats(
                 $item,
                 null,
@@ -171,7 +171,7 @@ class ContactServerController extends FormController
     protected function getPostActionRedirectArguments(array $args, $action)
     {
         $updateSelect = ($this->request->getMethod() == 'POST')
-            ? $this->request->request->get('contactserver[updateSelect]', false, true)
+            ? $this->request->request->get('contactsource[updateSelect]', false, true)
             : $this->request->get(
                 'updateSelect',
                 false
@@ -203,7 +203,7 @@ class ContactServerController extends FormController
     protected function getEntityFormOptions()
     {
         $updateSelect = ($this->request->getMethod() == 'POST')
-            ? $this->request->request->get('contactserver[updateSelect]', false, true)
+            ? $this->request->request->get('contactsource[updateSelect]', false, true)
             : $this->request->get(
                 'updateSelect',
                 false

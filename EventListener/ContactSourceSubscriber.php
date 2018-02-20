@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\EventListener;
+namespace MauticPlugin\MauticContactSourceBundle\EventListener;
 
 use Mautic\AssetBundle\Helper\TokenHelper as AssetTokenHelper;
 use Mautic\CoreBundle\EventListener\CommonSubscriber;
@@ -20,12 +20,12 @@ use Mautic\FormBundle\Helper\TokenHelper as FormTokenHelper;
 use Mautic\PageBundle\Helper\TokenHelper as PageTokenHelper;
 use Mautic\PageBundle\Model\PageModel;
 use Mautic\PageBundle\Model\TrackableModel;
-use MauticPlugin\MauticContactServerBundle\Entity\EventRepository;
-use MauticPlugin\MauticContactServerBundle\Entity\Stat;
-use MauticPlugin\MauticContactServerBundle\Event\ContactServerEvent;
-use MauticPlugin\MauticContactServerBundle\ContactServerEvents;
-use MauticPlugin\MauticContactServerBundle\Event\ContactServerTimelineEvent;
-use MauticPlugin\MauticContactServerBundle\Model\ContactServerModel;
+use MauticPlugin\MauticContactSourceBundle\Entity\EventRepository;
+use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
+use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceEvent;
+use MauticPlugin\MauticContactSourceBundle\ContactSourceEvents;
+use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceTimelineEvent;
+use MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -33,10 +33,10 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Form\FormEvents;
 
 /**
- * Class ContactServerSubscriber
- * @package MauticPlugin\MauticContactServerBundle\EventListener
+ * Class ContactSourceSubscriber
+ * @package MauticPlugin\MauticContactSourceBundle\EventListener
  */
-class ContactServerSubscriber extends CommonSubscriber
+class ContactSourceSubscriber extends CommonSubscriber
 {
     /**
      * @var RouterInterface
@@ -74,15 +74,15 @@ class ContactServerSubscriber extends CommonSubscriber
     protected $formTokenHelper;
 
     /**
-     * @var ContactServerModel
+     * @var ContactSourceModel
      */
-    protected $contactserverModel;
+    protected $contactsourceModel;
 
     /** @var PageModel */
     protected $pageModel;
 
     /**
-     * ContactServerSubscriber constructor.
+     * ContactSourceSubscriber constructor.
      *
      * @param RouterInterface $router
      * @param IpLookupHelper $ipLookupHelper
@@ -91,7 +91,7 @@ class ContactServerSubscriber extends CommonSubscriber
      * @param PageTokenHelper $pageTokenHelper
      * @param AssetTokenHelper $assetTokenHelper
      * @param FormTokenHelper $formTokenHelper
-     * @param ContactServerModel $contactserverModel
+     * @param ContactSourceModel $contactsourceModel
      */
     public function __construct(
         RouterInterface $router,
@@ -101,7 +101,7 @@ class ContactServerSubscriber extends CommonSubscriber
         PageTokenHelper $pageTokenHelper,
         AssetTokenHelper $assetTokenHelper,
         FormTokenHelper $formTokenHelper,
-        ContactServerModel $contactserverModel
+        ContactSourceModel $contactsourceModel
     ) {
         $this->router = $router;
         $this->ipHelper = $ipLookupHelper;
@@ -110,7 +110,7 @@ class ContactServerSubscriber extends CommonSubscriber
         $this->pageTokenHelper = $pageTokenHelper;
         $this->assetTokenHelper = $assetTokenHelper;
         $this->formTokenHelper = $formTokenHelper;
-        $this->contactserverModel = $contactserverModel;
+        $this->contactsourceModel = $contactsourceModel;
     }
 
     /**
@@ -119,24 +119,24 @@ class ContactServerSubscriber extends CommonSubscriber
     public static function getSubscribedEvents()
     {
         return [
-            ContactServerEvents::POST_SAVE => ['onContactServerPostSave', 0],
-            ContactServerEvents::POST_DELETE => ['onContactServerDelete', 0],
-            ContactServerEvents::TIMELINE_ON_GENERATE => ['onTimelineGenerate', 0],
+            ContactSourceEvents::POST_SAVE => ['onContactSourcePostSave', 0],
+            ContactSourceEvents::POST_DELETE => ['onContactSourceDelete', 0],
+            ContactSourceEvents::TIMELINE_ON_GENERATE => ['onTimelineGenerate', 0],
         ];
     }
 
     /**
      * Add an entry to the audit log.
      *
-     * @param ContactServerEvent $event
+     * @param ContactSourceEvent $event
      */
-    public function onContactServerPostSave(ContactServerEvent $event)
+    public function onContactSourcePostSave(ContactSourceEvent $event)
     {
-        $entity = $event->getContactServer();
+        $entity = $event->getContactSource();
         if ($details = $event->getChanges()) {
             $log = [
-                'bundle' => 'contactserver',
-                'object' => 'contactserver',
+                'bundle' => 'contactsource',
+                'object' => 'contactsource',
                 'objectId' => $entity->getId(),
                 'action' => ($event->isNew()) ? 'create' : 'update',
                 'details' => $details,
@@ -149,14 +149,14 @@ class ContactServerSubscriber extends CommonSubscriber
     /**
      * Add a delete entry to the audit log.
      *
-     * @param ContactServerEvent $event
+     * @param ContactSourceEvent $event
      */
-    public function onContactServerDelete(ContactServerEvent $event)
+    public function onContactSourceDelete(ContactSourceEvent $event)
     {
-        $entity = $event->getContactServer();
+        $entity = $event->getContactSource();
         $log = [
-            'bundle' => 'contactserver',
-            'object' => 'contactserver',
+            'bundle' => 'contactsource',
+            'object' => 'contactsource',
             'objectId' => $entity->deletedId,
             'action' => 'delete',
             'details' => ['name' => $entity->getName()],
@@ -168,15 +168,15 @@ class ContactServerSubscriber extends CommonSubscriber
     /**
      * Compile events for the lead timeline.
      *
-     * @param ContactServerTimelineEvent $event
+     * @param ContactSourceTimelineEvent $event
      */
-    public function onTimelineGenerate(ContactServerTimelineEvent $event)
+    public function onTimelineGenerate(ContactSourceTimelineEvent $event)
     {
         // Set available event types
         // $event->addSerializerGroup(['formList', 'submissionEventDetails']);
 
         /** @var EventRepository $eventRepository */
-        $eventRepository = $this->em->getRepository('MauticContactServerBundle:Event');
+        $eventRepository = $this->em->getRepository('MauticContactSourceBundle:Event');
 
         $stat = new Stat();
         $types = $stat->getAllTypes();
@@ -189,7 +189,7 @@ class ContactServerSubscriber extends CommonSubscriber
             $event->addEventType($eventTypeKey, $eventTypeName);
         }
 
-        $rows = $eventRepository->getEvents($options['contactServerId']);
+        $rows = $eventRepository->getEvents($options['contactSourceId']);
         foreach ($rows as $row) {
             $eventTypeKey = $row['type'];
             $eventTypeName = ucwords($eventTypeKey);
@@ -221,7 +221,7 @@ class ContactServerSubscriber extends CommonSubscriber
                             'logs' => $row['logs'],
                             'integrationEntityId' => $row['integration_entity_id'],
                         ],
-                        'contentTemplate' => 'MauticContactServerBundle:SubscribedEvents\Timeline:index.html.php',
+                        'contentTemplate' => 'MauticContactSourceBundle:SubscribedEvents\Timeline:index.html.php',
                         'icon' => 'fa-plus-square-o',
                         'message' => $row['message'],
                         'contactId' => $row['contact_id'],

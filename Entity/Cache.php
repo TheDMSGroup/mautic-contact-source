@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Entity;
+namespace MauticPlugin\MauticContactSourceBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
@@ -32,8 +32,8 @@ class Cache
     /** @var Contact $contact */
     private $contact;
 
-    /** @var integer $contactServer */
-    private $contactServer;
+    /** @var integer $contactSource */
+    private $contactSource;
 
     /** @var integer $category */
     private $category;
@@ -88,7 +88,7 @@ class Cache
 
         $builder->addId();
 
-        $builder->setTable('contactserver_cache');
+        $builder->setTable('contactsource_cache');
 
         $builder->addNullableField('email', 'string');
 
@@ -110,7 +110,7 @@ class Cache
 
         $builder->addNamedField('utmSource', 'string', 'utm_source', true);
 
-        $builder->addNamedField('contactServer', 'integer', 'contactserver_id');
+        $builder->addNamedField('contactSource', 'integer', 'contactsource_id');
 
         $builder->addNamedField('contact', 'integer', 'contact_id');
 
@@ -122,21 +122,21 @@ class Cache
             [
                 'contact_id',
             ],
-            'contactserver_cache_contact_id'
+            'contactsource_cache_contact_id'
         );
 
         $builder->addIndex(
             [
-                'contactserver_id',
+                'contactsource_id',
             ],
-            'contactserver_cache_contactserver_id'
+            'contactsource_cache_contactsource_id'
         );
 
         $builder->addIndex(
             [
                 'email',
             ],
-            'contactserver_cache_email'
+            'contactsource_cache_email'
         );
 
         $builder->addIndex(
@@ -144,7 +144,7 @@ class Cache
                 'phone',
                 'mobile',
             ],
-            'contactserver_cache_phone'
+            'contactsource_cache_phone'
         );
 
         $builder->addIndex(
@@ -152,7 +152,7 @@ class Cache
                 'address1',
                 'address2',
             ],
-            'contactserver_cache_address'
+            'contactsource_cache_address'
         );
 
         $builder->addIndex(
@@ -161,17 +161,17 @@ class Cache
                 'state',
                 'zipcode',
             ],
-            'contactserver_cache_city_state_zip'
+            'contactsource_cache_city_state_zip'
         );
 
         $builder->addIndex(
             [
                 'country',
             ],
-            'contactserver_cache_country'
+            'contactsource_cache_country'
         );
 
-        $builder->setCustomRepositoryClass('MauticPlugin\MauticContactServerBundle\Entity\CacheRepository');
+        $builder->setCustomRepositoryClass('MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository');
 
     }
 
@@ -406,19 +406,19 @@ class Cache
     /**
      * @return int
      */
-    public function getContactServer()
+    public function getContactSource()
     {
-        return $this->contactServer;
+        return $this->contactSource;
     }
 
     /**
-     * @param int $contactServer
+     * @param int $contactSource
      *
      * @return $this
      */
-    public function setContactServer($contactServer)
+    public function setContactSource($contactSource)
     {
-        $this->contactServer = $contactServer;
+        $this->contactSource = $contactSource;
 
         return $this;
     }

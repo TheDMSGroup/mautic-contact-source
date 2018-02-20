@@ -9,11 +9,11 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 $view->extend('MauticCoreBundle:Default:content.html.php');
-$view['slots']->set('mauticContent', 'contactserver');
+$view['slots']->set('mauticContent', 'contactsource');
 $view['slots']->set('headerTitle', $item->getName());
 
-echo $view['assets']->includeScript('plugins/MauticContactServerBundle/Assets/build/contactserver.min.js');
-echo $view['assets']->includeStylesheet('plugins/MauticContactServerBundle/Assets/build/contactserver.min.css');
+echo $view['assets']->includeScript('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.js');
+echo $view['assets']->includeStylesheet('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.css');
 
 $view['slots']->set(
     'actions',
@@ -23,20 +23,20 @@ $view['slots']->set(
             'item'            => $item,
             'templateButtons' => [
                 'edit' => $view['security']->hasEntityAccess(
-                    $permissions['plugin:contactserver:items:editown'],
-                    $permissions['plugin:contactserver:items:editother'],
+                    $permissions['plugin:contactsource:items:editown'],
+                    $permissions['plugin:contactsource:items:editother'],
                     $item->getCreatedBy()
                 ),
-                'clone'  => $permissions['plugin:contactserver:items:create'],
+                'clone'  => $permissions['plugin:contactsource:items:create'],
                 'delete' => $view['security']->hasEntityAccess(
-                    $permissions['plugin:contactserver:items:deleteown'],
-                    $permissions['plugin:contactserver:items:deleteother'],
+                    $permissions['plugin:contactsource:items:deleteown'],
+                    $permissions['plugin:contactsource:items:deleteother'],
                     $item->getCreatedBy()
                 ),
-                'close' => $view['security']->isGranted('plugin:contactserver:items:view'),
+                'close' => $view['security']->isGranted('plugin:contactsource:items:view'),
             ],
-            'routeBase' => 'contactserver',
-            'langVar'   => 'mautic.contactserver',
+            'routeBase' => 'contactsource',
+            'langVar'   => 'mautic.contactsource',
         ]
     )
 );
@@ -63,7 +63,7 @@ $token = $item->getToken();
             <!--/ form detail header -->
 
             <!-- form detail collapseable -->
-            <div class="collapse" id="contactserver-details">
+            <div class="collapse" id="contactsource-details">
                 <div class="pr-md pl-md pb-md">
                     <div class="panel shd-none mb-0">
                         <table class="table table-bordered table-striped mb-0">
@@ -81,7 +81,7 @@ $token = $item->getToken();
             <!-- form detail collapseable toggler -->
             <div class="hr-expand nm">
                 <span data-toggle="tooltip" title="<?php echo $view['translator']->trans('mautic.core.details'); ?>">
-                    <a href="javascript:void(0)" class="arrow text-muted collapsed" data-toggle="collapse" data-target="#contactserver-details"><span class="caret"></span> <?php echo $view['translator']->trans(
+                    <a href="javascript:void(0)" class="arrow text-muted collapsed" data-toggle="collapse" data-target="#contactsource-details"><span class="caret"></span> <?php echo $view['translator']->trans(
                             'mautic.core.details'
                         ); ?></a>
                 </span>
@@ -97,7 +97,7 @@ $token = $item->getToken();
                                 <div class="col-xs-4 va-m">
                                     <h5 class="text-white dark-md fw-sb mb-xs">
                                         <span class="fa fa-line-chart"></span>
-                                        <?php echo $view['translator']->trans('mautic.contactserver.graph.stats'); ?>
+                                        <?php echo $view['translator']->trans('mautic.contactsource.graph.stats'); ?>
                                     </h5>
                                 </div>
                                 <div class="col-xs-8 va-m">
@@ -126,7 +126,7 @@ $token = $item->getToken();
                         <span class="label label-primary mr-sm" id="TimelineCount">
                             <?php echo $events['total']; ?>
                         </span>
-                        <?php echo $view['translator']->trans('mautic.contactserver.timeline.events'); ?>
+                        <?php echo $view['translator']->trans('mautic.contactsource.timeline.events'); ?>
                     </a>
                 </li>
                 <? /*
@@ -148,10 +148,10 @@ $token = $item->getToken();
                 <!-- #history-container -->
                 <div class="tab-pane fade in active bdr-w-0" id="timeline-container">
                     <?php echo $view->render(
-                        'MauticContactServerBundle:Timeline:list.html.php',
+                        'MauticContactSourceBundle:Timeline:list.html.php',
                         [
                             'events' => $events,
-                            'contactServer' => $item,
+                            'contactSource' => $item,
                             'tmpl' => 'index',
                         ]
                     ); ?>
@@ -188,7 +188,7 @@ $token = $item->getToken();
             <div class="pa-md">
                 <div class="panel bg-info bg-light-lg bdr-w-0 mb-0">
                     <div class="panel-body">
-                        <h5 class="fw-sb mb-sm"><?php echo $view['translator']->trans('mautic.contactserver.form.token'); ?></h5>
+                        <h5 class="fw-sb mb-sm"><?php echo $view['translator']->trans('mautic.contactsource.form.token'); ?></h5>
                         <p class="mb-sm"><?php echo $token; ?></p>
                     </div>
                 </div>

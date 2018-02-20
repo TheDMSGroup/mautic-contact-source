@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Entity;
+namespace MauticPlugin\MauticContactSourceBundle\Entity;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Mautic\CoreBundle\Entity\CommonRepository;
@@ -17,7 +17,7 @@ use Mautic\LeadBundle\Entity\TimelineTrait;
 
 /**
  * Class EventRepository
- * @package MauticPlugin\MauticContactServerBundle\Entity
+ * @package MauticPlugin\MauticContactSourceBundle\Entity
  */
 class EventRepository extends CommonRepository
 {
@@ -26,20 +26,20 @@ class EventRepository extends CommonRepository
     /**
      * Fetch the base event data from the database.
      *
-     * @param $contactServerId
+     * @param $contactSourceId
      * @param $eventType
      * @param \DateTime|null $dateAdded
      * @return array
      */
-    public function getEvents($contactServerId, $eventType = null, \DateTime $dateAdded = null)
+    public function getEvents($contactSourceId, $eventType = null, \DateTime $dateAdded = null)
     {
         $q = $this->getEntityManager()->getConnection()->createQueryBuilder()
-            ->from(MAUTIC_TABLE_PREFIX.'contactserver_events', 'c')
+            ->from(MAUTIC_TABLE_PREFIX.'contactsource_events', 'c')
             ->select('c.*');
 
-        $expr = $q->expr()->eq('c.contactserver_id', ':contactServer');
+        $expr = $q->expr()->eq('c.contactsource_id', ':contactSource');
         $q->where($expr)
-            ->setParameter('contactServer', (int)$contactServerId);
+            ->setParameter('contactSource', (int)$contactSourceId);
 
         if ($dateAdded) {
             $expr->add(
@@ -58,23 +58,23 @@ class EventRepository extends CommonRepository
     }
 
     /**
-     * @param $contactServerId
+     * @param $contactSourceId
      * @param null $contactId
      * @param array $options
      * @return array
      */
-    public function getEventsForTimeline($contactServerId, $contactId = null, array $options = [])
+    public function getEventsForTimeline($contactSourceId, $contactId = null, array $options = [])
     {
         $eventType = null;
 
         $query = $this->getEntityManager()->getConnection()->createQueryBuilder()
-            ->from(MAUTIC_TABLE_PREFIX.'contactserver_events', 'c')
+            ->from(MAUTIC_TABLE_PREFIX.'contactsource_events', 'c')
             ->select('c.*');
 
         $query->where(
-            $query->expr()->eq('c.contactserver_id', ':contactServerId')
+            $query->expr()->eq('c.contactsource_id', ':contactSourceId')
         )
-            ->setParameter('contactServerId', $contactServerId);
+            ->setParameter('contactSourceId', $contactSourceId);
 
 
         if ($eventType) {
@@ -115,7 +115,7 @@ class EventRepository extends CommonRepository
         $q = $this->_em
             ->createQueryBuilder()
             ->select($alias)
-            ->from('MauticContactServerBundle:Event', $alias, $alias.'.id');
+            ->from('MauticContactSourceBundle:Event', $alias, $alias.'.id');
 
         $args['qb'] = $q;
 

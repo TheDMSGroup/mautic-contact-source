@@ -1,32 +1,32 @@
 <?php
 
-namespace MauticPlugin\MauticContactServerBundle\Form\Type;
+namespace MauticPlugin\MauticContactSourceBundle\Form\Type;
 
-use MauticPlugin\MauticContactServerBundle\Model\ContactServerModel;
+use MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Class ContactServerListType
- * @package MauticPlugin\MauticContactServerBundle\Form\Type
+ * Class ContactSourceListType
+ * @package MauticPlugin\MauticContactSourceBundle\Form\Type
  */
-class ContactServerListType extends AbstractType
+class ContactSourceListType extends AbstractType
 {
     /**
-     * @var ContactServerModel
+     * @var ContactSourceModel
      */
-    protected $contactServerModel;
+    protected $contactSourceModel;
 
     private $repo;
 
     /**
-     * @param ContactServerModel $contactServerModel
+     * @param ContactSourceModel $contactSourceModel
      */
-    public function __construct(ContactServerModel $contactServerModel)
+    public function __construct(ContactSourceModel $contactSourceModel)
     {
-        $this->contactServerModel = $contactServerModel;
-        $this->repo       = $this->contactServerModel->getRepository();
+        $this->contactSourceModel = $contactSourceModel;
+        $this->repo       = $this->contactSourceModel->getRepository();
     }
 
     /**
@@ -39,7 +39,7 @@ class ContactServerListType extends AbstractType
                 'choices' => function (Options $options) {
                     $choices = [];
 
-                    $list = $this->repo->getContactServerList($options['data']);
+                    $list = $this->repo->getContactSourceList($options['data']);
                     foreach ($list as $row) {
                         $choices[$row['id']] = $row['name'];
                     }
@@ -53,7 +53,7 @@ class ContactServerListType extends AbstractType
                 'multiple'    => true,
                 'required'    => false,
                 'empty_value' => function (Options $options) {
-                    return (empty($options['choices'])) ? 'mautic.contactserver.no.contactserveritem.note' : 'mautic.core.form.chooseone';
+                    return (empty($options['choices'])) ? 'mautic.contactsource.no.contactsourceitem.note' : 'mautic.core.form.chooseone';
                 },
                 'disabled' => function (Options $options) {
                     return empty($options['choices']);
@@ -70,7 +70,7 @@ class ContactServerListType extends AbstractType
      */
     public function getName()
     {
-        return 'contactserver_list';
+        return 'contactsource_list';
     }
 
     /**

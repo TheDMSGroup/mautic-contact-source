@@ -11,7 +11,7 @@
 ?>
 
 <!-- filter form -->
-<form method="post" action="<?php echo $view['router']->path('mautic_contactserver_timeline_action', ['contactServerId' => $contactServer->getId()]); ?>" class="panel" id="timeline-filters">
+<form method="post" action="<?php echo $view['router']->path('mautic_contactsource_timeline_action', ['contactSourceId' => $contactSource->getId()]); ?>" class="panel" id="timeline-filters">
     <div class="form-control-icon pa-xs">
         <input type="text" class="form-control bdr-w-0" name="search" id="search" placeholder="<?php echo $view['translator']->trans('mautic.core.search.placeholder'); ?>" value="<?php echo $events['filters']['search']; ?>">
         <span class="the-icon fa fa-search text-muted mt-xs"></span>
@@ -19,7 +19,7 @@
     <?php if (isset($events['types']) && is_array($events['types'])) : ?>
         <div class="history-search panel-footer text-muted">
             <div class="col-sm-5">
-                <select name="includeEvents[]" multiple="multiple" class="form-control bdr-w-0" data-placeholder="<?php echo $view['translator']->trans('mautic.contactserver.events.filter.include.placeholder'); ?>">
+                <select name="includeEvents[]" multiple="multiple" class="form-control bdr-w-0" data-placeholder="<?php echo $view['translator']->trans('mautic.contactsource.events.filter.include.placeholder'); ?>">
                     <?php foreach ($events['types'] as $typeKey => $typeName) : ?>
                         <option value="<?php echo $typeKey; ?>"<?php echo isset($events['filters']['includeEvents']) && in_array($typeKey, $events['filters']['includeEvents']) ? ' selected' : ''; ?> >
                             <?php echo $typeName; ?>
@@ -28,7 +28,7 @@
                 </select>
             </div>
             <div class="col-sm-5">
-                <select name="excludeEvents[]" multiple="multiple" class="form-control bdr-w-0" data-placeholder="<?php echo $view['translator']->trans('mautic.contactserver.events.filter.exclude.placeholder'); ?>">
+                <select name="excludeEvents[]" multiple="multiple" class="form-control bdr-w-0" data-placeholder="<?php echo $view['translator']->trans('mautic.contactsource.events.filter.exclude.placeholder'); ?>">
                     <?php foreach ($events['types'] as $typeKey => $typeName) : ?>
                         <option value="<?php echo $typeKey; ?>"<?php echo isset($events['filters']['excludeEvents']) && in_array($typeKey, $events['filters']['excludeEvents']) ? ' selected' : ''; ?> >
                             <?php echo $typeName; ?>
@@ -38,7 +38,7 @@
             </div>
             <?php /* @todo - export action. Doesn't yet have a router/controller config.
             <div class="col-sm-2">
-                <a class="btn btn-default btn-block" href="<?php echo $view['router']->generate('mautic_contactserver_timeline_export_action', ['contactServerId' => $contactServer->getId()]); ?>" data-toggle="download">
+                <a class="btn btn-default btn-block" href="<?php echo $view['router']->generate('mautic_contactsource_timeline_export_action', ['contactSourceId' => $contactSource->getId()]); ?>" data-toggle="download">
                     <span>
                         <i class="fa fa-download"></i> <span class="hidden-xs hidden-sm"><?php echo $view['translator']->trans('mautic.core.export'); ?></span>
                     </span>
@@ -47,7 +47,7 @@
         </div>
     <?php endif; ?>
 
-    <input type="hidden" name="leadId" id="leadId" value="<?php echo $contactServer->getId(); ?>" />
+    <input type="hidden" name="leadId" id="leadId" value="<?php echo $contactSource->getId(); ?>" />
 </form>
 
 <script>

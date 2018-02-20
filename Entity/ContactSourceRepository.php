@@ -9,15 +9,15 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Entity;
+namespace MauticPlugin\MauticContactSourceBundle\Entity;
 
 use Mautic\CoreBundle\Entity\CommonRepository;
 
 /**
- * Class ContactServerRepository
- * @package MauticPlugin\MauticContactServerBundle\Entity
+ * Class ContactSourceRepository
+ * @package MauticPlugin\MauticContactSourceBundle\Entity
  */
-class ContactServerRepository extends CommonRepository
+class ContactSourceRepository extends CommonRepository
 {
 
     /**
@@ -33,7 +33,7 @@ class ContactServerRepository extends CommonRepository
         $q = $this->_em
             ->createQueryBuilder()
             ->select($alias)
-            ->from('MauticContactServerBundle:ContactServer', $alias, $alias.'.id');
+            ->from('MauticContactSourceBundle:ContactSource', $alias, $alias.'.id');
 
         if (empty($args['iterator_mode'])) {
             $q->leftJoin($alias.'.category', 'c');
@@ -97,7 +97,7 @@ class ContactServerRepository extends CommonRepository
     /**
      * @return array
      */
-    public function getContactServerList($currentId)
+    public function getContactSourceList($currentId)
     {
         $q = $this->createQueryBuilder('f');
         $q->select('partial f.{id, name, description}')->orderBy('f.name');

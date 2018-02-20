@@ -1,9 +1,9 @@
 // Campaigns field.
-Mautic.contactserverCampaigns = function () {
-    var $campaigns = mQuery('#contactserver_campaign_settings');
-    if (typeof window.contactserverCampaignsLoaded === 'undefined' && $campaigns.length) {
+Mautic.contactsourceCampaigns = function () {
+    var $campaigns = mQuery('#contactsource_campaign_settings');
+    if (typeof window.contactsourceCampaignsLoaded === 'undefined' && $campaigns.length) {
 
-        window.contactserverCampaignsLoaded = true;
+        window.contactsourceCampaignsLoaded = true;
 
         var campaignsJSONEditor;
 
@@ -11,13 +11,13 @@ Mautic.contactserverCampaigns = function () {
         mQuery.ajax({
             dataType: 'json',
             cache: true,
-            url: mauticBasePath + '/' + mauticAssetPrefix + 'plugins/MauticContactServerBundle/Assets/json/campaigns.json',
+            url: mauticBasePath + '/' + mauticAssetPrefix + 'plugins/MauticContactSourceBundle/Assets/json/campaigns.json',
             success: function (data) {
                 var schema = data;
 
                 // Create our widget container for the JSON Editor.
                 var $campaignsJSONEditor = mQuery('<div>', {
-                    class: 'contactserver_jsoneditor'
+                    class: 'contactsource_jsoneditor'
                 }).insertBefore($campaigns);
 
                 // Instantiate the JSON Editor based on our schema.
@@ -57,7 +57,7 @@ Mautic.contactserverCampaigns = function () {
 
                 $campaigns.addClass('hide');
                 $campaignsJSONEditor.show();
-                // mQuery('label[for=contactserver_campaign_settings]').addClass('hide');
+                // mQuery('label[for=contactsource_campaign_settings]').addClass('hide');
             }
         });
 

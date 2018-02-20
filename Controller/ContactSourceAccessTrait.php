@@ -9,40 +9,40 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Controller;
+namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
-use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 
 /**
- * Class ContactServerAccessTrait.
+ * Class ContactSourceAccessTrait.
  */
-trait ContactServerAccessTrait
+trait ContactSourceAccessTrait
 {
     /**
-     * Determines if the user has access to the contactServer the note is for.
+     * Determines if the user has access to the contactSource the note is for.
      *
-     * @param $contactServerId
+     * @param $contactSourceId
      * @param $action
      * @param bool $isPlugin
      * @param string $integration
-     * @return ContactServer
+     * @return ContactSource
      */
-    protected function checkContactServerAccess($contactServerId, $action, $isPlugin = false, $integration = '')
+    protected function checkContactSourceAccess($contactSourceId, $action, $isPlugin = false, $integration = '')
     {
-        if (!$contactServerId instanceof ContactServer) {
-            //make sure the user has view access to this contactServer
-            $contactServerModel = $this->getModel('contactServer');
-            $contactServer = $contactServerModel->getEntity((int)$contactServerId);
+        if (!$contactSourceId instanceof ContactSource) {
+            //make sure the user has view access to this contactSource
+            $contactSourceModel = $this->getModel('contactSource');
+            $contactSource = $contactSourceModel->getEntity((int)$contactSourceId);
         } else {
-            $contactServer = $contactServerId;
-            $contactServerId = $contactServer->getId();
+            $contactSource = $contactSourceId;
+            $contactSourceId = $contactSource->getId();
         }
 
-        if ($contactServer === null || !$contactServer->getId()) {
+        if ($contactSource === null || !$contactSource->getId()) {
             if (method_exists($this, 'postActionRedirect')) {
                 //set the return URL
                 $page = $this->get('session')->get(
-                    $isPlugin ? 'mautic.'.$integration.'.page' : 'mautic.contactServer.page',
+                    $isPlugin ? 'mautic.'.$integration.'.page' : 'mautic.contactSource.page',
                     1
                 );
                 $returnUrl = $this->generateUrl(
@@ -54,16 +54,16 @@ trait ContactServerAccessTrait
                     [
                         'returnUrl' => $returnUrl,
                         'viewParameters' => ['page' => $page],
-                        'contentTemplate' => $isPlugin ? 'MauticContactServerBundle:ContactServer:pluginIndex' : 'MauticContactServerBundle:ContactServer:index',
+                        'contentTemplate' => $isPlugin ? 'MauticContactSourceBundle:ContactSource:pluginIndex' : 'MauticContactSourceBundle:ContactSource:index',
                         'passthroughVars' => [
                             'activeLink' => $isPlugin ? '#mautic_plugin_timeline_index' : '#mautic_contact_index',
-                            'mauticContent' => 'contactServerTimeline',
+                            'mauticContent' => 'contactSourceTimeline',
                         ],
                         'flashes' => [
                             [
                                 'type' => 'error',
-                                'msg' => 'mautic.contactServer.contactServer.error.notfound',
-                                'msgVars' => ['%id%' => $contactServerId],
+                                'msg' => 'mautic.contactSource.contactSource.error.notfound',
+                                'msgVars' => ['%id%' => $contactSourceId],
                             ],
                         ],
                     ]
@@ -72,19 +72,19 @@ trait ContactServerAccessTrait
                 return $this->notFound('mautic.contact.error.notfound');
             }
         } elseif (!$this->get('mautic.security')->hasEntityAccess(
-            'contactServer:contactServers:'.$action.'own',
-            'contactServer:contactServers:'.$action.'other',
-            $contactServer->getPermissionUser()
+            'contactSource:contactSources:'.$action.'own',
+            'contactSource:contactSources:'.$action.'other',
+            $contactSource->getPermissionUser()
         )
         ) {
             return $this->accessDenied();
         } else {
-            return $contactServer;
+            return $contactSource;
         }
     }
 
     /**
-     * Returns contactServers the user has access to.
+     * Returns contactSources the user has access to.
      *
      * @param $action
      *
@@ -92,14 +92,14 @@ trait ContactServerAccessTrait
      */
     protected function checkAllAccess($action, $limit)
     {
-        /** @var ContactServerModel $model */
-        $model = $this->getModel('contactServer');
+        /** @var ContactSourceModel $model */
+        $model = $this->getModel('contactSource');
 
-        //make sure the user has view access to contactServers
+        //make sure the user has view access to contactSources
         $repo = $model->getRepository();
 
         // order by lastactive, filter
-        $contactServers = $repo->getEntities(
+        $contactSources = $repo->getEntities(
             [
                 'filter' => [
                     'force' => [
@@ -116,21 +116,21 @@ trait ContactServerAccessTrait
             ]
         );
 
-        if ($contactServers === null) {
+        if ($contactSources === null) {
             return $this->accessDenied();
         }
 
-        foreach ($contactServers as $contactServer) {
+        foreach ($contactSources as $contactSource) {
             if (!$this->get('mautic.security')->hasEntityAccess(
-                'contactServer:contactServers:'.$action.'own',
-                'contactServer:contactServers:'.$action.'other',
-                $contactServer->getOwner()
+                'contactSource:contactSources:'.$action.'own',
+                'contactSource:contactSources:'.$action.'other',
+                $contactSource->getOwner()
             )
             ) {
-                unset($contactServer);
+                unset($contactSource);
             }
         }
 
-        return $contactServers;
+        return $contactSources;
     }
 }

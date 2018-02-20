@@ -10,33 +10,33 @@
  */
 
 return [
-    'name'        => 'Mautic Contact Server',
-    'description' => 'Sets up API endpoints for contact ingestion from providers.',
-    'version'     => '0.1',
+    'name'        => 'Mautic Contact Source',
+    'description' => 'Creates API endpoints for receiving contacts from third parties.',
+    'version'     => '0.6',
     'author'      => 'Mautic',
 
     'routes' => [
         'main' => [
-            'mautic_contactserver_index' => [
-                'path'       => '/contactserver/{page}',
-                'controller' => 'MauticContactServerBundle:ContactServer:index',
+            'mautic_contactsource_index' => [
+                'path'       => '/contactsource/{page}',
+                'controller' => 'MauticContactSourceBundle:ContactSource:index',
             ],
-            'mautic_contactserver_action' => [
-                'path'       => '/contactserver/{objectAction}/{objectId}',
-                'controller' => 'MauticContactServerBundle:ContactServer:execute',
+            'mautic_contactsource_action' => [
+                'path'       => '/contactsource/{objectAction}/{objectId}',
+                'controller' => 'MauticContactSourceBundle:ContactSource:execute',
             ],
-            'mautic_contactserver_timeline_action' => [
-                'path'       => '/contactserver/timeline/{contactServerId}',
-                'controller' => 'MauticContactServerBundle:Timeline:index',
+            'mautic_contactsource_timeline_action' => [
+                'path'       => '/contactsource/timeline/{contactSourceId}',
+                'controller' => 'MauticContactSourceBundle:Timeline:index',
                 'requirements' => [
-                    'contactServerId' => '\d+',
+                    'contactSourceId' => '\d+',
                 ],
             ],
         ],
         'public' => [
-            'mautic_contactserver_contact' => [
-                'path'       => '/server/{serverId}/{object}/{campaignId}/{action}',
-                'controller' => 'MauticContactServerBundle:Api\Api:contact',
+            'mautic_contactsource_contact' => [
+                'path'       => '/source/{sourceId}/{object}/{campaignId}/{action}',
+                'controller' => 'MauticContactSourceBundle:Api\Api:contact',
                 'method'     => ['POST', 'PUT'],
                 'defaults'   => [
                     'action' => 'add',
@@ -47,9 +47,9 @@ return [
                     'translator'
                 ]
             ],
-            'mautic_contactserver_documentation' => [
-                'path'       => '/server/{serverId}/{object}/{campaignId}/{action}',
-                'controller' => 'MauticContactServerBundle:Public:getDocumentation',
+            'mautic_contactsource_documentation' => [
+                'path'       => '/source/{sourceId}/{object}/{campaignId}/{action}',
+                'controller' => 'MauticContactSourceBundle:Public:getDocumentation',
                 'method'     => 'GET',
                 'defaults'   => [
                     'action' => 'add',
@@ -62,14 +62,14 @@ return [
 
     'services' => [
         'events' => [
-            'mautic.contactserver.subscriber.stat' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\EventListener\StatSubscriber',
+            'mautic.contactsource.subscriber.stat' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\StatSubscriber',
                 'arguments' => [
-                    'mautic.contactserver.model.contactserver',
+                    'mautic.contactsource.model.contactsource',
                 ],
             ],
-            'mautic.contactserver.subscriber.contactserver' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\EventListener\ContactServerSubscriber',
+            'mautic.contactsource.subscriber.contactsource' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\ContactSourceSubscriber',
                 'arguments' => [
                     'router',
                     'mautic.helper.ip_lookup',
@@ -78,36 +78,36 @@ return [
                     'mautic.page.helper.token',
                     'mautic.asset.helper.token',
                     'mautic.form.helper.token',
-                    'mautic.contactserver.model.contactserver',
+                    'mautic.contactsource.model.contactsource',
                 ],
             ],
-            'mautic.contactserver.stats.subscriber' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\EventListener\StatsSubscriber',
+            'mautic.contactsource.stats.subscriber' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\StatsSubscriber',
                 'arguments' => [
                     'doctrine.orm.entity_manager',
                 ],
             ],
         ],
         'forms' => [
-            'mautic.contactserver.form.type.contactservershow_list' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\Form\Type\ContactServerShowType',
+            'mautic.contactsource.form.type.contactsourceshow_list' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Type\ContactSourceShowType',
                 'arguments' => 'router',
-                'alias'     => 'contactservershow_list',
+                'alias'     => 'contactsourceshow_list',
             ],
-            'mautic.contactserver.form.type.contactserver_list' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\Form\Type\ContactServerListType',
-                'arguments' => 'mautic.contactserver.model.contactserver',
-                'alias'     => 'contactserver_list',
+            'mautic.contactsource.form.type.contactsource_list' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Type\ContactSourceListType',
+                'arguments' => 'mautic.contactsource.model.contactsource',
+                'alias'     => 'contactsource_list',
             ],
-            'mautic.contactserver.form.type.contactserver' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\Form\Type\ContactServerType',
-                'alias'     => 'contactserver',
+            'mautic.contactsource.form.type.contactsource' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Type\ContactSourceType',
+                'alias'     => 'contactsource',
                 'arguments' => 'mautic.security',
             ],
         ],
         'models' => [
-            'mautic.contactserver.model.contactserver' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\Model\ContactServerModel',
+            'mautic.contactsource.model.contactsource' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel',
                 'arguments' => [
                     'mautic.form.model.form',
                     'mautic.page.model.trackable',
@@ -116,14 +116,14 @@ return [
                     'mautic.lead.model.lead',
                 ],
             ],
-            'mautic.contactserver.model.campaign_settings' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\Model\CampaignSettings',
+            'mautic.contactsource.model.campaign_settings' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\CampaignSettings',
                 'arguments' => [
-                    'mautic.contactserver.model.contactserver',
+                    'mautic.contactsource.model.contactsource',
                 ],
             ],
-            'mautic.contactserver.model.campaign_event' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\Model\CampaignEventModel',
+            'mautic.contactsource.model.campaign_event' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\CampaignEventModel',
                 'arguments' => [
                     'mautic.helper.ip_lookup',
                     'mautic.helper.core_parameters',
@@ -134,8 +134,8 @@ return [
                     'mautic.factory',
                 ],
             ],
-            'mautic.contactserver.model.campaign' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\Model\CampaignModel',
+            'mautic.contactsource.model.campaign' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\CampaignModel',
                 'arguments' => [
                     'mautic.helper.core_parameters',
                     'mautic.lead.model.lead',
@@ -143,11 +143,11 @@ return [
                     'mautic.form.model.form',
                 ],
             ],
-            'mautic.contactserver.model.cache' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\Model\Cache',
+            'mautic.contactsource.model.cache' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\Cache',
             ],
-            'mautic.contactserver.model.contact' => [
-                'class'     => 'MauticPlugin\MauticContactServerBundle\Model\ContactModel',
+            'mautic.contactsource.model.contact' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\ContactModel',
                 'arguments' => [
                     'request_stack',
                     'mautic.helper.cookie',
@@ -171,15 +171,15 @@ return [
 
     'menu' => [
         'main' => [
-            'mautic.contactserver' => [
-                'route'     => 'mautic_contactserver_index',
-                'access'    => 'plugin:contactserver:items:view',
-                'id'        => 'mautic_contactserver_root',
+            'mautic.contactsource' => [
+                'route'     => 'mautic_contactsource_index',
+                'access'    => 'plugin:contactsource:items:view',
+                'id'        => 'mautic_contactsource_root',
                 'iconClass' => 'fa-cloud-download',
                 'priority'  => 65,
                 'checks'    => [
                     'integration' => [
-                        'Server' => [
+                        'Source' => [
                             'enabled' => true,
                         ],
                     ],
@@ -189,6 +189,6 @@ return [
     ],
 
     'categories' => [
-        'plugin:contactserver' => 'mautic.contactserver',
+        'plugin:contactsource' => 'mautic.contactsource',
     ],
 ];

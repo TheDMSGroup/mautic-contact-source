@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Entity;
+namespace MauticPlugin\MauticContactSourceBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
@@ -18,7 +18,7 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
 /**
  * Class Stat.
  *
- * Entity is used to track statistics around Contact Servers.
+ * Entity is used to track statistics around Contact Sources.
  */
 class Stat
 {
@@ -37,8 +37,8 @@ class Stat
     /** @var int $id */
     private $id;
 
-    /** @var ContactServer $contactServer */
-    private $contactServer;
+    /** @var ContactSource $contactSource */
+    private $contactSource;
 
     /** @var string $type */
     private $type;
@@ -59,13 +59,13 @@ class Stat
     {
         $builder = new ClassMetadataBuilder($metadata);
 
-        $builder->setTable('contactserver_stats')
-            ->setCustomRepositoryClass('MauticPlugin\MauticContactServerBundle\Entity\StatRepository');
+        $builder->setTable('contactsource_stats')
+            ->setCustomRepositoryClass('MauticPlugin\MauticContactSourceBundle\Entity\StatRepository');
 
         $builder->addId();
 
-        $builder->createManyToOne('contactServer', 'ContactServer')
-            ->addJoinColumn('contactserver_id', 'id', false, false, 'CASCADE')
+        $builder->createManyToOne('contactSource', 'ContactSource')
+            ->addJoinColumn('contactsource_id', 'id', false, false, 'CASCADE')
             ->build();
 
         $builder->addField('type', 'string');
@@ -79,8 +79,8 @@ class Stat
         $builder->addContact(true, 'SET NULL');
 
         $builder->addIndex(
-            ['contactserver_id', 'type', 'date_added'],
-            'contactserver_type_date_added'
+            ['contactsource_id', 'type', 'date_added'],
+            'contactsource_type_date_added'
         );
     }
 
@@ -95,19 +95,19 @@ class Stat
     /**
      * @return mixed
      */
-    public function getContactServer()
+    public function getContactSource()
     {
-        return $this->contactServer;
+        return $this->contactSource;
     }
 
     /**
-     * @param mixed $contactServer
+     * @param mixed $contactSource
      *
      * @return Stat
      */
-    public function setContactServer($contactServer)
+    public function setContactSource($contactSource)
     {
-        $this->contactServer = $contactServer;
+        $this->contactSource = $contactSource;
 
         return $this;
     }

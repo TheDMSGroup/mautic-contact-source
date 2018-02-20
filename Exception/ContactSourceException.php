@@ -9,16 +9,16 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Exception;
+namespace MauticPlugin\MauticContactSourceBundle\Exception;
 
 use Mautic\LeadBundle\Entity\Lead as Contact;
 
 /**
- * Class ContactServerException
+ * Class ContactSourceException
  *
- * @package MauticPlugin\MauticContactServerBundle\Exception
+ * @package MauticPlugin\MauticContactSourceBundle\Exception
  */
-class ContactServerException extends \Exception
+class ContactSourceException extends \Exception
 {
     /** @var string */
     private $contactId;
@@ -33,7 +33,7 @@ class ContactServerException extends \Exception
     private $field;
 
     /**
-     * ContactServerException constructor.
+     * ContactSourceException constructor.
      * @param string $message
      * @param int $code
      * @param \Exception|null $previous
@@ -41,7 +41,7 @@ class ContactServerException extends \Exception
      * @param null $field
      */
     public function __construct(
-        $message = 'Contact Server error',
+        $message = 'Contact Source error',
         $code = 0,
         \Exception $previous = null,
         $statType = null,
@@ -67,7 +67,7 @@ class ContactServerException extends \Exception
     /**
      * @param mixed $contactId
      *
-     * @return ContactServerException
+     * @return ContactSourceException
      */
     public function setContactId($contactId)
     {
@@ -87,7 +87,7 @@ class ContactServerException extends \Exception
     /**
      * @param string $statType
      *
-     * @return ContactServerException
+     * @return ContactSourceException
      */
     public function setStatType($statType)
     {
@@ -107,7 +107,7 @@ class ContactServerException extends \Exception
     /**
      * @param string $field
      *
-     * @return ContactServerException
+     * @return ContactSourceException
      */
     public function setField($field)
     {
@@ -127,7 +127,7 @@ class ContactServerException extends \Exception
     /**
      * @param Contact $contact
      *
-     * @return ContactServerException
+     * @return ContactSourceException
      */
     public function setContact(Contact $contact)
     {

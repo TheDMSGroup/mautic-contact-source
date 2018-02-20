@@ -19,10 +19,10 @@ module.exports = function (grunt) {
             my_target: {
                 options: {
                     sourceMap: true,
-                    sourceMapName: 'Assets/build/contactserver.min.js.map'
+                    sourceMapName: 'Assets/build/contactsource.min.js.map'
                 },
                 files: {
-                    'Assets/build/contactserver.min.js': ['Assets/js/libraries/*.js', 'Assets/js/*.js']
+                    'Assets/build/contactsource.min.js': ['Assets/js/libraries/*.js', 'Assets/js/*.js']
                 }
             }
         },
@@ -32,11 +32,11 @@ module.exports = function (grunt) {
                 roundingPrecision: -1,
                 sourceMap: true,
                 root: 'Assets/build',
-                sourceMapName: 'Assets/build/contactserver.min.css.map'
+                sourceMapName: 'Assets/build/contactsource.min.css.map'
             },
             target: {
                 files: {
-                    'Assets/build/contactserver.min.css': ['Assets/css/libraries/*.css', 'Assets/css/*.css']
+                    'Assets/build/contactsource.min.css': ['Assets/css/libraries/*.css', 'Assets/css/*.css']
                 }
             }
         },
