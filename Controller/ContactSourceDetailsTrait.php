@@ -9,24 +9,24 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Controller;
+namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
 use Mautic\CoreBundle\Entity\AuditLogRepository;
 use Mautic\CoreBundle\Helper\Chart\ChartQuery;
 use Mautic\CoreBundle\Helper\Chart\LineChart;
 use Mautic\CoreBundle\Model\AuditLogModel;
-use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
-use MauticPlugin\MauticContactServerBundle\Model\ContactServerModel;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
+use MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel;
 
 /**
- * Trait ContactServerDetailsTrait
- * @package MauticPlugin\MauticContactServerBundle\Controller
+ * Trait ContactSourceDetailsTrait
+ * @package MauticPlugin\MauticContactSourceBundle\Controller
  */
-trait ContactServerDetailsTrait
+trait ContactSourceDetailsTrait
 {
 
     /**
-     * @param array $contactServers
+     * @param array $contactSources
      * @param array|null $filters
      * @param array|null $orderBy
      * @param int $page
@@ -35,7 +35,7 @@ trait ContactServerDetailsTrait
      * @throws InvalidArgumentException
      */
     protected function getAllEngagements(
-        array $contactServers,
+        array $contactSources,
         array $filters = null,
         array $orderBy = null,
         $page = 1,
@@ -80,21 +80,21 @@ trait ContactServerDetailsTrait
         ];
 
         // get events for each contact
-        foreach ($contactServers as $contactServer) {
-            //  if (!$contactServer->getEmail()) continue; // discard contacts without email
+        foreach ($contactSources as $contactSource) {
+            //  if (!$contactSource->getEmail()) continue; // discard contacts without email
 
-            /** @var ContactServerModel $model */
-            $model = $this->getModel('contactServer');
-            $engagements = $model->getEngagements($contactServer, $filters, $orderBy, $page, $limit);
+            /** @var ContactSourceModel $model */
+            $model = $this->getModel('contactSource');
+            $engagements = $model->getEngagements($contactSource, $filters, $orderBy, $page, $limit);
             $events = $engagements['events'];
             $types = $engagements['types'];
 
-            // inject contactServer into events
+            // inject contactSource into events
             foreach ($events as &$event) {
-                $event['contactServerId'] = $contactServer->getId();
-                $event['contactServerEmail'] = $contactServer->getEmail();
-                $event['contactServerName'] = $contactServer->getName() ? $contactServer->getName(
-                ) : $contactServer->getEmail();
+                $event['contactSourceId'] = $contactSource->getId();
+                $event['contactSourceEmail'] = $contactSource->getEmail();
+                $event['contactSourceName'] = $contactSource->getName() ? $contactSource->getName(
+                ) : $contactSource->getEmail();
             }
 
             $result['events'] = array_merge($result['events'], $events);
@@ -145,18 +145,18 @@ trait ContactServerDetailsTrait
     }
 
     /**
-     * Get a list of places for the contactServer based on IP location.
+     * Get a list of places for the contactSource based on IP location.
      *
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      *
      * @return array
      */
-    protected function getPlaces(ContactServer $contactServer)
+    protected function getPlaces(ContactSource $contactSource)
     {
         // Get Places from IP addresses
         $places = [];
-        if ($contactServer->getIpAddresses()) {
-            foreach ($contactServer->getIpAddresses() as $ip) {
+        if ($contactSource->getIpAddresses()) {
+            foreach ($contactSource->getIpAddresses() as $ip) {
                 if ($details = $ip->getIpDetails()) {
                     if (!empty($details['latitude']) && !empty($details['longitude'])) {
                         $name = 'N/A';
@@ -179,14 +179,14 @@ trait ContactServerDetailsTrait
     }
 
     /**
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      * @param \DateTime|null $fromDate
      * @param \DateTime|null $toDate
      *
      * @return mixed
      */
     protected function getEngagementData(
-        ContactServer $contactServer,
+        ContactSource $contactSource,
         \DateTime $fromDate = null,
         \DateTime $toDate = null
     ) {
@@ -203,26 +203,26 @@ trait ContactServerDetailsTrait
         $lineChart = new LineChart(null, $fromDate, $toDate);
         $chartQuery = new ChartQuery($this->getDoctrine()->getConnection(), $fromDate, $toDate);
 
-        /** @var ContactServerModel $model */
-        $model = $this->getModel('contactServer');
-        $engagements = $model->getEngagementCount($contactServer, $fromDate, $toDate, 'm', $chartQuery);
+        /** @var ContactSourceModel $model */
+        $model = $this->getModel('contactSource');
+        $engagements = $model->getEngagementCount($contactSource, $fromDate, $toDate, 'm', $chartQuery);
         $lineChart->setDataset(
-            $translator->trans('mautic.contactServer.graph.line.all_engagements'),
+            $translator->trans('mautic.contactSource.graph.line.all_engagements'),
             $engagements['byUnit']
         );
 
         $pointStats = $chartQuery->fetchTimeData(
-            'contactServer_points_change_log',
+            'contactSource_points_change_log',
             'date_added',
-            ['contactServer_id' => $contactServer->getId()]
+            ['contactSource_id' => $contactSource->getId()]
         );
-        $lineChart->setDataset($translator->trans('mautic.contactServer.graph.line.points'), $pointStats);
+        $lineChart->setDataset($translator->trans('mautic.contactSource.graph.line.points'), $pointStats);
 
         return $lineChart->render();
     }
 
     /**
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      * @param array|null $filters
      * @param array|null $orderBy
      * @param int $page
@@ -231,7 +231,7 @@ trait ContactServerDetailsTrait
      * @return array
      */
     protected function getAuditlogs(
-        ContactServer $contactServer,
+        ContactSource $contactSource,
         array $filters = null,
         array $orderBy = null,
         $page = 1,
@@ -241,7 +241,7 @@ trait ContactServerDetailsTrait
 
         if (null == $filters) {
             $filters = $session->get(
-                'mautic.contactServer.'.$contactServer->getId().'.auditlog.filters',
+                'mautic.contactSource.'.$contactSource->getId().'.auditlog.filters',
                 [
                     'search' => '',
                     'includeEvents' => [],
@@ -251,14 +251,14 @@ trait ContactServerDetailsTrait
         }
 
         if (null == $orderBy) {
-            if (!$session->has('mautic.contactServer.'.$contactServer->getId().'.auditlog.orderby')) {
-                $session->set('mautic.contactServer.'.$contactServer->getId().'.auditlog.orderby', 'al.dateAdded');
-                $session->set('mautic.contactServer.'.$contactServer->getId().'.auditlog.orderbydir', 'DESC');
+            if (!$session->has('mautic.contactSource.'.$contactSource->getId().'.auditlog.orderby')) {
+                $session->set('mautic.contactSource.'.$contactSource->getId().'.auditlog.orderby', 'al.dateAdded');
+                $session->set('mautic.contactSource.'.$contactSource->getId().'.auditlog.orderbydir', 'DESC');
             }
 
             $orderBy = [
-                $session->get('mautic.contactServer.'.$contactServer->getId().'.auditlog.orderby'),
-                $session->get('mautic.contactServer.'.$contactServer->getId().'.auditlog.orderbydir'),
+                $session->get('mautic.contactSource.'.$contactSource->getId().'.auditlog.orderby'),
+                $session->get('mautic.contactSource.'.$contactSource->getId().'.auditlog.orderbydir'),
             ];
         }
 
@@ -266,16 +266,16 @@ trait ContactServerDetailsTrait
         /** @var AuditLogModel $auditlogModel */
         $auditlogModel = $this->getModel('core.auditLog');
 
-        $logs = $auditlogModel->getLogForObject('contactserver', $contactServer->getId(), $contactServer->getDateAdded());
+        $logs = $auditlogModel->getLogForObject('contactsource', $contactSource->getId(), $contactSource->getDateAdded());
         $logCount = count($logs);
 
         $types = [
-            'delete' => $this->translator->trans('mautic.contactServer.event.delete'),
-            'create' => $this->translator->trans('mautic.contactServer.event.create'),
-            'identified' => $this->translator->trans('mautic.contactServer.event.identified'),
-            'ipadded' => $this->translator->trans('mautic.contactServer.event.ipadded'),
-            'merge' => $this->translator->trans('mautic.contactServer.event.merge'),
-            'update' => $this->translator->trans('mautic.contactServer.event.update'),
+            'delete' => $this->translator->trans('mautic.contactSource.event.delete'),
+            'create' => $this->translator->trans('mautic.contactSource.event.create'),
+            'identified' => $this->translator->trans('mautic.contactSource.event.identified'),
+            'ipadded' => $this->translator->trans('mautic.contactSource.event.ipadded'),
+            'merge' => $this->translator->trans('mautic.contactSource.event.merge'),
+            'update' => $this->translator->trans('mautic.contactSource.event.update'),
         ];
 
         return [
@@ -291,7 +291,7 @@ trait ContactServerDetailsTrait
     }
 
     /**
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      * @param array|null $filters
      * @param array|null $orderBy
      * @param int $page
@@ -300,7 +300,7 @@ trait ContactServerDetailsTrait
      * @return array
      */
     protected function getEngagements(
-        ContactServer $contactServer,
+        ContactSource $contactSource,
         array $filters = null,
         array $orderBy = null,
         $page = 1,
@@ -310,7 +310,7 @@ trait ContactServerDetailsTrait
 
         if (null == $filters) {
             $filters = $session->get(
-                'mautic.contactServer.'.$contactServer->getId().'.timeline.filters',
+                'mautic.contactSource.'.$contactSource->getId().'.timeline.filters',
                 [
                     'search' => '',
                     'includeEvents' => [],
@@ -320,38 +320,38 @@ trait ContactServerDetailsTrait
         }
 
         if (null == $orderBy) {
-            if (!$session->has('mautic.contactServer.'.$contactServer->getId().'.timeline.orderby')) {
-                $session->set('mautic.contactServer.'.$contactServer->getId().'.timeline.orderby', 'timestamp');
-                $session->set('mautic.contactServer.'.$contactServer->getId().'.timeline.orderbydir', 'DESC');
+            if (!$session->has('mautic.contactSource.'.$contactSource->getId().'.timeline.orderby')) {
+                $session->set('mautic.contactSource.'.$contactSource->getId().'.timeline.orderby', 'timestamp');
+                $session->set('mautic.contactSource.'.$contactSource->getId().'.timeline.orderbydir', 'DESC');
             }
 
             $orderBy = [
-                $session->get('mautic.contactServer.'.$contactServer->getId().'.timeline.orderby'),
-                $session->get('mautic.contactServer.'.$contactServer->getId().'.timeline.orderbydir'),
+                $session->get('mautic.contactSource.'.$contactSource->getId().'.timeline.orderby'),
+                $session->get('mautic.contactSource.'.$contactSource->getId().'.timeline.orderbydir'),
             ];
         }
-        /** @var ContactServerModel $model */
-        $model = $this->getModel('contactServer');
+        /** @var ContactSourceModel $model */
+        $model = $this->getModel('contactSource');
 
-        return $model->getEngagements($contactServer, $filters, $orderBy, $page, $limit);
+        return $model->getEngagements($contactSource, $filters, $orderBy, $page, $limit);
     }
 
     /**
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      *
      * @return array
      */
-    protected function getScheduledCampaignEvents(ContactServer $contactServer)
+    protected function getScheduledCampaignEvents(ContactSource $contactSource)
     {
         // Upcoming events from Campaign Bundle
-        /** @var \Mautic\CampaignBundle\Entity\ContactServerEventLogRepository $contactServerEventLogRepository */
-        $contactServerEventLogRepository = $this->getDoctrine()->getManager()->getRepository(
-            'MauticCampaignBundle:ContactServerEventLog'
+        /** @var \Mautic\CampaignBundle\Entity\ContactSourceEventLogRepository $contactSourceEventLogRepository */
+        $contactSourceEventLogRepository = $this->getDoctrine()->getManager()->getRepository(
+            'MauticCampaignBundle:ContactSourceEventLog'
         );
 
-        return $contactServerEventLogRepository->getUpcomingEvents(
+        return $contactSourceEventLogRepository->getUpcomingEvents(
             [
-                'contactServer' => $contactServer,
+                'contactSource' => $contactSource,
                 'eventType' => ['action', 'condition'],
             ]
         );

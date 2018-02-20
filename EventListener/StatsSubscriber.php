@@ -9,14 +9,14 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\EventListener;
+namespace MauticPlugin\MauticContactSourceBundle\EventListener;
 
 use Doctrine\ORM\EntityManager;
 use Mautic\CoreBundle\EventListener\CommonStatsSubscriber;
 
 /**
  * Class StatsSubscriber
- * @package MauticPlugin\MauticContactServerBundle\EventListener
+ * @package MauticPlugin\MauticContactSourceBundle\EventListener
  */
 class StatsSubscriber extends CommonStatsSubscriber
 {
@@ -27,6 +27,6 @@ class StatsSubscriber extends CommonStatsSubscriber
      */
     public function __construct(EntityManager $em)
     {
-        $this->addContactRestrictedRepositories($em, 'MauticContactServerBundle:Stat');
+        $this->addContactRestrictedRepositories($em, 'MauticContactSourceBundle:Stat');
     }
 }

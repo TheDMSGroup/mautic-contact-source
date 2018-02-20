@@ -9,13 +9,13 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Controller;
+namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
 use Mautic\CoreBundle\Controller\AjaxController as CommonAjaxController;
 use Mautic\CoreBundle\Controller\AjaxLookupControllerTrait;
 use Mautic\CoreBundle\Helper\InputHelper;
 use Symfony\Component\HttpFoundation\Request;
-use MauticPlugin\MauticContactServerBundle\Integration\ServerIntegration;
+use MauticPlugin\MauticContactSourceBundle\Integration\SourceIntegration;
 
 /**
  * Class AjaxController.
@@ -42,12 +42,12 @@ class AjaxController extends CommonAjaxController
 
         if (!empty($apiPayload)) {
 
-            /** @var ServerIntegration $serverIntegration */
-            $serverIntegration = $this->get('mautic.contactserver.integration');
+            /** @var SourceIntegration $sourceIntegration */
+            $sourceIntegration = $this->get('mautic.contactsource.integration');
 
-            $result = $serverIntegration->sendTest($apiPayload);
+            $result = $sourceIntegration->sendTest($apiPayload);
 
-            $html = $serverIntegration->getLogsYAML();
+            $html = $sourceIntegration->getLogsYAML();
 //            $html = $this->renderView(
 //                'MauticSocialBundle:FormTheme:'.$type.'_widget.html.php'
 //            );

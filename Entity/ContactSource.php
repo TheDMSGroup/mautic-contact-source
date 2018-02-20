@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Entity;
+namespace MauticPlugin\MauticContactSourceBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Mautic\ApiBundle\Serializer\Driver\ApiMetadataDriver;
@@ -19,11 +19,11 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 /**
- * Class ContactServer.
+ * Class ContactSource.
  *
- * Entity is used to contain all the rules necessary to create a dynamic integration called a Contact Server.
+ * Entity is used to contain all the rules necessary to create a dynamic integration called a Contact Source.
  */
-class ContactServer extends FormEntity
+class ContactSource extends FormEntity
 {
     /** @var int */
     private $id;
@@ -56,7 +56,7 @@ class ContactServer extends FormEntity
     private $publishDown;
 
     /**
-     * ContactServer constructor.
+     * ContactSource constructor.
      */
     public function __construct()
     {
@@ -80,7 +80,7 @@ class ContactServer extends FormEntity
         $metadata->addPropertyConstraint(
             'token',
             new NotBlank(
-                ['message' => 'mautic.contactserver.error.token',]
+                ['message' => 'mautic.contactsource.error.token',]
             )
         );
 
@@ -93,8 +93,8 @@ class ContactServer extends FormEntity
     {
         $builder = new ClassMetadataBuilder($metadata);
 
-        $builder->setTable('contactserver')
-            ->setCustomRepositoryClass('MauticPlugin\MauticContactServerBundle\Entity\ContactServerRepository');
+        $builder->setTable('contactsource')
+            ->setCustomRepositoryClass('MauticPlugin\MauticContactSourceBundle\Entity\ContactSourceRepository');
 
         $builder->addIdColumns();
 
@@ -234,7 +234,7 @@ class ContactServer extends FormEntity
     /**
      * @param string $description
      *
-     * @return ContactServer
+     * @return ContactSource
      */
     public function setDescription($description)
     {
@@ -256,7 +256,7 @@ class ContactServer extends FormEntity
     /**
      * @param string $description_public
      *
-     * @return ContactServer
+     * @return ContactSource
      */
     public function setDescriptionPublic($description_public)
     {
@@ -278,7 +278,7 @@ class ContactServer extends FormEntity
     /**
      * @param mixed $name
      *
-     * @return ContactServer
+     * @return ContactSource
      */
     public function setName($name)
     {
@@ -300,7 +300,7 @@ class ContactServer extends FormEntity
     /**
      * @param mixed $category
      *
-     * @return ContactServer
+     * @return ContactSource
      */
     public function setCategory($category)
     {
@@ -322,7 +322,7 @@ class ContactServer extends FormEntity
     /**
      * @param mixed $publishUp
      *
-     * @return ContactServer
+     * @return ContactSource
      */
     public function setPublishUp($publishUp)
     {
@@ -344,7 +344,7 @@ class ContactServer extends FormEntity
     /**
      * @param mixed $publishDown
      *
-     * @return ContactServer
+     * @return ContactSource
      */
     public function setPublishDown($publishDown)
     {

@@ -9,16 +9,16 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Security\Permissions;
+namespace MauticPlugin\MauticContactSourceBundle\Security\Permissions;
 
 use Mautic\CoreBundle\Security\Permissions\AbstractPermissions;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /**
- * Class ContactServerPermissions
- * @package MauticPlugin\MauticContactServerBundle\Security\Permissions
+ * Class ContactSourcePermissions
+ * @package MauticPlugin\MauticContactSourceBundle\Security\Permissions
  */
-class ContactServerPermissions extends AbstractPermissions
+class ContactSourcePermissions extends AbstractPermissions
 {
     /**
      * {@inheritdoc}
@@ -37,7 +37,7 @@ class ContactServerPermissions extends AbstractPermissions
      */
     public function getName()
     {
-        return 'contactserver';
+        return 'contactsource';
     }
 
     /**
@@ -48,7 +48,7 @@ class ContactServerPermissions extends AbstractPermissions
      */
     public function buildForm(FormBuilderInterface &$builder, array $options, array $data)
     {
-        $this->addStandardFormFields('contactserver', 'categories', $builder, $data);
-        $this->addExtendedFormFields('contactserver', 'items', $builder, $data);
+        $this->addStandardFormFields('contactsource', 'categories', $builder, $data);
+        $this->addExtendedFormFields('contactsource', 'items', $builder, $data);
     }
 }

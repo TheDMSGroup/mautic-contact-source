@@ -1,6 +1,6 @@
 {
-    "name": "thedmsgroup/mautic-contact-server-bundle",
-    "description": "Customize API endpoints for receiving contacts from third parties.",
+    "name": "thedmsgroup/mautic-contact-source-bundle",
+    "description": "Creates API endpoints for receiving contacts from third parties.",
     "keywords": ["mautic","marketing","marketing automation","plugin"],
     "type": "mautic-plugin",
     "require": {

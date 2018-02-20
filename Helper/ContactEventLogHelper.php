@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Helper;
+namespace MauticPlugin\MauticContactSourceBundle\Helper;
 
 
 use Mautic\CoreBundle\Translation\Translator;
@@ -17,14 +17,14 @@ use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\LeadEventLog as ContactEventLog;
 use Mautic\LeadBundle\Entity\LeadEventLogRepository as ContactEventLogRepository;
-use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 
 /**
  * Class ContactEventLogHelper
  *
- * @todo - To be used to log where a contact was sourced (imported) when it has been created by a contact server.
+ * @todo - To be used to log where a contact was sourced (imported) when it has been created by a contact source.
  *
- * @package MauticPlugin\MauticContactServerBundle\Helper
+ * @package MauticPlugin\MauticContactSourceBundle\Helper
  */
 class ContactEventLogHelper
 {
@@ -62,23 +62,23 @@ class ContactEventLogHelper
     /**
      * Initialize ContactEventLog object and configure it as the import event.
      *
-     * @param ContactServer $server
+     * @param ContactSource $source
      * @param Contact $contact
      * @param $lineNumber
      * @return ContactEventLog
      */
-    public function initEventLog(ContactServer $server, Contact $contact, $lineNumber)
+    public function initEventLog(ContactSource $source, Contact $contact, $lineNumber)
     {
         $eventLog = new ContactEventLog();
-        $eventLog->setUserId($server->getCreatedBy())
-            ->setUserName($server->getCreatedByUser())
+        $eventLog->setUserId($source->getCreatedBy())
+            ->setUserName($source->getCreatedByUser())
             ->setBundle('lead')
             ->setObject('import')
             ->setObjectId($contact->getId())
             ->setProperties(
                 [
                     'line' => $lineNumber,
-                    'file' => $server->getOriginalFile(),
+                    'file' => $source->getOriginalFile(),
                 ]
             );
 

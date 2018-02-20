@@ -9,24 +9,24 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Model;
+namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use Mautic\CoreBundle\Helper\CoreParametersHelper;
 use Mautic\LeadBundle\Entity\Lead as Contact;
-use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
-use MauticPlugin\MauticContactServerBundle\Helper\JSONHelper;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
+use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
 
 /**
  * Class CampaignSettings
- * For business logic regarding the Campaign Settings field within the ContactServer model.
+ * For business logic regarding the Campaign Settings field within the ContactSource model.
  *
- * @package MauticPlugin\MauticContactServerBundle\Model
+ * @package MauticPlugin\MauticContactSourceBundle\Model
  */
 class CampaignSettings
 {
 
-    /** @var ContactServer */
-    protected $contactServer;
+    /** @var ContactSource */
+    protected $contactSource;
 
     /** @var Contact */
     protected $contact;
@@ -40,17 +40,17 @@ class CampaignSettings
     /** @var bool */
     protected $valid = true;
 
-    /** @var contactServerModel */
-    protected $contactServerModel;
+    /** @var contactSourceModel */
+    protected $contactSourceModel;
 
     /**
      * CampaignSettings constructor.
-     * @param contactServerModel $contactServerModel
+     * @param contactSourceModel $contactSourceModel
      */
     public function __construct(
-        contactServerModel $contactServerModel
+        contactSourceModel $contactSourceModel
     ) {
-        $this->contactServerModel = $contactServerModel;
+        $this->contactSourceModel = $contactSourceModel;
     }
 
     /**
@@ -74,22 +74,22 @@ class CampaignSettings
     }
 
     /**
-     * @return ContactServer
+     * @return ContactSource
      */
-    public function getContactServer()
+    public function getContactSource()
     {
-        return $this->contactServer;
+        return $this->contactSource;
     }
 
     /**
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      * @return $this
      * @throws \Exception
      */
-    public function setContactServer(ContactServer $contactServer)
+    public function setContactSource(ContactSource $contactSource)
     {
-        $this->contactServer = $contactServer;
-        $this->setCampaignSettings($this->contactServer->getCampaignSettings());
+        $this->contactSource = $contactSource;
+        $this->setCampaignSettings($this->contactSource->getCampaignSettings());
 
         return $this;
     }

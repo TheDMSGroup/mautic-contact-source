@@ -9,16 +9,16 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Entity;
+namespace MauticPlugin\MauticContactSourceBundle\Entity;
 
 use Mautic\CoreBundle\Entity\CommonRepository;
 use Mautic\CoreBundle\Helper\PhoneNumberHelper;
 use Mautic\LeadBundle\Entity\Lead as Contact;
-use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 
 /**
  * Class CacheRepository
- * @package MauticPlugin\MauticContactServerBundle\Entity
+ * @package MauticPlugin\MauticContactSourceBundle\Entity
  */
 class CacheRepository extends CommonRepository
 {
@@ -48,14 +48,14 @@ class CacheRepository extends CommonRepository
      * Used for exclusivity and duplicate checking.
      *
      * @param Contact $contact
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      * @param array $rules
      * @return bool|mixed
      * @throws \Exception
      */
     public function findDuplicate(
         Contact $contact,
-        ContactServer $contactServer,
+        ContactSource $contactSource,
         $rules = []
     ) {
         // Generate our filters based on the rules provided.
@@ -148,7 +148,7 @@ class CacheRepository extends CommonRepository
 
             // Scope Category
             if ($scope & self::SCOPE_CATEGORY) {
-                $category = $contactServer->getCategory();
+                $category = $contactSource->getCategory();
                 if ($category) {
                     $category = $category->getId();
                     if (!empty($category)) {
@@ -211,7 +211,7 @@ class CacheRepository extends CommonRepository
             $query
                 ->select('*')
                 ->setMaxResults(1)
-                ->from(MAUTIC_TABLE_PREFIX.'contactserver_cache', $alias);
+                ->from(MAUTIC_TABLE_PREFIX.'contactsource_cache', $alias);
 
             foreach ($filters as $k => $set) {
                 // Expect orx, anx, or neither.

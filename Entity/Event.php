@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Entity;
+namespace MauticPlugin\MauticContactSourceBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
@@ -17,7 +17,7 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
 
 /**
  * Class Event
- * @package MauticPlugin\MauticContactServerBundle\Entity
+ * @package MauticPlugin\MauticContactSourceBundle\Entity
  */
 class Event
 {
@@ -39,9 +39,9 @@ class Event
     protected $type;
 
     /**
-     * @var ContactServer
+     * @var ContactSource
      */
-    protected $contactServer;
+    protected $contactSource;
 
     /**
      * @var array
@@ -76,15 +76,15 @@ class Event
     {
         $builder = new ClassMetadataBuilder($metadata);
 
-        $builder->setTable('contactserver_events')
-            ->setCustomRepositoryClass('MauticPlugin\MauticContactServerBundle\Entity\EventRepository')
+        $builder->setTable('contactsource_events')
+            ->setCustomRepositoryClass('MauticPlugin\MauticContactSourceBundle\Entity\EventRepository')
             ->addIndex(['type', 'contact_id'], 'type_contact')
             ->addIndex(['date_added'], 'date_added');
 
         $builder->addId();
 
-        $builder->createManyToOne('contactServer', 'ContactServer')
-            ->addJoinColumn('contactserver_id', 'id', false, false, 'CASCADE')
+        $builder->createManyToOne('contactSource', 'ContactSource')
+            ->addJoinColumn('contactsource_id', 'id', false, false, 'CASCADE')
             ->build();
 
         $builder->createField('type', 'string')
@@ -164,18 +164,18 @@ class Event
     /**
      * @return mixed
      */
-    public function getContactServer()
+    public function getContactSource()
     {
-        return $this->contactServer;
+        return $this->contactSource;
     }
 
     /**
-     * @param $contactServer
+     * @param $contactSource
      * @return $this
      */
-    public function setContactServer($contactServer)
+    public function setContactSource($contactSource)
     {
-        $this->contactServer = $contactServer;
+        $this->contactSource = $contactSource;
 
         return $this;
     }

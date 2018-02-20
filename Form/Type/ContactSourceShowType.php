@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Form\Type;
+namespace MauticPlugin\MauticContactSourceBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -18,10 +18,10 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 /**
- * Class ContactServerShowType
- * @package MauticPlugin\MauticContactServerBundle\Form\Type
+ * Class ContactSourceShowType
+ * @package MauticPlugin\MauticContactSourceBundle\Form\Type
  */
-class ContactServerShowType extends AbstractType
+class ContactSourceShowType extends AbstractType
 {
     /**
      * @var RouterInterface
@@ -43,21 +43,21 @@ class ContactServerShowType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->add(
-            'contactserver',
-            'contactserver_list',
+            'contactsource',
+            'contactsource_list',
             [
-                'label'      => 'mautic.contactserver.contactserveritem.selectitem',
+                'label'      => 'mautic.contactsource.contactsourceitem.selectitem',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => [
                     'class'    => 'form-control',
-                    'tooltip'  => 'mautic.contactserver.contactserveritem.selectitem_descr',
-                    'onchange' => 'Mautic.disabledContactServerActions()',
+                    'tooltip'  => 'mautic.contactsource.contactsourceitem.selectitem_descr',
+                    'onchange' => 'Mautic.disabledContactSourceActions()',
                 ],
                 'multiple'    => false,
                 'required'    => true,
                 'constraints' => [
                     new NotBlank(
-                        ['message' => 'mautic.contactserver.choosecontactserver.notblank']
+                        ['message' => 'mautic.contactsource.choosecontactsource.notblank']
                     ),
                 ],
             ]
@@ -65,7 +65,7 @@ class ContactServerShowType extends AbstractType
 
         if (!empty($options['update_select'])) {
             $windowUrl = $this->router->generate(
-                'mautic_contactserver_action',
+                'mautic_contactsource_action',
                 [
                     'objectAction' => 'new',
                     'contentOnly'  => 1,
@@ -74,7 +74,7 @@ class ContactServerShowType extends AbstractType
             );
 
             $builder->add(
-                'newContactServerButton',
+                'newContactSourceButton',
                 'button',
                 [
                     'attr' => [
@@ -84,32 +84,32 @@ class ContactServerShowType extends AbstractType
                     })',
                         'icon' => 'fa fa-plus',
                     ],
-                    'label' => 'mautic.contactserver.show.new.item',
+                    'label' => 'mautic.contactsource.show.new.item',
                 ]
             );
 
-            // create button edit contactserver
+            // create button edit contactsource
             $windowUrlEdit = $this->router->generate(
-                'mautic_contactserver_action',
+                'mautic_contactsource_action',
                 [
                     'objectAction' => 'edit',
-                    'objectId'     => 'contactserverId',
+                    'objectId'     => 'contactsourceId',
                     'contentOnly'  => 1,
                     'updateSelect' => $options['update_select'],
                 ]
             );
 
             $builder->add(
-                'editContactServerButton',
+                'editContactSourceButton',
                 'button',
                 [
                     'attr' => [
                         'class'    => 'btn btn-primary btn-nospin',
-                        'onclick'  => 'Mautic.loadNewWindow(Mautic.standardContactServerUrl({"windowUrl": "'.$windowUrlEdit.'"}))',
-                        'disabled' => !isset($options['data']['contactserver']),
+                        'onclick'  => 'Mautic.loadNewWindow(Mautic.standardContactSourceUrl({"windowUrl": "'.$windowUrlEdit.'"}))',
+                        'disabled' => !isset($options['data']['contactsource']),
                         'icon'     => 'fa fa-edit',
                     ],
-                    'label' => 'mautic.contactserver.show.edit.item',
+                    'label' => 'mautic.contactsource.show.edit.item',
                 ]
             );
         }
@@ -128,6 +128,6 @@ class ContactServerShowType extends AbstractType
      */
     public function getName()
     {
-        return 'contactservershow_list';
+        return 'contactsourceshow_list';
     }
 }

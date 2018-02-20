@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Model;
+namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use Doctrine\DBAL\Query\QueryBuilder;
 use Mautic\CoreBundle\Helper\Chart\ChartQuery;
@@ -19,22 +19,22 @@ use Mautic\CoreBundle\Model\FormModel;
 use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\PageBundle\Model\TrackableModel;
-use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
-use MauticPlugin\MauticContactServerBundle\Entity\Stat;
-use MauticPlugin\MauticContactServerBundle\Entity\Event as EventEntity;
-use MauticPlugin\MauticContactServerBundle\Event\ContactServerEvent;
-use MauticPlugin\MauticContactServerBundle\Event\ContactServerTimelineEvent;
-use MauticPlugin\MauticContactServerBundle\ContactServerEvents;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
+use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
+use MauticPlugin\MauticContactSourceBundle\Entity\Event as EventEntity;
+use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceEvent;
+use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceTimelineEvent;
+use MauticPlugin\MauticContactSourceBundle\ContactSourceEvents;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
- * Class ContactServerModel
- * @package MauticPlugin\MauticContactServerBundle\Model
+ * Class ContactSourceModel
+ * @package MauticPlugin\MauticContactSourceBundle\Model
  */
-class ContactServerModel extends FormModel
+class ContactSourceModel extends FormModel
 {
     /** @var ContainerAwareEventDispatcher */
     protected $dispatcher;
@@ -52,7 +52,7 @@ class ContactServerModel extends FormModel
     protected $contactModel;
 
     /**
-     * ContactServerModel constructor.
+     * ContactSourceModel constructor.
      *
      * @param \Mautic\FormBundle\Model\FormModel $formModel
      * @param TrackableModel $trackableModel
@@ -79,7 +79,7 @@ class ContactServerModel extends FormModel
      */
     public function getActionRouteBase()
     {
-        return 'contactserver';
+        return 'contactsource';
     }
 
     /**
@@ -87,7 +87,7 @@ class ContactServerModel extends FormModel
      */
     public function getPermissionBase()
     {
-        return 'plugin:contactserver:items';
+        return 'plugin:contactsource:items';
     }
 
     /**
@@ -102,15 +102,15 @@ class ContactServerModel extends FormModel
      */
     public function createForm($entity, $formFactory, $action = null, $options = [])
     {
-        if (!$entity instanceof ContactServer) {
-            throw new MethodNotAllowedHttpException(['ContactServer']);
+        if (!$entity instanceof ContactSource) {
+            throw new MethodNotAllowedHttpException(['ContactSource']);
         }
 
         if (!empty($action)) {
             $options['action'] = $action;
         }
 
-        return $formFactory->create('contactserver', $entity, $options);
+        return $formFactory->create('contactsource', $entity, $options);
     }
 
     /**
@@ -118,12 +118,12 @@ class ContactServerModel extends FormModel
      *
      * @param null $id
      *
-     * @return ContactServer
+     * @return ContactSource
      */
     public function getEntity($id = null)
     {
         if ($id === null) {
-            return new ContactServer();
+            return new ContactSource();
         }
 
         return parent::getEntity($id);
@@ -132,7 +132,7 @@ class ContactServerModel extends FormModel
     /**
      * {@inheritdoc}
      *
-     * @param ContactServer $entity
+     * @param ContactSource $entity
      * @param bool|false $unlock
      */
     public function saveEntity($entity, $unlock = true)
@@ -145,25 +145,25 @@ class ContactServerModel extends FormModel
     /**
      * {@inheritdoc}
      *
-     * @return \MauticPlugin\MauticContactServerBundle\Entity\ContactServerRepository
+     * @return \MauticPlugin\MauticContactSourceBundle\Entity\ContactSourceRepository
      */
     public function getRepository()
     {
-        return $this->em->getRepository('MauticContactServerBundle:ContactServer');
+        return $this->em->getRepository('MauticContactSourceBundle:ContactSource');
     }
 
     /**
      * Add a stat entry.
      *
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      * @param $type
      * @param null|Contact $contact
      * @param int $attribution
      */
-    public function addStat(ContactServer $contactServer, $type, $contact = null, $attribution = 0)
+    public function addStat(ContactSource $contactSource, $type, $contact = null, $attribution = 0)
     {
         $stat = new Stat();
-        $stat->setContactServer($contactServer)
+        $stat->setContactSource($contactSource)
             ->setDateAdded(new \DateTime())
             ->setType($type)
             ->setAttribution($attribution);
@@ -180,17 +180,17 @@ class ContactServerModel extends FormModel
     /**
      * {@inheritdoc}
      *
-     * @return \MauticPlugin\MauticContactServerBundle\Entity\StatRepository
+     * @return \MauticPlugin\MauticContactSourceBundle\Entity\StatRepository
      */
     public function getStatRepository()
     {
-        return $this->em->getRepository('MauticContactServerBundle:Stat');
+        return $this->em->getRepository('MauticContactSourceBundle:Stat');
     }
 
     /**
-     * Add transactional log in contactserver_events
+     * Add transactional log in contactsource_events
      *
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      * @param $type
      * @param null $contact
      * @param null $logs
@@ -198,7 +198,7 @@ class ContactServerModel extends FormModel
      * @param null $integration_entity_id
      */
     public function addEvent(
-        ContactServer $contactServer,
+        ContactSource $contactSource,
         $type,
         $contact = null,
         $logs = null,
@@ -206,7 +206,7 @@ class ContactServerModel extends FormModel
         $integration_entity_id = null
     ) {
         $event = new EventEntity();
-        $event->setContactServer($contactServer)
+        $event->setContactSource($contactSource)
             ->setDateAdded(new \DateTime())
             ->setType($type);
         if ($contact) {
@@ -228,15 +228,15 @@ class ContactServerModel extends FormModel
     /**
      * {@inheritdoc}
      *
-     * @return \MauticPlugin\MauticContactServerBundle\Entity\StatRepository
+     * @return \MauticPlugin\MauticContactSourceBundle\Entity\StatRepository
      */
     public function getEventRepository()
     {
-        return $this->em->getRepository('MauticContactServerBundle:Event');
+        return $this->em->getRepository('MauticContactSourceBundle:Event');
     }
 
     /**
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      * @param                $unit
      * @param \DateTime|null $dateFrom
      * @param \DateTime|null $dateTo
@@ -247,7 +247,7 @@ class ContactServerModel extends FormModel
      * @return array
      */
     public function getStats(
-        ContactServer $contactServer,
+        ContactSource $contactSource,
         $unit,
         \DateTime $dateFrom = null,
         \DateTime $dateTo = null,
@@ -258,9 +258,9 @@ class ContactServerModel extends FormModel
         $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateTo, $unit);
 
         $q = $query->prepareTimeDataQuery(
-            'contactserver_stats',
+            'contactsource_stats',
             'date_added',
-            ['contactserver_id' => $contactServer->getId()]
+            ['contactsource_id' => $contactSource->getId()]
         );
         if (!$canViewOthers) {
             $this->limitQueryToCreator($q);
@@ -268,14 +268,14 @@ class ContactServerModel extends FormModel
         $stat = new Stat();
         foreach ($stat->getAllTypes() as $type) {
 
-            $q = $query->prepareTimeDataQuery('contactserver_stats', 'date_added', ['type' => $type]);
+            $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['type' => $type]);
             if (!$canViewOthers) {
                 $this->limitQueryToCreator($q);
             }
             $data = $query->loadAndBuildTimeData($q);
             foreach ($data as $val) {
                 if ($val !== 0) {
-                    $chart->setDataset($this->translator->trans('mautic.contactserver.graph.'.$type), $data);
+                    $chart->setDataset($this->translator->trans('mautic.contactsource.graph.'.$type), $data);
                     break;
                 }
             }
@@ -283,7 +283,7 @@ class ContactServerModel extends FormModel
 
         // Add attribution to the chart.
         // @todo - This should really be in it's own chart in the future.
-        $q = $query->prepareTimeDataQuery('contactserver_stats', 'date_added', ['type' => Stat::TYPE_ACCEPT]);
+        $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['type' => Stat::TYPE_ACCEPT]);
         if (!$canViewOthers) {
             $this->limitQueryToCreator($q);
         }
@@ -295,7 +295,7 @@ class ContactServerModel extends FormModel
         $data = $query->loadAndBuildTimeData($q);
         foreach ($data as $val) {
             if ($val !== 0) {
-                $chart->setDataset($this->translator->trans('mautic.contactserver.graph.attribution'), $data);
+                $chart->setDataset($this->translator->trans('mautic.contactsource.graph.attribution'), $data);
                 break;
             }
         }
@@ -310,7 +310,7 @@ class ContactServerModel extends FormModel
      */
     public function limitQueryToCreator(QueryBuilder $q)
     {
-        $q->join('t', MAUTIC_TABLE_PREFIX.'contactserver', 'm', 'e.id = t.contactserver_id')
+        $q->join('t', MAUTIC_TABLE_PREFIX.'contactsource', 'm', 'e.id = t.contactsource_id')
             ->andWhere('m.created_by = :userId')
             ->setParameter('userId', $this->userHelper->getUser()->getId());
     }
@@ -318,7 +318,7 @@ class ContactServerModel extends FormModel
     /**
      * Get timeline/engagement data.
      *
-     * @param ContactServer|null $contactServer
+     * @param ContactSource|null $contactSource
      * @param array $filters
      * @param null $orderBy
      * @param int $page
@@ -327,7 +327,7 @@ class ContactServerModel extends FormModel
      * @return array
      */
     public function getEngagements(
-        ContactServer $contactServer = null,
+        ContactSource $contactSource = null,
         $filters = [],
         $orderBy = null,
         $page = 1,
@@ -335,9 +335,9 @@ class ContactServerModel extends FormModel
         $forTimeline = true
     ) {
         $event = $this->dispatcher->dispatch(
-            ContactServerEvents::TIMELINE_ON_GENERATE,
-            new ContactServerTimelineEvent(
-                $contactServer,
+            ContactSourceEvents::TIMELINE_ON_GENERATE,
+            new ContactSourceTimelineEvent(
+                $contactSource,
                 $filters,
                 $orderBy,
                 $page,
@@ -369,10 +369,10 @@ class ContactServerModel extends FormModel
      */
     public function getEngagementTypes()
     {
-        $event = new ContactServerTimelineEvent();
+        $event = new ContactSourceTimelineEvent();
         $event->fetchTypesOnly();
 
-        $this->dispatcher->dispatch(ContactServerEvents::TIMELINE_ON_GENERATE, $event);
+        $this->dispatcher->dispatch(ContactSourceEvents::TIMELINE_ON_GENERATE, $event);
 
         return $event->getEventTypes();
     }
@@ -395,10 +395,10 @@ class ContactServerModel extends FormModel
         $unit = 'm',
         ChartQuery $chartQuery = null
     ) {
-        $event = new ContactServerTimelineEvent($contact);
+        $event = new ContactSourceTimelineEvent($contact);
         $event->setCountOnly($dateFrom, $dateTo, $unit, $chartQuery);
 
-        $this->dispatcher->dispatch(ContactServerEvents::TIMELINE_ON_GENERATE, $event);
+        $this->dispatcher->dispatch(ContactSourceEvents::TIMELINE_ON_GENERATE, $event);
 
         return $event->getEventCounter();
     }
@@ -406,28 +406,28 @@ class ContactServerModel extends FormModel
     /**
      * {@inheritdoc}
      *
-     * @return bool|ContactServerEvent
+     * @return bool|ContactSourceEvent
      *
      * @throws \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException
      */
     protected function dispatchEvent($action, &$entity, $isNew = false, Event $event = null)
     {
-        if (!$entity instanceof ContactServer) {
-            throw new MethodNotAllowedHttpException(['ContactServer']);
+        if (!$entity instanceof ContactSource) {
+            throw new MethodNotAllowedHttpException(['ContactSource']);
         }
 
         switch ($action) {
             case 'pre_save':
-                $name = ContactServerEvents::PRE_SAVE;
+                $name = ContactSourceEvents::PRE_SAVE;
                 break;
             case 'post_save':
-                $name = ContactServerEvents::POST_SAVE;
+                $name = ContactSourceEvents::POST_SAVE;
                 break;
             case 'pre_delete':
-                $name = ContactServerEvents::PRE_DELETE;
+                $name = ContactSourceEvents::PRE_DELETE;
                 break;
             case 'post_delete':
-                $name = ContactServerEvents::POST_DELETE;
+                $name = ContactSourceEvents::POST_DELETE;
                 break;
             default:
                 return null;
@@ -435,7 +435,7 @@ class ContactServerModel extends FormModel
 
         if ($this->dispatcher->hasListeners($name)) {
             if (empty($event)) {
-                $event = new ContactServerEvent($entity, $isNew);
+                $event = new ContactSourceEvent($entity, $isNew);
                 $event->setEntityManager($this->em);
             }
 

@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Form\Type;
+namespace MauticPlugin\MauticContactSourceBundle\Form\Type;
 
 use Mautic\CoreBundle\Form\EventListener\CleanFormSubscriber;
 use Mautic\CoreBundle\Form\EventListener\FormExitSubscriber;
@@ -19,10 +19,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 /**
- * Class ContactServerType
- * @package MauticPlugin\MauticContactServerBundle\Form\Type
+ * Class ContactSourceType
+ * @package MauticPlugin\MauticContactSourceBundle\Form\Type
  */
-class ContactServerType extends AbstractType
+class ContactSourceType extends AbstractType
 {
     /**
      * @var CorePermissions
@@ -30,7 +30,7 @@ class ContactServerType extends AbstractType
     private $security;
 
     /**
-     * ContactServerType constructor.
+     * ContactSourceType constructor.
      *
      * @param CorePermissions $security
      */
@@ -46,7 +46,7 @@ class ContactServerType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->addEventSubscriber(new CleanFormSubscriber(['website' => 'url']));
-        $builder->addEventSubscriber(new FormExitSubscriber('contactserver', $options));
+        $builder->addEventSubscriber(new FormExitSubscriber('contactsource', $options));
 
         $builder->add(
             'name',
@@ -62,7 +62,7 @@ class ContactServerType extends AbstractType
             'description',
             'textarea',
             [
-                'label'      => 'mautic.contactserver.form.description',
+                'label'      => 'mautic.contactsource.form.description',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => ['class' => 'form-control editor'],
                 'required'   => false,
@@ -73,11 +73,11 @@ class ContactServerType extends AbstractType
             'description_public',
             'textarea',
             [
-                'label'      => 'mautic.contactserver.form.description_public',
+                'label'      => 'mautic.contactsource.form.description_public',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => [
                     'class'   => 'form-control editor',
-                    'tooltip' => 'mautic.contactserver.form.description_public.tooltip',
+                    'tooltip' => 'mautic.contactsource.form.description_public.tooltip',
                 ],
                 'required'   => false,
             ]
@@ -87,11 +87,11 @@ class ContactServerType extends AbstractType
             'documentation',
             'boolean',
             [
-                'label'      => 'mautic.contactserver.form.documentation',
+                'label'      => 'mautic.contactsource.form.documentation',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => [
                     'class'   => 'form-control',
-                    'tooltip' => 'mautic.contactserver.form.website.tooltip',
+                    'tooltip' => 'mautic.contactsource.form.website.tooltip',
                 ],
                 'required' => false,
             ]
@@ -101,7 +101,7 @@ class ContactServerType extends AbstractType
             'campaign_settings',
             'textarea',
             [
-                'label'      => 'mautic.contactserver.form.campaign.settings',
+                'label'      => 'mautic.contactsource.form.campaign.settings',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => [
                     'class'        => 'form-control',
@@ -116,14 +116,14 @@ class ContactServerType extends AbstractType
             'category',
             'category',
             [
-                'bundle' => 'plugin:contactserver',
+                'bundle' => 'plugin:contactsource',
             ]
         );
 
         if (!empty($options['data']) && $options['data']->getId()) {
-            $readonly = !$this->security->isGranted('plugin:contactserver:items:publish');
+            $readonly = !$this->security->isGranted('plugin:contactsource:items:publish');
             $data     = $options['data']->isPublished(false);
-        } elseif (!$this->security->isGranted('plugin:contactserver:items:publish')) {
+        } elseif (!$this->security->isGranted('plugin:contactsource:items:publish')) {
             $readonly = true;
             $data     = false;
         } else {
@@ -176,13 +176,13 @@ class ContactServerType extends AbstractType
             'documentation',
             'yesno_button_group',
             [
-                'label' => 'mautic.contactserver.form.documentation',
+                'label' => 'mautic.contactsource.form.documentation',
                 'label_attr' => ['class' => 'control-label'],
                 'choices_as_values' => true,
                 'required' => true,
                 'attr'       => [
                     'class'       => 'form-control',
-                    'tooltip'     => 'mautic.contactserver.form.documentation.tooltip',
+                    'tooltip'     => 'mautic.contactsource.form.documentation.tooltip',
                 ],
             ]
         );
@@ -191,12 +191,12 @@ class ContactServerType extends AbstractType
             'token',
             'text',
             [
-                'label' => 'mautic.contactserver.form.token',
+                'label' => 'mautic.contactsource.form.token',
                 'label_attr' => ['class' => 'control-label'],
                 'required' => false,
                 'attr'       => [
                     'class'       => 'form-control',
-                    'tooltip'     => 'mautic.contactserver.form.token.tooltip',
+                    'tooltip'     => 'mautic.contactsource.form.token.tooltip',
                 ],
             ]
         );
@@ -242,7 +242,7 @@ class ContactServerType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'data_class' => 'MauticPlugin\MauticContactServerBundle\Entity\ContactServer',
+                'data_class' => 'MauticPlugin\MauticContactSourceBundle\Entity\ContactSource',
             ]
         );
         $resolver->setDefined(['update_select']);
@@ -253,6 +253,6 @@ class ContactServerType extends AbstractType
      */
     public function getName()
     {
-        return 'contactserver';
+        return 'contactsource';
     }
 }

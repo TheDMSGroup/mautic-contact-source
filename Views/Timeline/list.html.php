@@ -9,25 +9,25 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 if (isset($tmpl) && $tmpl == 'index') {
-    $view->extend('MauticContactServerBundle:Timeline:index.html.php');
+    $view->extend('MauticContactSourceBundle:Timeline:index.html.php');
 }
 
 $baseUrl = $view['router']->path(
-    'mautic_contactserver_timeline_action',
+    'mautic_contactsource_timeline_action',
     [
-        'contactServerId' => $contactServer->getId()
+        'contactSourceId' => $contactSource->getId()
     ]
 );
 ?>
 
 <!-- timeline -->
 <div class="table-responsive">
-    <table class="table table-hover table-bordered" id="contactserver-timeline" style="z-index: 2; position: relative;">
+    <table class="table table-hover table-bordered" id="contactsource-timeline" style="z-index: 2; position: relative;">
         <thead>
         <tr>
             <th class="timeline-icon">
                 <a class="btn btn-sm btn-nospin btn-default" data-activate-details="all" data-toggle="tooltip" title="<?php echo $view['translator']->trans(
-                    'mautic.contactserver.timeline.toggle_all_details'
+                    'mautic.contactsource.timeline.toggle_all_details'
                 ); ?>">
                     <span class="fa fa-fw fa-level-down"></span>
                 </a>
@@ -35,36 +35,36 @@ $baseUrl = $view['router']->path(
             <?php
             echo $view->render('MauticCoreBundle:Helper:tableheader.html.php', [
                 'orderBy'    => 'message',
-                'text'       => 'mautic.contactserver.timeline.message',
+                'text'       => 'mautic.contactsource.timeline.message',
                 'class'      => 'timeline-name',
-                'sessionVar' => 'contactserver.'.$contactServer->getId().'.timeline',
+                'sessionVar' => 'contactsource.'.$contactSource->getId().'.timeline',
                 'baseUrl'    => $baseUrl,
                 'target'     => '#timeline-table',
             ]);
 
             echo $view->render('MauticCoreBundle:Helper:tableheader.html.php', [
                 'orderBy'    => 'contactId',
-                'text'       => 'mautic.contactserver.timeline.contact_id',
+                'text'       => 'mautic.contactsource.timeline.contact_id',
                 'class'      => 'visible-md visible-lg timeline-contact-id',
-                'sessionVar' => 'contactserver.'.$contactServer->getId().'.timeline',
+                'sessionVar' => 'contactsource.'.$contactSource->getId().'.timeline',
                 'baseUrl'    => $baseUrl,
                 'target'     => '#timeline-table',
             ]);
 
             echo $view->render('MauticCoreBundle:Helper:tableheader.html.php', [
                 'orderBy'    => 'eventType',
-                'text'       => 'mautic.contactserver.timeline.event_type',
+                'text'       => 'mautic.contactsource.timeline.event_type',
                 'class'      => 'visible-md visible-lg timeline-type',
-                'sessionVar' => 'contactserver.'.$contactServer->getId().'.timeline',
+                'sessionVar' => 'contactsource.'.$contactSource->getId().'.timeline',
                 'baseUrl'    => $baseUrl,
                 'target'     => '#timeline-table',
             ]);
 
             echo $view->render('MauticCoreBundle:Helper:tableheader.html.php', [
                 'orderBy'    => 'timestamp',
-                'text'       => 'mautic.contactserver.timeline.event_timestamp',
+                'text'       => 'mautic.contactsource.timeline.event_timestamp',
                 'class'      => 'visible-md visible-lg timeline-timestamp',
-                'sessionVar' => 'contactserver.'.$contactServer->getId().'.timeline',
+                'sessionVar' => 'contactsource.'.$contactSource->getId().'.timeline',
                 'baseUrl'    => $baseUrl,
                 'target'     => '#timeline-table',
             ]);
@@ -85,7 +85,7 @@ $baseUrl = $view['router']->path(
 
             $details = '';
             if (isset($event['contentTemplate']) && $view->exists($event['contentTemplate'])):
-                $details = trim($view->render($event['contentTemplate'], ['event' => $event, 'contactServer' => $contactServer]));
+                $details = trim($view->render($event['contentTemplate'], ['event' => $event, 'contactSource' => $contactSource]));
             endif;
 
             $rowStripe = ($counter % 2 === 0) ? ' timeline-row-highlighted' : '';
@@ -96,7 +96,7 @@ $baseUrl = $view['router']->path(
                 <td class="timeline-icon">
                     <a href="javascript:void(0);" data-activate-details="<?php echo $counter; ?>" class="btn btn-sm btn-nospin btn-default<?php if (empty($details)) {
                 echo ' disabled';
-            } ?>" data-toggle="tooltip" title="<?php echo $view['translator']->trans('mautic.contactserver.timeline.toggle_details'); ?>">
+            } ?>" data-toggle="tooltip" title="<?php echo $view['translator']->trans('mautic.contactsource.timeline.toggle_details'); ?>">
                         <span class="fa fa-fw <?php echo $icon ?>"></span>
                     </a>
                 </td>

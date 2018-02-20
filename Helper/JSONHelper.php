@@ -9,11 +9,11 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Helper;
+namespace MauticPlugin\MauticContactSourceBundle\Helper;
 
 /**
  * Class JSONHelper
- * @package MauticPlugin\MauticContactServerBundle\Helper
+ * @package MauticPlugin\MauticContactSourceBundle\Helper
  */
 class JSONHelper
 {

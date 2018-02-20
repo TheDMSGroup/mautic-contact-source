@@ -39,7 +39,7 @@
           "format": "select",
           "options": {
             "grid_columns": 1,
-            "infoText": "Select a campaign to allow this server to post contacts into. This is a whitelist of campaigns. If no campaigns are selected the server will not be able to send you any contacts."
+            "infoText": "Select a campaign to allow this source to post contacts into. This is a whitelist of campaigns. If no campaigns are selected the source will not be able to send you any contacts."
           },
           "enumSource": [
             {
@@ -104,7 +104,7 @@
           "propertyOrder": 20,
           "options": {
             "grid_columns": 1,
-            "infoText": "Optionally override the UTM Source field of each contact when first saved. Leave blank to allow the server to post any value. Override occurs after limits are evaluated below."
+            "infoText": "Optionally override the UTM Source field of each contact when first saved. Leave blank to allow the source to post any value. Override occurs after limits are evaluated below."
           }
         },
         "attribution": {
@@ -114,7 +114,7 @@
           "propertyOrder": 30,
           "options": {
             "grid_columns": 1,
-            "infoText": "Optionally override the attribution field of each contact when first saved. Leave blank to allow the server to post any value. Positive numbers equate to revenue, negative numbers to cost."
+            "infoText": "Optionally override the attribution field of each contact when first saved. Leave blank to allow the source to post any value. Positive numbers equate to revenue, negative numbers to cost."
           }
         },
         "realTime": {

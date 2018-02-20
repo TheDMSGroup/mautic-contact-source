@@ -9,20 +9,20 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 $view->extend('MauticCoreBundle:Default:content.html.php');
-$view['slots']->set('mauticContent', 'contactserver');
+$view['slots']->set('mauticContent', 'contactsource');
 
 $header = ($entity->getId())
     ?
     $view['translator']->trans(
-        'mautic.contactserver.edit',
+        'mautic.contactsource.edit',
         ['%name%' => $view['translator']->trans($entity->getName())]
     )
     :
-    $view['translator']->trans('mautic.contactserver.new');
+    $view['translator']->trans('mautic.contactsource.new');
 $view['slots']->set('headerTitle', $header);
 
-echo $view['assets']->includeScript('plugins/MauticContactServerBundle/Assets/build/contactserver.min.js');
-echo $view['assets']->includeStylesheet('plugins/MauticContactServerBundle/Assets/build/contactserver.min.css');
+echo $view['assets']->includeScript('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.js');
+echo $view['assets']->includeStylesheet('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.css');
 
 echo $view['form']->start($form);
 ?>
@@ -31,17 +31,17 @@ echo $view['form']->start($form);
 <div class="box-layout">
 
     <!-- tab container -->
-    <div class="col-md-9 bg-white height-auto bdr-l contactserver-left">
+    <div class="col-md-9 bg-white height-auto bdr-l contactsource-left">
         <div class="">
             <ul class="nav nav-tabs pr-md pl-md mt-10">
                 <li class="active">
-                    <a href="#details" role="tab" data-toggle="tab" class="contactserver-tab">
-                        <?php echo $view['translator']->trans('mautic.contactserver.form.group.details'); ?>
+                    <a href="#details" role="tab" data-toggle="tab" class="contactsource-tab">
+                        <?php echo $view['translator']->trans('mautic.contactsource.form.group.details'); ?>
                     </a>
                 </li>
                 <li>
-                    <a href="#campaigns" role="tab" data-toggle="tab" class="contactserver-tab">
-                        <?php echo $view['translator']->trans('mautic.contactserver.form.group.campaigns'); ?>
+                    <a href="#campaigns" role="tab" data-toggle="tab" class="contactsource-tab">
+                        <?php echo $view['translator']->trans('mautic.contactsource.form.group.campaigns'); ?>
                     </a>
                 </li>
             </ul>
@@ -93,7 +93,7 @@ echo $view['form']->start($form);
     <!--/ tab container -->
 
     <!-- container -->
-    <div class="col-md-3 bg-white height-auto contactserver-right">
+    <div class="col-md-3 bg-white height-auto contactsource-right">
         <div class="pr-lg pl-lg pt-md pb-md">
             <?php
             echo $view['form']->row($form['category']);

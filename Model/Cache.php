@@ -9,26 +9,26 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Model;
+namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use Mautic\CoreBundle\Model\AbstractCommonModel;
-use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use Mautic\LeadBundle\Entity\Lead as Contact;
-use MauticPlugin\MauticContactServerBundle\Entity\Cache as CacheEntity;
-use MauticPlugin\MauticContactServerBundle\Helper\JSONHelper;
+use MauticPlugin\MauticContactSourceBundle\Entity\Cache as CacheEntity;
+use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
 use Mautic\CoreBundle\Helper\PhoneNumberHelper;
-use MauticPlugin\MauticContactServerBundle\Exception\ContactServerException;
-use MauticPlugin\MauticContactServerBundle\Entity\Stat;
+use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
+use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 
 /**
  * Class Cache
- * @package MauticPlugin\MauticContactServerBundle\Model
+ * @package MauticPlugin\MauticContactSourceBundle\Model
  */
 class Cache extends AbstractCommonModel
 {
 
-    /** @var ContactServer $contactServer */
-    protected $contactServer;
+    /** @var ContactSource $contactSource */
+    protected $contactSource;
 
     /** @var Contact */
     protected $contact;
@@ -37,7 +37,7 @@ class Cache extends AbstractCommonModel
     protected $phoneHelper;
 
     /**
-     * Create all necessary cache entities for the given Contact and Contact Server.
+     * Create all necessary cache entities for the given Contact and Contact Source.
      * @throws \Exception
      */
     public function create()
@@ -85,7 +85,7 @@ class Cache extends AbstractCommonModel
     }
 
     /**
-     * Create a new cache entity with the existing Contact and contactServer.
+     * Create a new cache entity with the existing Contact and contactSource.
      * Normalize the fields as much as possible to aid in exclusive/duplicate/limit correlation.
      *
      * @return CacheEntity
@@ -95,13 +95,13 @@ class Cache extends AbstractCommonModel
         $entity = new CacheEntity();
         $entity->setAddress1(trim(ucwords($this->contact->getAddress1())));
         $entity->setAddress2(trim(ucwords($this->contact->getAddress2())));
-        $category = $this->contactServer->getCategory();
+        $category = $this->contactSource->getCategory();
         if ($category) {
             $entity->setCategory($category->getId());
         }
         $entity->setCity(trim(ucwords($this->contact->getCity())));
         $entity->setContact($this->contact->getId());
-        $entity->setContactServer($this->contactServer->getId());
+        $entity->setContactSource($this->contactSource->getId());
         $entity->setState(trim(ucwords($this->contact->getStage())));
         $entity->setCountry(trim(ucwords($this->contact->getCountry())));
         $entity->setZipcode(trim($this->contact->getZipcode()));
@@ -153,29 +153,29 @@ class Cache extends AbstractCommonModel
     }
 
     /**
-     * @return \MauticPlugin\MauticContactServerBundle\Entity\CacheRepository
+     * @return \MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository
      */
     public function getRepository()
     {
-        return $this->em->getRepository('MauticContactServerBundle:Cache');
+        return $this->em->getRepository('MauticContactSourceBundle:Cache');
     }
 
     /**
      * Using the duplicate rules, evaluate if the current contact matches any entry in the cache.
      *
-     * @throws ContactServerException
+     * @throws ContactSourceException
      * @throws \Exception
      */
     public function evaluateDuplicate()
     {
         $duplicate = $this->getRepository()->findDuplicate(
             $this->contact,
-            $this->contactServer,
+            $this->contactSource,
             $this->getDuplicateRules()
         );
         if ($duplicate) {
-            throw new ContactServerException(
-                'Skipping duplicate. A contact matching this one was already accepted by this server: '.
+            throw new ContactSourceException(
+                'Skipping duplicate. A contact matching this one was already accepted by this source: '.
                 json_encode($duplicate),
                 0,
                 null,
@@ -186,14 +186,14 @@ class Cache extends AbstractCommonModel
     }
 
     /**
-     * Given the Contact and Contact Server, get the rules used to evaluate duplicates.
+     * Given the Contact and Contact Source, get the rules used to evaluate duplicates.
      *
      * @throws \Exception
      */
     public function getDuplicateRules()
     {
         $jsonHelper = new JSONHelper();
-        $duplicate = $jsonHelper->decodeObject($this->contactServer->getDuplicate(), 'Duplicate');
+        $duplicate = $jsonHelper->decodeObject($this->contactSource->getDuplicate(), 'Duplicate');
 
         return $this->mergeRules($duplicate);
     }
@@ -219,21 +219,21 @@ class Cache extends AbstractCommonModel
     }
 
     /**
-     * @return ContactServer
+     * @return ContactSource
      */
-    public function getContactServer()
+    public function getContactSource()
     {
-        return $this->contactServer;
+        return $this->contactSource;
     }
 
     /**
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      * @return $this
      * @throws \Exception
      */
-    public function setContactServer(ContactServer $contactServer)
+    public function setContactSource(ContactSource $contactSource)
     {
-        $this->contactServer = $contactServer;
+        $this->contactSource = $contactSource;
 
         return $this;
     }

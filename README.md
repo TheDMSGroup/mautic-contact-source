@@ -1,5 +1,5 @@
-![](./Assets/img/server.png)
-# Mautic Contact Server (WIP)
+![](./Assets/img/source.png)
+# Mautic Contact Source (WIP)
 
 Creates API endpoints for receiving contacts from third parties.
 
@@ -11,8 +11,8 @@ Can optionally be used in tandem with it's sibling [Mautic Contact Client](https
 - [ ] Campaign Limits: Limit the number of contacts accepted to a campaign within defined time frames.
 - [ ] Campaign Finance: Track the cost/revenue of contacts upon ingestion per campaign.
 - [ ] Campaign Scrub: Support an optional scrub-rate per campaign which affects the cost/revenue.
-- [ ] Campaign Required Fields: The fields being used within a campaign should percolate upward to the Server, updating required fields.
-- [ ] Self-Documentation: Each server (API) created should auto-generate a public documentation page for a third party. 
+- [ ] Campaign Required Fields: The fields being used within a campaign should percolate upward to the Source, updating required fields.
+- [ ] Self-Documentation: Each source (API) created should auto-generate a public documentation page for a third party. 
 - [ ] Notifications: Third parties should be notified when their API changes (such as an added campaign or required field change).
 
 ## Installation & Usage
@@ -20,9 +20,9 @@ Can optionally be used in tandem with it's sibling [Mautic Contact Client](https
 Currently being tested with Mautic `2.12.x`.
 If you have success/issues with other versions please report.
 
-1. Install by running `composer require thedmsgroup/mautic-contact-server-bundle`
+1. Install by running `composer require thedmsgroup/mautic-contact-source-bundle`
 2. Go to `/s/plugins/reload`
-3. After a refresh you will find "Servers" in the main menu, you can dive in and create your first one.
+3. After a refresh you will find "Sources" in the main menu, you can dive in and create your first one.
 
 ## Uses these fine libraries:
 

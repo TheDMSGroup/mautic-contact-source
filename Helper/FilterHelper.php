@@ -9,13 +9,13 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Helper;
+namespace MauticPlugin\MauticContactSourceBundle\Helper;
 
 use Exception;
 
 /**
  * Class FilterHelper.
- * @package MauticPlugin\MauticContactServerBundle\Helper
+ * @package MauticPlugin\MauticContactSourceBundle\Helper
  *
  * Based loosely on https://github.com/josedacosta/jQueryQueryBuilderBundle
  *

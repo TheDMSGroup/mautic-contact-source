@@ -45,60 +45,60 @@
 }
 
 /* ContactClient API Payload - JSON Editor */
-.contactserver_jsoneditor h3 {
+.contactsource_jsoneditor h3 {
     font-size: 16px;
     font-weight: 600;
     padding: 0 0 5px 0;
 }
 
-.contactserver_jsoneditor .btn-md i.fa {
+.contactsource_jsoneditor .btn-md i.fa {
     font-size: 15px;
 }
 
-.contactserver_jsoneditor i.fa-caret-right,
-.contactserver_jsoneditor i.fa-caret-down {
+.contactsource_jsoneditor i.fa-caret-right,
+.contactsource_jsoneditor i.fa-caret-down {
     font-size: 20px;
 }
-.contactserver_jsoneditor i.fa-caret-square-o-right,
-.contactserver_jsoneditor i.fa-caret-square-o-down {
+.contactsource_jsoneditor i.fa-caret-square-o-right,
+.contactsource_jsoneditor i.fa-caret-square-o-down {
     font-size: 16px;
 }
 
-.contactserver_jsoneditor .btn-group.btn-left {
+.contactsource_jsoneditor .btn-group.btn-left {
     margin-bottom: 8px;
 }
 
 /* Hidden nav items in this group cause border radius to look strange */
-.contactserver_jsoneditor .btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle),
-.contactserver_jsoneditor .btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle),
-.contactserver_jsoneditor .btn-group.btn-left .btn {
+.contactsource_jsoneditor .btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle),
+.contactsource_jsoneditor .btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle),
+.contactsource_jsoneditor .btn-group.btn-left .btn {
     border-radius: 3px;
 }
 
-.contactserver_jsoneditor .btn-group.btn-right .btn {
+.contactsource_jsoneditor .btn-group.btn-right .btn {
     margin-left: 8px;
     border-radius: 3px;
 }
 
-.contactserver_jsoneditor .btn-group .btn-secondary {
+.contactsource_jsoneditor .btn-group .btn-secondary {
     background: transparent;
 }
 
-.contactserver_jsoneditor .btn-group .btn-secondary.active {
+.contactsource_jsoneditor .btn-group .btn-secondary.active {
     background: transparent;
 }
 
 /* Show the expandable headers as clickable */
-.contactserver_jsoneditor > div > h3 span {
+.contactsource_jsoneditor > div > h3 span {
     cursor: pointer;
 }
 
 /* Hide the root definition as it'd be a duplicate label in this case. */
-.contactserver_jsoneditor > div > h3 {
+.contactsource_jsoneditor > div > h3 {
     display: none;
 }
 
-.contactserver_jsoneditor > div > .well {
+.contactsource_jsoneditor > div > .well {
     min-height: 0;
     padding: 0;
     margin: 0;
@@ -109,7 +109,7 @@
     box-shadow: none;
 }
 
-.contactserver_jsoneditor .well {
+.contactsource_jsoneditor .well {
     background: rgba(145, 145, 145, .1);
     border: 1px solid rgba(45, 45, 45, .1);
     -webkit-box-shadow: none;
@@ -117,30 +117,30 @@
 }
 
 /* Prevent faulty glyphicon load */
-.contactserver_jsoneditor .glyphicon {
+.contactsource_jsoneditor .glyphicon {
     font-family: "Courier New", monospace;
 }
 
 /* Positioning tooltips in tables */
-.contactserver_jsoneditor td > div > .glyphicon-info-sign.pull-right {
+.contactsource_jsoneditor td > div > .glyphicon-info-sign.pull-right {
     position: absolute !important;
     top: 50px;
     margin: 0 0 0 -16px;
     height: 0;
 }
 
-.contactserver_jsoneditor td > div > .glyphicon-info-sign.pull-right:before {
+.contactsource_jsoneditor td > div > .glyphicon-info-sign.pull-right:before {
     opacity: 0;
     width: 60px;
 }
 
 /* Styling tooltips */
-.contactserver_jsoneditor .glyphicon-info-sign.pull-right {
+.contactsource_jsoneditor .glyphicon-info-sign.pull-right {
     float: none !important;
     margin-left: 5px;
 }
 
-.contactserver_jsoneditor .glyphicon-info-sign:before {
+.contactsource_jsoneditor .glyphicon-info-sign:before {
     content: "\f059";
     display: inline-block;
     font: normal normal normal 14px/1 FontAwesome;
@@ -149,30 +149,30 @@
     -webkit-font-smoothing: antialiased;
 }
 
-.contactserver_jsoneditor .glyphicon-info-sign span {
+.contactsource_jsoneditor .glyphicon-info-sign span {
     font-family: "Open Sans", Helvetica, Arial, sans-serif !important;
     z-index: 1000;
     transform: translateX(0.5rem) translateY(-0.5rem) !important;
 }
 
 /* Table styles */
-.contactserver_jsoneditor table.table-bordered {
+.contactsource_jsoneditor table.table-bordered {
     min-width: 100%;
     border: 0;
 }
 
-.contactserver_jsoneditor table.table-bordered,
-.contactserver_jsoneditor table.table-bordered > thead > tr > th,
-.contactserver_jsoneditor table.table-bordered > tbody > tr > th,
-.contactserver_jsoneditor table.table-bordered > tbody > tr > td,
-.contactserver_jsoneditor table.table-bordered > tfoot > tr > td,
-.contactserver_jsoneditor table.table-bordered > tfoot > tr > th {
+.contactsource_jsoneditor table.table-bordered,
+.contactsource_jsoneditor table.table-bordered > thead > tr > th,
+.contactsource_jsoneditor table.table-bordered > tbody > tr > th,
+.contactsource_jsoneditor table.table-bordered > tbody > tr > td,
+.contactsource_jsoneditor table.table-bordered > tfoot > tr > td,
+.contactsource_jsoneditor table.table-bordered > tfoot > tr > th {
     border-left: 0;
     border-right: 0;
     padding: 4px 4px;
 }
 
-.contactserver_jsoneditor table .form-group {
+.contactsource_jsoneditor table .form-group {
     margin-bottom: 0;
 }
 

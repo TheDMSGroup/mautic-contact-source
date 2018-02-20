@@ -9,13 +9,13 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Entity;
+namespace MauticPlugin\MauticContactSourceBundle\Entity;
 
 use Mautic\CoreBundle\Entity\CommonRepository;
 
 /**
  * Class StatRepository
- * @package MauticPlugin\MauticContactServerBundle\Entity
+ * @package MauticPlugin\MauticContactSourceBundle\Entity
  */
 class StatRepository extends CommonRepository
 {
@@ -33,7 +33,7 @@ class StatRepository extends CommonRepository
         $q = $this->createQueryBuilder('s');
 
         $expr = $q->expr()->andX(
-            $q->expr()->eq('IDENTITY(s.contactserver)', (int) $id),
+            $q->expr()->eq('IDENTITY(s.contactsource)', (int) $id),
             $q->expr()->eq('s.type', ':type')
         );
 

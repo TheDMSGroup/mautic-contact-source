@@ -9,33 +9,33 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\EventListener;
+namespace MauticPlugin\MauticContactSourceBundle\EventListener;
 
 use Mautic\CoreBundle\EventListener\CommonSubscriber;
 use Mautic\FormBundle\Event\SubmissionEvent;
 use Mautic\FormBundle\FormEvents;
 use Mautic\PageBundle\Event\PageHitEvent;
 use Mautic\PageBundle\PageEvents;
-use MauticPlugin\MauticContactServerBundle\Entity\Stat;
-use MauticPlugin\MauticContactServerBundle\Model\ContactServerModel;
+use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
+use MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel;
 
 /**
  * Class StatSubscriber
- * @package MauticPlugin\MauticContactServerBundle\EventListener
+ * @package MauticPlugin\MauticContactSourceBundle\EventListener
  */
 class StatSubscriber extends CommonSubscriber
 {
     /**
-     * @var ContactServerModel
+     * @var ContactSourceModel
      */
     protected $model;
 
     /**
      * FormSubscriber constructor.
      *
-     * @param ContactServerModel $model
+     * @param ContactSourceModel $model
      */
-    public function __construct(ContactServerModel $model)
+    public function __construct(ContactSourceModel $model)
     {
         $this->model = $model;
     }

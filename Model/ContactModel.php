@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Model;
+namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use Mautic\LeadBundle\Model\LeadModel as OriginalContactModel;
 use Mautic\LeadBundle\Entity\Lead as Contact;
@@ -54,7 +54,7 @@ class ContactModel extends OriginalContactModel
         $fields = array_flip($fields);
         $fieldData = [];
 
-        // Servers will not be able to set this on creation: Companies and their linkages.
+        // Sources will not be able to set this on creation: Companies and their linkages.
 
         foreach ($fields as $leadField => $importField) {
             // Prevent overwriting existing data with empty data
@@ -91,10 +91,10 @@ class ContactModel extends OriginalContactModel
         }
         unset($fieldData['dateIdentified']);
 
-        // Servers will not be able to set this on creation: createdByUser
+        // Sources will not be able to set this on creation: createdByUser
         unset($fieldData['createdByUser']);
 
-        // Servers will not be able to set this on creation: modifiedByUser
+        // Sources will not be able to set this on creation: modifiedByUser
         unset($fieldData['modifiedByUser']);
 
         if (!empty($fields['ip']) && !empty($data[$fields['ip']])) {
@@ -107,15 +107,15 @@ class ContactModel extends OriginalContactModel
         }
         unset($fieldData['ip']);
 
-        // Servers will not be able to set this on creation: points
+        // Sources will not be able to set this on creation: points
 
-        // Servers will not be able to set this on creation: stage
+        // Sources will not be able to set this on creation: stage
         unset($fieldData['stage']);
 
-        // Servers will not be able to set this on creation: doNotEmail
+        // Sources will not be able to set this on creation: doNotEmail
         unset($fieldData['doNotEmail']);
 
-        // Servers will not be able to set this on creation: ownerusername
+        // Sources will not be able to set this on creation: ownerusername
         unset($fieldData['ownerusername']);
 
         if ($owner !== null) {
@@ -206,7 +206,7 @@ class ContactModel extends OriginalContactModel
                 $this->addToLists($lead, [$list]);
             }
 
-            // Servers will not be able to set this on creation: company
+            // Sources will not be able to set this on creation: company
         } else {
             // Rather than return a boolean, we need the contact.
             return $lead;

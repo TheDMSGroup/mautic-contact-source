@@ -9,22 +9,22 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Model;
+namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use Mautic\LeadBundle\Entity\Lead as Contact;
-use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
-use MauticPlugin\MauticContactServerBundle\Helper\JSONHelper;
-use MauticPlugin\MauticContactServerBundle\Model\ApiPayload;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
+use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
+use MauticPlugin\MauticContactSourceBundle\Model\ApiPayload;
 
 /**
  * Class Attribution
- * @package MauticPlugin\MauticContactServerBundle\Model
+ * @package MauticPlugin\MauticContactSourceBundle\Model
  */
 class Attribution
 {
 
-    /** @var ContactServer $contactServer */
-    protected $contactServer;
+    /** @var ContactSource $contactSource */
+    protected $contactSource;
 
     /** @var ApiPayload */
     protected $payload;
@@ -37,12 +37,12 @@ class Attribution
 
     /**
      * Attribution constructor.
-     * @param ContactServer $contactServer
+     * @param ContactSource $contactSource
      * @param Contact $contact
      */
-    public function __construct(ContactServer $contactServer, Contact $contact)
+    public function __construct(ContactSource $contactSource, Contact $contact)
     {
-        $this->contactServer = $contactServer;
+        $this->contactSource = $contactSource;
         $this->contact = $contact;
     }
 
@@ -55,7 +55,7 @@ class Attribution
     }
 
     /**
-     * Apply attribution to the current contact based on payload and settings of the Contact Server.
+     * Apply attribution to the current contact based on payload and settings of the Contact Source.
      * This assumes the Payload was successfully delivered (valid = true).
      *
      * @return bool
@@ -71,7 +71,7 @@ class Attribution
         if ($this->payload) {
 
             $jsonHelper = new JSONHelper();
-            $attributionSettings = $jsonHelper->decodeObject($this->contactServer->getAttributionSettings(), 'AttributionSettings');
+            $attributionSettings = $jsonHelper->decodeObject($this->contactSource->getAttributionSettings(), 'AttributionSettings');
 
             if ($attributionSettings && is_object(
                     $attributionSettings->mode
@@ -107,7 +107,7 @@ class Attribution
 
         // If we were not able to apply a dynamic cost/attribution, then fall back to the default (if set).
         if (!$update) {
-            $attributionDefault = $this->contactServer->getAttributionDefault();
+            $attributionDefault = $this->contactSource->getAttributionDefault();
             if (!empty($attributionDefault) && is_numeric($attributionDefault)) {
                 $newAttribution = $attributionDefault;
                 $update = true;

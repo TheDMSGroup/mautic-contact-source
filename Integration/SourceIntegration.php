@@ -9,15 +9,18 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Integration;
+namespace MauticPlugin\MauticContactSourceBundle\Integration;
 
 use Mautic\PluginBundle\Integration\AbstractIntegration;
 
 /**
- * Class ServerIntegration
- * @package MauticPlugin\MauticContactServerBundle\Integration
+ * Class SourceIntegration
+ *
+ * This plugin does not add integrations. This is here purely for name/logo/etc.
+ *
+ * @package MauticPlugin\MauticContactSourceBundle\Integration
  */
-class ServerIntegration extends AbstractIntegration
+class SourceIntegration extends AbstractIntegration
 {
 
     /**
@@ -41,7 +44,7 @@ class ServerIntegration extends AbstractIntegration
      */
     public function getName()
     {
-        return 'Server';
+        return 'Source';
     }
 
     /**
@@ -49,7 +52,7 @@ class ServerIntegration extends AbstractIntegration
      */
     public function getDisplayName()
     {
-        return 'Servers';
+        return 'Sources';
     }
 
     /**
@@ -64,10 +67,10 @@ class ServerIntegration extends AbstractIntegration
                 'domain',
                 'text',
                 [
-                    'label' => $this->translator->trans('mautic.contactserver.domain'),
+                    'label' => $this->translator->trans('mautic.contactsource.domain'),
                     'data'  => !isset($data['domain']) ? false : $data['domain'],
                     'attr'  => [
-                        'tooltip' => $this->translator->trans('mautic.contactserver.domain.tooltip'),
+                        'tooltip' => $this->translator->trans('mautic.contactsource.domain.tooltip'),
                     ]
                 ]
             );

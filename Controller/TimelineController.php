@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Controller;
+namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
 use Mautic\CoreBundle\Helper\InputHelper;
@@ -18,22 +18,22 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class TimelineController
- * @package MauticPlugin\MauticContactServerBundle\Controller
+ * @package MauticPlugin\MauticContactSourceBundle\Controller
  */
 class TimelineController extends CommonController
 {
-    use ContactServerAccessTrait;
-    use ContactServerDetailsTrait;
+    use ContactSourceAccessTrait;
+    use ContactSourceDetailsTrait;
 
-    public function indexAction(Request $request, $contactServerId, $page = 1)
+    public function indexAction(Request $request, $contactSourceId, $page = 1)
     {
-        if (empty($contactServerId)) {
+        if (empty($contactSourceId)) {
             return $this->accessDenied();
         }
 
-        $contactServer = $this->checkContactServerAccess($contactServerId, 'view');
-        if ($contactServer instanceof Response) {
-            return $contactServer;
+        $contactSource = $this->checkContactSourceAccess($contactSourceId, 'view');
+        if ($contactSource instanceof Response) {
+            return $contactSource;
         }
 
         $this->setListFilters();
@@ -45,31 +45,31 @@ class TimelineController extends CommonController
                 'includeEvents' => InputHelper::clean($request->request->get('includeEvents', [])),
                 'excludeEvents' => InputHelper::clean($request->request->get('excludeEvents', [])),
             ];
-            $session->set('mautic.contactServer.'.$contactServerId.'.timeline.filters', $filters);
+            $session->set('mautic.contactSource.'.$contactSourceId.'.timeline.filters', $filters);
         } else {
             $filters = null;
         }
 
         $order = [
-            $session->get('mautic.contactServer.'.$contactServerId.'.timeline.orderby'),
-            $session->get('mautic.contactServer.'.$contactServerId.'.timeline.orderbydir'),
+            $session->get('mautic.contactSource.'.$contactSourceId.'.timeline.orderby'),
+            $session->get('mautic.contactSource.'.$contactSourceId.'.timeline.orderbydir'),
         ];
 
-        $events = $this->getEngagements($contactServer, $filters, $order, $page);
+        $events = $this->getEngagements($contactSource, $filters, $order, $page);
 
         return $this->delegateView(
             [
                 'viewParameters' => [
-                    'contactServer' => $contactServer,
+                    'contactSource' => $contactSource,
                     'page' => $page,
                     'events' => $events,
                 ],
                 'passthroughVars' => [
                     'route' => false,
-                    'mauticContent' => 'contactServerTimeline',
+                    'mauticContent' => 'contactSourceTimeline',
                     'timelineCount' => $events['total'],
                 ],
-                'contentTemplate' => 'MauticContactServerBundle:Timeline:list.html.php',
+                'contentTemplate' => 'MauticContactSourceBundle:Timeline:list.html.php',
             ]
         );
     }
@@ -77,10 +77,10 @@ class TimelineController extends CommonController
     public function pluginIndexAction(Request $request, $integration, $page = 1)
     {
         $limit = 25;
-        $contactServers = $this->checkAllAccess('view', $limit);
+        $contactSources = $this->checkAllAccess('view', $limit);
 
-        if ($contactServers instanceof Response) {
-            return $contactServers;
+        if ($contactSources instanceof Response) {
+            return $contactSources;
         }
 
         $this->setListFilters();
@@ -102,10 +102,10 @@ class TimelineController extends CommonController
             $session->get('mautic.plugin.timeline.orderbydir'),
         ];
 
-        // get all events grouped by contactServer
-        $events = $this->getAllEngagements($contactServers, $filters, $order, $page, $limit);
+        // get all events grouped by contactSource
+        $events = $this->getAllEngagements($contactSources, $filters, $order, $page, $limit);
 
-        $str = $this->request->server->get('QUERY_STRING');
+        $str = $this->request->source->get('QUERY_STRING');
         parse_str($str, $query);
 
         $tmpl = 'table';
@@ -119,7 +119,7 @@ class TimelineController extends CommonController
         return $this->delegateView(
             [
                 'viewParameters' => [
-                    'contactServers' => $contactServers,
+                    'contactSources' => $contactSources,
                     'page' => $page,
                     'events' => $events,
                     'integration' => $integration,
@@ -131,20 +131,20 @@ class TimelineController extends CommonController
                     'mauticContent' => 'pluginTimeline',
                     'timelineCount' => $events['total'],
                 ],
-                'contentTemplate' => sprintf('MauticContactServerBundle:Timeline:plugin_%s.html.php', $tmpl),
+                'contentTemplate' => sprintf('MauticContactSourceBundle:Timeline:plugin_%s.html.php', $tmpl),
             ]
         );
     }
 
-    public function pluginViewAction(Request $request, $integration, $contactServerId, $page = 1)
+    public function pluginViewAction(Request $request, $integration, $contactSourceId, $page = 1)
     {
-        if (empty($contactServerId)) {
+        if (empty($contactSourceId)) {
             return $this->notFound();
         }
 
-        $contactServer = $this->checkContactServerAccess($contactServerId, 'view', true, $integration);
-        if ($contactServer instanceof Response) {
-            return $contactServer;
+        $contactSource = $this->checkContactSourceAccess($contactSourceId, 'view', true, $integration);
+        if ($contactSource instanceof Response) {
+            return $contactSource;
         }
 
         $this->setListFilters();
@@ -156,19 +156,19 @@ class TimelineController extends CommonController
                 'includeEvents' => InputHelper::clean($request->request->get('includeEvents', [])),
                 'excludeEvents' => InputHelper::clean($request->request->get('excludeEvents', [])),
             ];
-            $session->set('mautic.plugin.timeline.'.$contactServerId.'.filters', $filters);
+            $session->set('mautic.plugin.timeline.'.$contactSourceId.'.filters', $filters);
         } else {
             $filters = null;
         }
 
         $order = [
-            $session->get('mautic.plugin.timeline.'.$contactServerId.'.orderby'),
-            $session->get('mautic.plugin.timeline.'.$contactServerId.'.orderbydir'),
+            $session->get('mautic.plugin.timeline.'.$contactSourceId.'.orderby'),
+            $session->get('mautic.plugin.timeline.'.$contactSourceId.'.orderbydir'),
         ];
 
-        $events = $this->getEngagements($contactServer, $filters, $order, $page);
+        $events = $this->getEngagements($contactSource, $filters, $order, $page);
 
-        $str = $this->request->server->get('QUERY_STRING');
+        $str = $this->request->source->get('QUERY_STRING');
         parse_str($str, $query);
 
         $tmpl = 'table';
@@ -182,7 +182,7 @@ class TimelineController extends CommonController
         return $this->delegateView(
             [
                 'viewParameters' => [
-                    'contactServer' => $contactServer,
+                    'contactSource' => $contactSource,
                     'page' => $page,
                     'integration' => $integration,
                     'events' => $events,
@@ -193,7 +193,7 @@ class TimelineController extends CommonController
                     'mauticContent' => 'pluginTimeline',
                     'timelineCount' => $events['total'],
                 ],
-                'contentTemplate' => sprintf('MauticContactServerBundle:Timeline:plugin_%s.html.php', $tmpl),
+                'contentTemplate' => sprintf('MauticContactSourceBundle:Timeline:plugin_%s.html.php', $tmpl),
             ]
         );
     }
@@ -203,15 +203,15 @@ class TimelineController extends CommonController
      *
      * @todo - Needs refactoring to function.
      */
-    public function batchExportAction(Request $request, $contactServerId)
+    public function batchExportAction(Request $request, $contactSourceId)
     {
-        if (empty($contactServerId)) {
+        if (empty($contactSourceId)) {
             return $this->accessDenied();
         }
 
-        $contactServer = $this->checkContactServerAccess($contactServerId, 'view');
-        if ($contactServer instanceof Response) {
-            return $contactServer;
+        $contactSource = $this->checkContactSourceAccess($contactSourceId, 'view');
+        if ($contactSource instanceof Response) {
+            return $contactSource;
         }
 
         $this->setListFilters();
@@ -223,14 +223,14 @@ class TimelineController extends CommonController
                 'includeEvents' => InputHelper::clean($request->request->get('includeEvents', [])),
                 'excludeEvents' => InputHelper::clean($request->request->get('excludeEvents', [])),
             ];
-            $session->set('mautic.contactServer.'.$contactServerId.'.timeline.filters', $filters);
+            $session->set('mautic.contactSource.'.$contactSourceId.'.timeline.filters', $filters);
         } else {
             $filters = null;
         }
 
         $order = [
-            $session->get('mautic.contactServer.'.$contactServerId.'.timeline.orderby'),
-            $session->get('mautic.contactServer.'.$contactServerId.'.timeline.orderbydir'),
+            $session->get('mautic.contactSource.'.$contactSourceId.'.timeline.orderby'),
+            $session->get('mautic.contactSource.'.$contactSourceId.'.timeline.orderbydir'),
         ];
 
         $dataType = $this->request->get('filetype', 'csv');
@@ -253,7 +253,7 @@ class TimelineController extends CommonController
             ];
         };
 
-        $results = $this->getEngagements($contactServer, $filters, $order, 1, 200);
+        $results = $this->getEngagements($contactSource, $filters, $order, 1, 200);
         $count = $results['total'];
         $items = $results['events'];
         $iterations = ceil($count / 200);
@@ -277,7 +277,7 @@ class TimelineController extends CommonController
                 }
             }
 
-            $items = $this->getEngagements($contactServer, $filters, $order, $loop + 1, 200);
+            $items = $this->getEngagements($contactSource, $filters, $order, $loop + 1, 200);
 
             $this->getDoctrine()->getManager()->clear();
 

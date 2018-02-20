@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactServerBundle\Controller\Api;
+namespace MauticPlugin\MauticContactSourceBundle\Controller\Api;
 
 use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
@@ -17,19 +17,19 @@ use Mautic\CampaignBundle\Entity\Campaign;
 // use Mautic\CampaignBundle\Model\CampaignModel;
 // use Mautic\CoreBundle\Helper\InputHelper;
 use Mautic\LeadBundle\Entity\Lead as Contact;
-use MauticPlugin\MauticContactServerBundle\Entity\ContactServer;
-use MauticPlugin\MauticContactServerBundle\Entity\Stat;
-use MauticPlugin\MauticContactServerBundle\Exception\ContactServerException;
-use MauticPlugin\MauticContactServerBundle\Model\Cache;
-use MauticPlugin\MauticContactServerBundle\Model\CampaignEventModel;
-use MauticPlugin\MauticContactServerBundle\Model\CampaignModel;
-use MauticPlugin\MauticContactServerBundle\Model\CampaignSettings;
-use MauticPlugin\MauticContactServerBundle\Model\ContactModel;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
+use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
+use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
+use MauticPlugin\MauticContactSourceBundle\Model\Cache;
+use MauticPlugin\MauticContactSourceBundle\Model\CampaignEventModel;
+use MauticPlugin\MauticContactSourceBundle\Model\CampaignModel;
+use MauticPlugin\MauticContactSourceBundle\Model\CampaignSettings;
+use MauticPlugin\MauticContactSourceBundle\Model\ContactModel;
 use Symfony\Component\HttpFoundation\Request;
 use Mautic\LeadBundle\Entity\UtmTag;
 
 /**
- * Class ContactServerApiController.
+ * Class ContactSourceApiController.
  *
  * @todo - This controller now contains too much business logic. Refactor offloading the logic to a model.
  */
@@ -45,8 +45,8 @@ class ApiController extends CommonApiController
     /** @var ContactModel */
     protected $contactModel;
 
-    /** @var ContactServer */
-    protected $contactServer;
+    /** @var ContactSource */
+    protected $contactSource;
 
     /** @var Cache */
     protected $cacheModel;
@@ -85,14 +85,14 @@ class ApiController extends CommonApiController
     protected $fieldsAccepted;
 
     /**
-     * Primary API endpoint for servers to post contacts.
+     * Primary API endpoint for sources to post contacts.
      *
      * @param Request $request
-     * @param null $serverId
+     * @param null $sourceId
      * @param null $campaignId
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function contactAction(Request $request, $serverId = null, $campaignId = null)
+    public function contactAction(Request $request, $sourceId = null, $campaignId = null)
     {
 
         $response = [];
@@ -116,9 +116,9 @@ class ApiController extends CommonApiController
                 }
             }
             // Basic field pre-validation.
-            unset($fieldData['token'], $fieldData['serverId'], $fieldData['campaignId']);
+            unset($fieldData['token'], $fieldData['sourceId'], $fieldData['campaignId']);
             if (!count($fieldData)) {
-                throw new ContactServerException(
+                throw new ContactSourceException(
                     'No fields were posted. Did you mean to do that?',
                     Codes::HTTP_I_AM_A_TEAPOT,
                     null,
@@ -131,7 +131,7 @@ class ApiController extends CommonApiController
                 if (!$token) {
                     $token = $request->headers->get('X-Auth-Token');
                     if (!$token) {
-                        throw new ContactServerException(
+                        throw new ContactSourceException(
                             'The token was not supplied. Please provide your authentication token.',
                             Codes::HTTP_UNAUTHORIZED,
                             null,
@@ -141,16 +141,16 @@ class ApiController extends CommonApiController
                     }
                 }
             }
-            $serverId = intval($serverId);
-            if (!$serverId) {
-                $serverId = intval($request->get('serverId'));
-                if (!$serverId) {
-                    throw new ContactServerException(
-                        'The serverId was not supplied. Please provide your serverId.',
+            $sourceId = intval($sourceId);
+            if (!$sourceId) {
+                $sourceId = intval($request->get('sourceId'));
+                if (!$sourceId) {
+                    throw new ContactSourceException(
+                        'The sourceId was not supplied. Please provide your sourceId.',
                         Codes::HTTP_BAD_REQUEST,
                         null,
                         Stat::TYPE_INVALID,
-                        'serverId'
+                        'sourceId'
                     );
                 }
             }
@@ -158,7 +158,7 @@ class ApiController extends CommonApiController
             if (!$campaignId) {
                 $campaignId = intval($request->get('campaignId'));
                 if (!$campaignId) {
-                    throw new ContactServerException(
+                    throw new ContactSourceException(
                         'The campaignId was not supplied. Please provide your campaignId.',
                         Codes::HTTP_BAD_REQUEST,
                         null,
@@ -168,30 +168,30 @@ class ApiController extends CommonApiController
                 }
             }
 
-            // Check Server existence and published status.
-            $serverModel = $this->get('mautic.contactserver.model.contactserver');
-            $this->contactServer = $serverModel->getEntity($serverId);
-            if (!$this->contactServer) {
-                throw new ContactServerException(
-                    'The serverId specified does not exist.',
+            // Check Source existence and published status.
+            $sourceModel = $this->get('mautic.contactsource.model.contactsource');
+            $this->contactSource = $sourceModel->getEntity($sourceId);
+            if (!$this->contactSource) {
+                throw new ContactSourceException(
+                    'The sourceId specified does not exist.',
                     Codes::HTTP_NOT_FOUND,
                     null,
                     Stat::TYPE_INVALID,
-                    'serverId'
+                    'sourceId'
                 );
-            } elseif ($this->contactServer->getIsPublished() === false) {
-                throw new ContactServerException(
-                    'The serverId specified has been unpublished (deactivated).',
+            } elseif ($this->contactSource->getIsPublished() === false) {
+                throw new ContactSourceException(
+                    'The sourceId specified has been unpublished (deactivated).',
                     Codes::HTTP_GONE,
                     null,
                     Stat::TYPE_INVALID,
-                    'serverId'
+                    'sourceId'
                 );
             }
 
-            // Check authentication token against the server.
-            if ($token !== $this->contactServer->getToken()) {
-                throw new ContactServerException(
+            // Check authentication token against the source.
+            if ($token !== $this->contactSource->getToken()) {
+                throw new ContactSourceException(
                     'The token specified is invalid. Please request a new token.',
                     Codes::HTTP_UNAUTHORIZED,
                     null,
@@ -200,16 +200,16 @@ class ApiController extends CommonApiController
                 );
             }
 
-            // Check that the campaign is in the whitelist for this server.
+            // Check that the campaign is in the whitelist for this source.
             /** @var CampaignSettings $campaignSettingsModel */
-            $campaignSettingsModel = $this->get('mautic.contactserver.model.campaign_settings');
-            $campaignSettingsModel->setContactServer($this->contactServer);
+            $campaignSettingsModel = $this->get('mautic.contactsource.model.campaign_settings');
+            $campaignSettingsModel->setContactSource($this->contactSource);
             $campaignSettings = $campaignSettingsModel->getCampaignSettingsById($campaignId);
             // @todo - Support or thwart multiple copies of the same campaign, should it occur. In the meantime...
             $campaignSettings = reset($campaignSettings);
             if (!$campaignSettings) {
-                throw new ContactServerException(
-                    'The campaignId supplied is not currently in the permitted list of campaigns for this server.',
+                throw new ContactSourceException(
+                    'The campaignId supplied is not currently in the permitted list of campaigns for this source.',
                     Codes::HTTP_GONE,
                     null,
                     Stat::TYPE_INVALID,
@@ -233,7 +233,7 @@ class ApiController extends CommonApiController
             /** @var Campaign $campaign */
             $this->campaign = $this->getCampaignModel()->getEntity($campaignId);
             if (!$this->campaign) {
-                throw new ContactServerException(
+                throw new ContactSourceException(
                     'The campaignId specified does not exist.',
                     Codes::HTTP_GONE,
                     null,
@@ -241,7 +241,7 @@ class ApiController extends CommonApiController
                     'campaignId'
                 );
             } elseif ($this->campaign->getIsPublished() === false) {
-                throw new ContactServerException(
+                throw new ContactSourceException(
                     'The campaignId specified has been unpublished (deactivated).',
                     Codes::HTTP_GONE,
                     null,
@@ -253,7 +253,7 @@ class ApiController extends CommonApiController
             // Generate a new contact entity (not yet saved so that we can use it for validations).
             $this->contact = $this->import($fieldData, $debug);
             if (!$this->contact) {
-                throw new ContactServerException(
+                throw new ContactSourceException(
                     'Not enough valid data was provided to create a contact for this campaign.',
                     Codes::HTTP_BAD_REQUEST,
                     null,
@@ -266,12 +266,12 @@ class ApiController extends CommonApiController
             // (This would best be done by cron, and cached somewhere as a list like campaign_required_fields)
             // (presuppose the overridden fields, if any)
 
-            // @todo - Evaluate Server & Campaign limits using the Cache (method doesn't yet exist for either contact/client).
+            // @todo - Evaluate Source & Campaign limits using the Cache (method doesn't yet exist for either contact/client).
             // $this->getCacheModel()->evaluateLimits();
 
-            // @todo - Evaluate Server duplicates against the cache. This is different than contact duplicates,
-            // as we only care about duplicates within the server. It is unsustainable to check against all contacts
-            // ever received by Mautic, so we only check for duplicates received by this server within a time frame.
+            // @todo - Evaluate Source duplicates against the cache. This is different than contact duplicates,
+            // as we only care about duplicates within the source. It is unsustainable to check against all contacts
+            // ever received by Mautic, so we only check for duplicates received by this source within a time frame.
 
             // Save the new contact since it is valid by this point.
             $this->getContactModel()->saveEntity($this->contact);
@@ -303,13 +303,13 @@ class ApiController extends CommonApiController
                 }
             }
 
-            // Synchronous (real time): If this Server & Campaign is set to synchronous (and wasn't scrub), push the contact through the campaign now.
+            // Synchronous (real time): If this Source & Campaign is set to synchronous (and wasn't scrub), push the contact through the campaign now.
             if ($this->realTime) {
                 // Synchronous acceptance or denial.
                 // Step through the campaign model events to define status.
                 $totalEventCount = 0;
                 /** @var CampaignEventModel $campaignEventModel */
-                $campaignEventModel = $this->get('mautic.contactserver.model.campaign_event');
+                $campaignEventModel = $this->get('mautic.contactsource.model.campaign_event');
                 $campaignResult = $campaignEventModel->triggerContactStartingEvents($this->campaign, $totalEventCount, [$this->contact]);
 
                 // Sync (real-time): Evaluate the result of the campaign workflow and return status.
@@ -353,8 +353,8 @@ class ApiController extends CommonApiController
             if ($this->fieldsAccepted) {
                 $response['fields'] = $this->fieldsAccepted;
             }
-            if ($this->contactServer) {
-                $response['serverId'] = $this->contactServer->getId();
+            if ($this->contactSource) {
+                $response['sourceId'] = $this->contactSource->getId();
             }
             $response['success'] = $this->valid;
             $response['time'] = [
@@ -377,7 +377,7 @@ class ApiController extends CommonApiController
 
             $field = null;
             $code = $e->getCode();
-            if ($e instanceof ContactServerException) {
+            if ($e instanceof ContactSourceException) {
                 if ($this->contact) {
                     $e->setContact($this->contact);
                 }
@@ -443,7 +443,7 @@ class ApiController extends CommonApiController
     {
         if (!$this->campaignModel) {
             /** @var CampaignModel */
-            $this->campaignModel = $this->get('mautic.contactserver.model.campaign');
+            $this->campaignModel = $this->get('mautic.contactsource.model.campaign');
         }
 
         return $this->campaignModel;
@@ -590,7 +590,7 @@ class ApiController extends CommonApiController
     private function getContactModel()
     {
         if (!$this->contactModel) {
-            $this->contactModel = $this->get('mautic.contactserver.model.contact');
+            $this->contactModel = $this->get('mautic.contactsource.model.contact');
         }
 
         return $this->contactModel;
@@ -603,10 +603,10 @@ class ApiController extends CommonApiController
     private function getCacheModel()
     {
         if (!$this->cacheModel) {
-            /** @var \MauticPlugin\MauticContactServerBundle\Model\Cache $cacheModel */
-            $this->cacheModel = $this->get('mautic.contactserver.model.cache');
+            /** @var \MauticPlugin\MauticContactSourceBundle\Model\Cache $cacheModel */
+            $this->cacheModel = $this->get('mautic.contactsource.model.cache');
             $this->cacheModel->setContact($this->contact);
-            $this->cacheModel->setContactServer($this->contactServer);
+            $this->cacheModel->setContactSource($this->contactSource);
         }
 
         return $this->cacheModel;
