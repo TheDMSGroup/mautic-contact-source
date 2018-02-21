@@ -24,7 +24,7 @@ class Stat
 {
     // Used for querying stats
     const TYPE_ACCEPT = 'accepted';
-    // const TYPE_DUPLICATE = 'duplicate';
+    const TYPE_DUPLICATE = 'duplicate';
     const TYPE_ERROR = 'error';
     // const TYPE_FILTER = 'filtered';
     const TYPE_INVALID = 'invalid';

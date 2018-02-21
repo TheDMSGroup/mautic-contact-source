@@ -28,6 +28,7 @@ By default your third parties can POST contacts to urls matching this pattern:
 * [JSON Editor](https://github.com/json-editor/json-editor)
 
 ## Todo
+- [ ] Logging: Log statistics on contact ingestion, provide charts when viewing a source in the UI.
 - [ ] Campaigns: A whitelist of campaigns can be selected for the third party to post into.
 - [ ] Campaign Limits: Limit the number of contacts accepted to a campaign within defined time frames.
 - [ ] Campaign Finance: Track the cost/revenue of contacts upon ingestion per campaign.

@@ -11,6 +11,7 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
+use Mautic\CampaignBundle\Entity\CampaignRepository;
 use Mautic\CoreBundle\Controller\AjaxController as CommonAjaxController;
 use Mautic\CoreBundle\Controller\AjaxLookupControllerTrait;
 use Mautic\CoreBundle\Helper\InputHelper;
@@ -25,38 +26,34 @@ class AjaxController extends CommonAjaxController
     use AjaxLookupControllerTrait;
 
     /**
-     * @param Request $request
+     * Retrieve a list of campaigns for use in drop-downs.
+     *
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      * @throws \Exception
      */
-    protected function getApiPayloadTestAction(Request $request)
+    protected function getCampaignListAction()
     {
-        // Get the API payload to test.
-        $apiPayload = html_entity_decode(InputHelper::clean($request->request->get('apiPayload')));
-
-        // default to empty
-        $dataArray = [
-            'html'    => '',
-            'success' => 0,
-        ];
-
-        if (!empty($apiPayload)) {
-
-            /** @var SourceIntegration $sourceIntegration */
-            $sourceIntegration = $this->get('mautic.contactsource.integration');
-
-            $result = $sourceIntegration->sendTest($apiPayload);
-
-            $html = $sourceIntegration->getLogsYAML();
-//            $html = $this->renderView(
-//                'MauticSocialBundle:FormTheme:'.$type.'_widget.html.php'
-//            );
-
-            $dataArray['html']    = $html;
-            $dataArray['success'] = $result['valid'];
-            $dataArray['payload'] = $result['payload'];
+        $output = [];
+        /** @var CampaignRepository */
+        $campaignRepository = $this->get('mautic.contactsource.model.campaign')->getRepository();
+        $campaigns = $campaignRepository->getEntities();
+        foreach ($campaigns as $campaign) {
+            $published = $campaign->isPublished();
+            $name = $campaign->getName();
+            $category = $campaign->getCategory();
+            $id = $campaign->getId();
+            $output[$name.'_'.$category.'_'.$id] = [
+                'value' => $id,
+                'title' => $name.($category ? ' - '.$category : '').(!$published ? ' (unpublished)' : ''),
+            ];
         }
+        // Sort by name and category if not already, then drop the keys.
+        ksort($output);
 
-        return $this->sendJsonResponse($dataArray);
+        return $this->sendJsonResponse(
+            [
+                'array' => array_values($output),
+            ]
+        );
     }
 }

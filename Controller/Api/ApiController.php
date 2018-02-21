@@ -287,7 +287,10 @@ class ApiController extends CommonApiController
             $this->status = Stat::TYPE_QUEUED;
 
             // Create cache entry if all was successful for duplicate checking and limits.
-            $this->getCacheModel()->create();
+            $this->getCacheModel()
+                ->setContact($this->contact)
+                ->setContactSource($this->contactSource)
+                ->create();
 
             // Asynchronous (not real time): Accept the contact by return status, or scrub.
             if (!$this->realTime) {

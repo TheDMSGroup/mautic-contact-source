@@ -45,52 +45,8 @@
             {
               "source": [
                 {
-                  "value": 1,
-                  "title": "Campaign 1"
-                },
-                {
-                  "value": 2,
-                  "title": "Campaign 2"
-                },
-                {
-                  "value": 3,
-                  "title": "Campaign 3"
-                },
-                {
-                  "value": 4,
-                  "title": "Campaign 4"
-                },
-                {
-                  "value": 5,
-                  "title": "Campaign 5"
-                },
-                {
-                  "value": 6,
-                  "title": "Campaign 6"
-                },
-                {
-                  "value": 7,
-                  "title": "Campaign 7"
-                },
-                {
-                  "value": 8,
-                  "title": "Campaign 8"
-                },
-                {
-                  "value": 9,
-                  "title": "Campaign 9"
-                },
-                {
-                  "value": 10,
-                  "title": "Campaign 10"
-                },
-                {
-                  "value": 11,
-                  "title": "Campaign 11"
-                },
-                {
-                  "value": 12,
-                  "title": "Campaign 12"
+                  "value": 0,
+                  "title": "-- Please create a Campaign --"
                 }
               ],
               "title": "{{item.title}}",

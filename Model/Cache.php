@@ -50,41 +50,6 @@ class Cache extends AbstractCommonModel
     }
 
     /**
-     * Validate and merge the rules object (exclusivity/duplicate/limits)
-     *
-     * @param $rules
-     * @return array
-     */
-    private function mergeRules($rules)
-    {
-        $newRules = [];
-        if (isset($rules->rules) && is_array($rules->rules)) {
-            foreach ($rules->rules as $rule) {
-                if (
-                    !empty($rule->matching)
-                    && !empty($rule->scope)
-                    && !empty($rule->duration)
-                ) {
-                    $duration = $rule->duration;
-                    $scope = intval($rule->scope);
-                    $key = $duration.'-'.$scope;
-                    if (!isset($newRules[$key])) {
-                        $newRules[$key] = [];
-                        $newRules[$key]['matching'] = intval($rule->matching);
-                        $newRules[$key]['scope'] = $scope;
-                        $newRules[$key]['duration'] = $duration;
-                    } else {
-                        $newRules[$key]['matching'] += intval($rule->matching);
-                    }
-                }
-            }
-        }
-        krsort($newRules);
-
-        return $newRules;
-    }
-
-    /**
      * Create a new cache entity with the existing Contact and contactSource.
      * Normalize the fields as much as possible to aid in exclusive/duplicate/limit correlation.
      *
@@ -196,6 +161,41 @@ class Cache extends AbstractCommonModel
         $duplicate = $jsonHelper->decodeObject($this->contactSource->getDuplicate(), 'Duplicate');
 
         return $this->mergeRules($duplicate);
+    }
+
+    /**
+     * Validate and merge the rules object (exclusivity/duplicate/limits)
+     *
+     * @param $rules
+     * @return array
+     */
+    private function mergeRules($rules)
+    {
+        $newRules = [];
+        if (isset($rules->rules) && is_array($rules->rules)) {
+            foreach ($rules->rules as $rule) {
+                if (
+                    !empty($rule->matching)
+                    && !empty($rule->scope)
+                    && !empty($rule->duration)
+                ) {
+                    $duration = $rule->duration;
+                    $scope = intval($rule->scope);
+                    $key = $duration.'-'.$scope;
+                    if (!isset($newRules[$key])) {
+                        $newRules[$key] = [];
+                        $newRules[$key]['matching'] = intval($rule->matching);
+                        $newRules[$key]['scope'] = $scope;
+                        $newRules[$key]['duration'] = $duration;
+                    } else {
+                        $newRules[$key]['matching'] += intval($rule->matching);
+                    }
+                }
+            }
+        }
+        krsort($newRules);
+
+        return $newRules;
     }
 
     /**
