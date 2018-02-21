@@ -222,7 +222,7 @@ class ApiController extends CommonApiController
             $this->attribution = isset($campaignSettings->attribution) ? intval($campaignSettings->attribution) : 0;
             $this->utmSource = !empty($campaignSettings->utmSource) ? $campaignSettings->utmSource : null;
             // Apply field overrides
-            if ($this->attribution) {
+            if ($this->attribution || $this->attribution === 0) {
                 $fieldData['attribution'] = $this->attribution;
             }
             if ($this->utmSource) {
@@ -286,12 +286,6 @@ class ApiController extends CommonApiController
             $this->getCampaignModel()->addContact($this->campaign, $this->contact, false, $this->realTime);
             $this->status = Stat::TYPE_QUEUED;
 
-            // Create cache entry if all was successful for duplicate checking and limits.
-            $this->getCacheModel()
-                ->setContact($this->contact)
-                ->setContactSource($this->contactSource)
-                ->create();
-
             // Asynchronous (not real time): Accept the contact by return status, or scrub.
             if (!$this->realTime) {
                 // Establish scrub now.
@@ -348,8 +342,32 @@ class ApiController extends CommonApiController
                 }
             }
 
+            // Invert the original attribution if we have been scrubbed and an attribution was given.
+            // Not the end result may NOT balance out to 0, as we may have run through campaign actions that
+            // had costs/values associated. We are only reversing the original value we applied.
+            if ($this->isScrubbed() && $this->attribution) {
+                $originalAttribution = $this->contact->getAttribution();
+                $newAttribution = $originalAttribution + ($this->attribution * -1);
+                if ($newAttribution != $originalAttribution) {
+                    $this->contact->addUpdatedField(
+                        'attribution',
+                        $newAttribution
+                    );
+                    $this->getContactModel()->saveEntity($this->contact);
+                }
+            }
+
+            // Create cache entry if all was successful for duplicate checking and limits (with final attribution)
+            $this->getCacheModel()
+                ->setContact($this->contact)
+                ->setContactSource($this->contactSource)
+                ->create();
+
             // Parse the response.
-            $response['attribution'] = $this->valid ? ($this->attribution ? $this->attribution : 0) : 0;
+            if ($this->valid && $this->attribution) {
+                // Attribution in this context is the revenue/cost for the third party.
+                $response['attribution'] = $this->attribution;
+            }
             if ($this->campaign) {
                 $response['campaignId'] = $this->campaign->getId();
             }
@@ -358,6 +376,9 @@ class ApiController extends CommonApiController
             }
             if ($this->contactSource) {
                 $response['sourceId'] = $this->contactSource->getId();
+            }
+            if ($this->utmSource) {
+                $response['utmSource'] = $this->utmSource;
             }
             $response['success'] = $this->valid;
             $response['time'] = [
