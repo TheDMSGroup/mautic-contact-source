@@ -15,7 +15,6 @@ Mautic.contactsourceCampaigns = function () {
             },
             dataType: 'json',
             success: function (response) {
-                console.log(response);
                 if (typeof response.array !== 'undefined') {
                     campaigns = response.array;
                 }

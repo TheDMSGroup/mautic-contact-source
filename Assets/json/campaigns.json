@@ -63,14 +63,14 @@
             "infoText": "Optionally override the UTM Source field of each contact when first saved. Leave blank to allow the source to post any value. Override occurs after limits are evaluated below."
           }
         },
-        "attribution": {
-          "comment": "Using type 'string' here so that a null value can be saved.",
-          "title": "Revenue/Cost",
-          "type": "string",
+        "cost": {
+          "title": "Cost",
+          "type": "integer",
           "propertyOrder": 30,
+          "default": 0,
           "options": {
             "grid_columns": 1,
-            "infoText": "Optionally override the attribution field of each contact when first saved. Leave blank to allow the source to post any value. Positive numbers equate to revenue, negative numbers to cost."
+            "infoText": "How much is paid to this source whenever a contact is accepted?"
           }
         },
         "realTime": {

@@ -219,10 +219,10 @@ class ApiController extends CommonApiController
             // Establish parameters from campaign settings.
             $this->realTime = (boolean)isset($campaignSettings->realTime) && $campaignSettings->realTime;
             $this->scrubRate = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
-            $this->attribution = isset($campaignSettings->attribution) ? intval($campaignSettings->attribution) : 0;
+            $this->attribution = isset($campaignSettings->cost) ? (abs(intval($campaignSettings->cost)) * -1) : 0;
             $this->utmSource = !empty($campaignSettings->utmSource) ? $campaignSettings->utmSource : null;
             // Apply field overrides
-            if ($this->attribution || $this->attribution === 0) {
+            if ($this->attribution !== 0) {
                 $fieldData['attribution'] = $this->attribution;
             }
             if ($this->utmSource) {
@@ -345,7 +345,7 @@ class ApiController extends CommonApiController
             // Invert the original attribution if we have been scrubbed and an attribution was given.
             // Not the end result may NOT balance out to 0, as we may have run through campaign actions that
             // had costs/values associated. We are only reversing the original value we applied.
-            if ($this->isScrubbed() && $this->attribution) {
+            if ($this->isScrubbed() && $this->attribution !== 0) {
                 $originalAttribution = $this->contact->getAttribution();
                 $newAttribution = $originalAttribution + ($this->attribution * -1);
                 if ($newAttribution != $originalAttribution) {
@@ -595,7 +595,7 @@ class ApiController extends CommonApiController
         }
 
         // Exclude fields from the accepted array that we overrode.
-        if ($this->attribution) {
+        if ($this->attribution !== 0) {
             unset($this->fieldsAccepted['attribution']);
         }
         if ($this->utmSource) {
