@@ -23,7 +23,6 @@ use FOS\RestBundle\Util\Codes;
 class ApiController extends CommonApiController
 {
 
-
     /**
      * Primary API endpoint for sources to post contacts.
      *
@@ -54,7 +53,7 @@ class ApiController extends CommonApiController
                 ->setContainer($this->container)
                 ->setSourceId((int)$sourceId)
                 ->setCampaignId((int)$campaignId)
-                ->setDebug((bool)$request->headers->get('debug'))
+                ->setVerbose((bool)$request->headers->get('verbose'))
                 ->validateAndImportContact();
 
             $result = $ApiModel->getResult();
