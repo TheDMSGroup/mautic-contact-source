@@ -12,7 +12,7 @@
 return [
     'name'        => 'Mautic Contact Source',
     'description' => 'Creates API endpoints for receiving contacts from third parties.',
-    'version'     => '0.6',
+    'version'     => '0.8',
     'author'      => 'Mautic',
 
     'routes' => [
@@ -26,8 +26,8 @@ return [
                 'controller' => 'MauticContactSourceBundle:ContactSource:execute',
             ],
             'mautic_contactsource_timeline_action' => [
-                'path'       => '/contactsource/timeline/{contactSourceId}',
-                'controller' => 'MauticContactSourceBundle:Timeline:index',
+                'path'         => '/contactsource/timeline/{contactSourceId}',
+                'controller'   => 'MauticContactSourceBundle:Timeline:index',
                 'requirements' => [
                     'contactSourceId' => '\d+',
                 ],
@@ -35,26 +35,30 @@ return [
         ],
         'public' => [
             'mautic_contactsource_contact' => [
-                'path'       => '/source/{sourceId}/{object}/{campaignId}/{action}',
-                'controller' => 'MauticContactSourceBundle:Api\Api:contact',
-                'method'     => ['POST', 'PUT'],
-                'defaults'   => [
-                    'action' => 'add',
+                'path'           => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',
+                'controller'     => 'MauticContactSourceBundle:Api\Api:contact',
+                'method'         => ['POST', 'PUT'],
+                'defaults'       => [
+                    'object'     => 'contact',
+                    'action'     => 'add',
+                    'main'       => 'campaign',
                     'campaignId' => '',
-                    'object' => 'campaign',
+                    'sourceId'   => '',
                 ],
                 'arguments'  => [
                     'translator'
                 ]
             ],
             'mautic_contactsource_documentation' => [
-                'path'       => '/source/{sourceId}/{object}/{campaignId}/{action}',
-                'controller' => 'MauticContactSourceBundle:Public:getDocumentation',
-                'method'     => 'GET',
-                'defaults'   => [
-                    'action' => 'add',
+                'path'           => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',
+                'controller'     => 'MauticContactSourceBundle:Public:getDocumentation',
+                'method'         => 'GET',
+                'defaults'       => [
+                    'object'     => 'contact',
+                    'action'     => 'add',
+                    'main'       => 'campaign',
                     'campaignId' => '',
-                    'object' => 'campaign'
+                    'sourceId'   => '',
                 ],
             ],
         ],
@@ -115,6 +119,9 @@ return [
                     'event_dispatcher',
                     'mautic.lead.model.lead',
                 ],
+            ],
+            'mautic.contactsource.model.api' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\Api',
             ],
             'mautic.contactsource.model.campaign_settings' => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\CampaignSettings',
