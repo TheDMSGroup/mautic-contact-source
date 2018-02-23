@@ -12,6 +12,11 @@
 namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
+use Symfony\Component\HttpFoundation\Request;
+use FOS\RestBundle\Util\Codes;
+use MauticPlugin\MauticContactSourceBundle\Model\Api;
+use Symfony\Component\HttpFoundation\Response;
+
 
 class PublicController extends CommonController
 {
@@ -39,4 +44,33 @@ class PublicController extends CommonController
             ]
         );
     }
+
+    public function handlerAction(
+        Request $request,
+        $sourceId = null,
+        $main,
+        $campaignId = null,
+        $object,
+        $action
+    ) {
+
+        /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
+        $ApiModel = $this->get('mautic.contactsource.model.api')
+            ->setRequest($request)
+            ->setContainer($this->container)
+            ->setSourceId((int)$sourceId)
+            ->setCampaignId((int)$campaignId)
+            ->setDebug((bool)$request->headers->get('debug'))
+            ->handleInputPublic();
+
+        $result = $ApiModel->getResult(true);
+
+        $response = new Response('', $result['statusCode'] ? $result['statusCode'] : Codes::HTTP_OK);
+        return $this->render(
+            'MauticContactSourceBundle:Documentation:details.html.php',
+            $result,
+            $response
+        );
+    }
+
 }

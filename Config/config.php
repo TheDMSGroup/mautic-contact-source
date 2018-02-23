@@ -36,7 +36,7 @@ return [
         'public' => [
             'mautic_contactsource_contact' => [
                 'path'           => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',
-                'controller'     => 'MauticContactSourceBundle:Api\Api:contact',
+                'controller'     => 'MauticContactSourceBundle:Api\Api:handler',
                 'method'         => ['POST', 'PUT'],
                 'defaults'       => [
                     'object'     => 'contact',
@@ -51,7 +51,7 @@ return [
             ],
             'mautic_contactsource_documentation' => [
                 'path'           => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',
-                'controller'     => 'MauticContactSourceBundle:Public:getDocumentation',
+                'controller'     => 'MauticContactSourceBundle:Public:handler',
                 'method'         => 'GET',
                 'defaults'       => [
                     'object'     => 'contact',

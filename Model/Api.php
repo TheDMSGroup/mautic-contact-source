@@ -158,176 +158,32 @@ class Api
     }
 
     /**
-     * Given the needed parameters, import the contact if applicable.
+     * Parse and validate for public access, without field and token validation.
      *
      * @return $this
      */
-    public function validateAndImportContact()
+    public function handleInputPublic()
     {
-        $this->valid = false;
-
         try {
-            $this->parseFieldsProvided();
-
-            $this->parseParameters();
-
-            $this->getSource();
-
+            $this->parseSourceId();
+            $this->parseSource();
             $this->parseSourceCampaignSettings();
-
-            $this->getCampaign();
-
-            $this->createContact();
-
-            // @todo - Evaluate required fields based on all the fields that are used in the campaign.
-            // (This would best be done by cron, and cached somewhere as a list like campaign_required_fields)
-            // (presuppose the overridden fields, if any)
-
-            // @todo - Evaluate Source & Campaign limits using the Cache (method doesn't yet exist for either contact/client).
-            // $this->getCacheModel()->evaluateLimits();
-
-            // @todo - Evaluate Source duplicates against the cache. This is different than contact duplicates,
-            // as we only care about duplicates within the source. It is unsustainable to check against all contacts
-            // ever received by Mautic, so we only check for duplicates received by this source within a time frame.
-
-            $this->saveContact();
-
-            // @todo - Optionally allow a segment to be targeted instead of a campaign in the future? No problem...
-            // /** @var \Mautic\LeadBundle\Model\ListModel $leadListModel */
-            // $leadListModel = $this->container->get('mautic.lead.model.list');
-            // $leadListModel->addLead($this->contact, [LeadList $list], true, !$this->realTime, -1);
-
-            $this->addContactToCampaign();
-
-            $this->processOffline();
-
-            $this->processRealTime();
-
-            $this->reverseScrub();
-
-            $this->createCache();
-
-        } catch (\Exception $e) {
-
-            $field = null;
-            $code = $e->getCode();
-            if ($e instanceof ContactSourceException) {
-                if ($this->contact) {
-                    $e->setContact($this->contact);
-                }
-                $status = $e->getStatType();
-                if ($status) {
-                    $this->status = $status;
-                }
-                $field = $e->getField();
-                if ($code) {
-                    // We'll use these as HTTP status codes.
-                    $this->statusCode = $code;
-                }
-            } elseif (!$this->statusCode) {
-                // Unexpected exceptions should send 500.
-                $this->statusCode = Codes::HTTP_INTERNAL_SERVER_ERROR;
-            }
-            $this->errors[$field ? $field : $code] = $e->getMessage();
+            $this->parseCampaign();
+        } catch (\Exception $exception) {
+            $this->handleException($exception);
         }
 
         return $this;
     }
 
     /**
-     * Capture a clean array input trimming all keys and values, excluding empties.
-     * Throw exception if no fields provided.
-     *
-     * @return array
-     * @throws ContactSourceException
-     */
-    private function parseFieldsProvided()
-    {
-        if ($this->fieldsProvided === null) {
-            $fieldsProvided = [];
-            foreach ($this->request->request->all() as $k => $v) {
-                $k = trim($k);
-                if ($k !== '') {
-                    $v = trim($v);
-                    if ($v !== '') {
-                        $fieldsProvided[$k] = $v;
-                    }
-                }
-            }
-            // Some inputs do not pertain to contact fields.
-            unset($fieldsProvided['token'], $fieldsProvided['sourceId'], $fieldsProvided['campaignId']);
-            $this->fieldsProvided = $fieldsProvided;
-        }
-        if (!count($this->fieldsProvided)) {
-            throw new ContactSourceException(
-                'No fields were posted. Did you mean to do that?',
-                Codes::HTTP_I_AM_A_TEAPOT,
-                null,
-                Stat::TYPE_INVALID
-            );
-        }
-
-        return $this->fieldsProvided;
-    }
-
-    /**
-     * Ensure the required parameters were provided and not empty while parsing.
-     * @throws ContactSourceException
-     */
-    private function parseParameters()
-    {
-        $this->token = $this->request->get('token');
-        if (!$this->token) {
-            $this->token = $this->request->headers->get('token');
-            if (!$this->token) {
-                $this->token = $this->request->headers->get('X-Auth-Token');
-                if (!$this->token) {
-                    throw new ContactSourceException(
-                        'The token was not supplied. Please provide your authentication token.',
-                        Codes::HTTP_UNAUTHORIZED,
-                        null,
-                        Stat::TYPE_INVALID,
-                        'token'
-                    );
-                }
-            }
-        }
-        $this->sourceId = intval($this->sourceId);
-        if (!$this->sourceId) {
-            $this->sourceId = intval($this->request->get('sourceId'));
-            if (!$this->sourceId) {
-                throw new ContactSourceException(
-                    'The sourceId was not supplied. Please provide your sourceId.',
-                    Codes::HTTP_BAD_REQUEST,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'sourceId'
-                );
-            }
-        }
-        $this->campaignId = intval($this->campaignId);
-        if (!$this->campaignId) {
-            $this->campaignId = intval($this->request->get('campaignId'));
-            if (!$this->campaignId) {
-                throw new ContactSourceException(
-                    'The campaignId was not supplied. Please provide your campaignId.',
-                    Codes::HTTP_BAD_REQUEST,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'campaignId'
-                );
-            }
-        }
-    }
-
-    /**
      * Find and validate the source matching our parameters.
      *
-     * @return ContactSource
+     * @return $this
      * @throws ContactSourceException
      * @throws \Exception
      */
-    private function getSource()
+    private function parseSource()
     {
         if ($this->contactSource == null) {
             // Check Source existence and published status.
@@ -349,18 +205,10 @@ class Api
                     Stat::TYPE_INVALID,
                     'sourceId'
                 );
-            } elseif ($this->token !== $this->contactSource->getToken()) {
-                throw new ContactSourceException(
-                    'The token specified is invalid. Please request a new token.',
-                    Codes::HTTP_UNAUTHORIZED,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'token'
-                );
             }
         }
 
-        return $this->contactSource;
+        return $this;
     }
 
     /**
@@ -405,11 +253,11 @@ class Api
     /**
      * Load and validate the campaign based on our parameters.
      *
-     * @return Campaign|null
+     * @return $this
      * @throws ContactSourceException
      * @throws \Exception
      */
-    private function getCampaign()
+    private function parseCampaign()
     {
         if ($this->campaign == null) {
             // Check Campaign existence and published status.
@@ -434,8 +282,7 @@ class Api
             }
         }
 
-        return $this->campaign;
-
+        return $this;
     }
 
     /**
@@ -452,6 +299,212 @@ class Api
         }
 
         return $this->campaignModel;
+    }
+
+    /**
+     * @param \Exception $exception
+     */
+    private function handleException(\Exception $exception)
+    {
+        $field = null;
+        $code = $exception->getCode();
+        if ($exception instanceof ContactSourceException) {
+            if ($this->contact) {
+                $exception->setContact($this->contact);
+            }
+            $status = $exception->getStatType();
+            if ($status) {
+                $this->status = $status;
+            }
+            $field = $exception->getField();
+            if (is_integer($code)) {
+                // We'll use these as HTTP status codes.
+                $this->statusCode = $code;
+            }
+        } elseif (!$this->statusCode) {
+            // Unexpected exceptions should send 500.
+            $this->statusCode = Codes::HTTP_INTERNAL_SERVER_ERROR;
+        }
+        $this->errors[$field ? $field : $code] = $exception->getMessage();
+
+    }
+
+    /**
+     * Given the needed parameters, import the contact if applicable.
+     *
+     * @return $this
+     */
+    public function validateAndImportContact()
+    {
+        $this->valid = false;
+
+        try {
+            $this->handleInputPrivate();
+            $this->createContact();
+
+            // @todo - Evaluate required fields based on all the fields that are used in the campaign.
+            // (This would best be done by cron, and cached somewhere as a list like campaign_required_fields)
+            // (presuppose the overridden fields, if any)
+
+            // @todo - Evaluate Source & Campaign limits using the Cache (method doesn't yet exist for either contact/client).
+            // $this->getCacheModel()->evaluateLimits();
+
+            // @todo - Evaluate Source duplicates against the cache. This is different than contact duplicates,
+            // as we only care about duplicates within the source. It is unsustainable to check against all contacts
+            // ever received by Mautic, so we only check for duplicates received by this source within a time frame.
+
+            $this->saveContact();
+
+            // @todo - Optionally allow a segment to be targeted instead of a campaign in the future? No problem...
+            // /** @var \Mautic\LeadBundle\Model\ListModel $leadListModel */
+            // $leadListModel = $this->container->get('mautic.lead.model.list');
+            // $leadListModel->addLead($this->contact, [LeadList $list], true, !$this->realTime, -1);
+
+            $this->addContactToCampaign();
+            $this->processOffline();
+            $this->processRealTime();
+            $this->reverseScrub();
+            $this->createCache();
+
+        } catch (\Exception $exception) {
+            $this->handleException($exception);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Parse and validate all input for the API.
+     *
+     * @return $this
+     * @throws ContactSourceException
+     * @throws \Exception
+     */
+    private function handleInputPrivate()
+    {
+        $this->parseFieldsProvided();
+        $this->parseSourceId();
+        $this->parseCampaignId();
+        $this->parseToken();
+        $this->parseSource();
+        $this->validateToken();
+        $this->parseSourceCampaignSettings();
+        $this->parseCampaign();
+
+        return $this;
+    }
+
+    /**
+     * Capture a clean array input trimming all keys and values, excluding empties.
+     * Throw exception if no fields provided.
+     *
+     * @return $this
+     * @throws ContactSourceException
+     */
+    private function parseFieldsProvided()
+    {
+        if ($this->fieldsProvided === null) {
+            $fieldsProvided = [];
+            foreach ($this->request->request->all() as $k => $v) {
+                $k = trim($k);
+                if ($k !== '') {
+                    $v = trim($v);
+                    if ($v !== '') {
+                        $fieldsProvided[$k] = $v;
+                    }
+                }
+            }
+            // Some inputs do not pertain to contact fields.
+            unset($fieldsProvided['token'], $fieldsProvided['sourceId'], $fieldsProvided['campaignId']);
+            $this->fieldsProvided = $fieldsProvided;
+        }
+        if (!count($this->fieldsProvided)) {
+            throw new ContactSourceException(
+                'No fields were posted. Did you mean to do that?',
+                Codes::HTTP_I_AM_A_TEAPOT,
+                null,
+                Stat::TYPE_INVALID
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @throws ContactSourceException
+     */
+    private function parseSourceId()
+    {
+        $this->sourceId = intval($this->sourceId);
+        if (!$this->sourceId) {
+            $this->sourceId = intval($this->request->get('sourceId'));
+            if (!$this->sourceId) {
+                throw new ContactSourceException(
+                    'The sourceId was not supplied. Please provide your sourceId.',
+                    Codes::HTTP_BAD_REQUEST,
+                    null,
+                    Stat::TYPE_INVALID,
+                    'sourceId'
+                );
+            }
+        }
+    }
+
+    /**
+     * @throws ContactSourceException
+     */
+    private function parseCampaignId()
+    {
+        $this->campaignId = intval($this->campaignId);
+        if (!$this->campaignId) {
+            $this->campaignId = intval($this->request->get('campaignId'));
+            if (!$this->campaignId) {
+                throw new ContactSourceException(
+                    'The campaignId was not supplied. Please provide your campaignId.',
+                    Codes::HTTP_BAD_REQUEST,
+                    null,
+                    Stat::TYPE_INVALID,
+                    'campaignId'
+                );
+            }
+        }
+    }
+
+    /**
+     * Ensure the required parameters were provided and not empty while parsing.
+     * @throws ContactSourceException
+     */
+    private function parseToken()
+    {
+        $this->token = $this->request->get('token');
+        if (!$this->token) {
+            $this->token = $this->request->headers->get('token');
+            if (!$this->token) {
+                $this->token = $this->request->headers->get('X-Auth-Token');
+                if (!$this->token) {
+                    throw new ContactSourceException(
+                        'The token was not supplied. Please provide your authentication token.',
+                        Codes::HTTP_UNAUTHORIZED,
+                        null,
+                        Stat::TYPE_INVALID,
+                        'token'
+                    );
+                }
+            }
+        }
+    }
+
+    private function validateToken()
+    {
+        if ($this->token !== $this->contactSource->getToken()) {
+            throw new ContactSourceException(
+                'The token specified is invalid. Please request a new token.',
+                Codes::HTTP_UNAUTHORIZED,
+                null,
+                Stat::TYPE_INVALID,
+                'token'
+            );
+        }
     }
 
     /**
@@ -785,9 +838,11 @@ class Api
 
     /**
      * Get the result array of the import process.
+     *
+     * @param bool $verbose
      * @return array
      */
-    public function getResult()
+    public function getResult($verbose = false)
     {
         $result = [];
 
@@ -797,13 +852,26 @@ class Api
             $result['attribution'] = $this->attribution;
         }
         if ($this->campaign) {
-            $result['campaignId'] = $this->campaign->getId();
+            $result['campaign'] = [];
+            $result['campaign']['id'] = $this->campaign->getId();
+            if ($verbose) {
+                $result['campaign']['name'] = $this->campaign->getName();
+                $result['campaign']['description'] = $this->campaign->getDescription();
+                $result['campaign']['category'] = $this->campaign->getCategory();
+            }
         }
         if ($this->fieldsAccepted) {
             $result['fields'] = $this->fieldsAccepted;
         }
         if ($this->contactSource) {
-            $result['sourceId'] = $this->contactSource->getId();
+            $result['source'] = [];
+            $result['source']['id'] = $this->contactSource->getId();
+            if ($verbose) {
+                $result['source']['name'] = $this->contactSource->getName();
+                $result['source']['description'] = $this->contactSource->getDescriptionPublic();
+                $result['source']['category'] = $this->contactSource->getCategory();
+                $result['source']['documentation'] = $this->contactSource->getDocumentation();
+            }
         }
         if ($this->utmSource) {
             $result['utmSource'] = $this->utmSource;

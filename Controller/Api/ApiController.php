@@ -65,7 +65,10 @@ class ApiController extends CommonApiController
                 'statusCode' => Codes::HTTP_NOT_IMPLEMENTED,
             ];
         } else {
-            // @todo - Redirect to the documentation.
+            $result = [
+                'errors' => ['Sorry, posting a ' . $object . ' is not yet available. Did you mean "contact"?'],
+                'statusCode' => Codes::HTTP_NOT_IMPLEMENTED,
+            ];
         }
 
         $result['time'] = [
