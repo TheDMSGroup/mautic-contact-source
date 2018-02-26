@@ -19,8 +19,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 /**
- * Class ContactSourceType
- * @package MauticPlugin\MauticContactSourceBundle\Form\Type
+ * Class ContactSourceType.
  */
 class ContactSourceType extends AbstractType
 {
@@ -93,7 +92,7 @@ class ContactSourceType extends AbstractType
                     'class'   => 'form-control',
                     'tooltip' => 'mautic.contactsource.form.website.tooltip',
                 ],
-                'required' => false,
+                'required'   => false,
             ]
         );
 
@@ -104,10 +103,10 @@ class ContactSourceType extends AbstractType
                 'label'      => 'mautic.contactsource.form.campaign.settings',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => [
-                    'class'        => 'form-control',
-                    'rows'         => 12,
+                    'class' => 'form-control',
+                    'rows'  => 12,
                 ],
-                'required' => false,
+                'required'   => false,
             ]
         );
 
@@ -151,8 +150,8 @@ class ContactSourceType extends AbstractType
                     'class'       => 'form-control',
                     'data-toggle' => 'datetime',
                 ],
-                'format'   => 'yyyy-MM-dd HH:mm',
-                'required' => false,
+                'format'     => 'yyyy-MM-dd HH:mm',
+                'required'   => false,
             ]
         );
 
@@ -167,8 +166,8 @@ class ContactSourceType extends AbstractType
                     'class'       => 'form-control',
                     'data-toggle' => 'datetime',
                 ],
-                'format'   => 'yyyy-MM-dd HH:mm',
-                'required' => false,
+                'format'     => 'yyyy-MM-dd HH:mm',
+                'required'   => false,
             ]
         );
 
@@ -176,13 +175,13 @@ class ContactSourceType extends AbstractType
             'documentation',
             'yesno_button_group',
             [
-                'label' => 'mautic.contactsource.form.documentation',
-                'label_attr' => ['class' => 'control-label'],
+                'label'             => 'mautic.contactsource.form.documentation',
+                'label_attr'        => ['class' => 'control-label'],
                 'choices_as_values' => true,
-                'required' => true,
-                'attr'       => [
-                    'class'       => 'form-control',
-                    'tooltip'     => 'mautic.contactsource.form.documentation.tooltip',
+                'required'          => true,
+                'attr'              => [
+                    'class'   => 'form-control',
+                    'tooltip' => 'mautic.contactsource.form.documentation.tooltip',
                 ],
             ]
         );
@@ -191,12 +190,12 @@ class ContactSourceType extends AbstractType
             'token',
             'text',
             [
-                'label' => 'mautic.contactsource.form.token',
+                'label'      => 'mautic.contactsource.form.token',
                 'label_attr' => ['class' => 'control-label'],
-                'required' => false,
+                'required'   => false,
                 'attr'       => [
-                    'class'       => 'form-control',
-                    'tooltip'     => 'mautic.contactsource.form.token.tooltip',
+                    'class'   => 'form-control',
+                    'tooltip' => 'mautic.contactsource.form.token.tooltip',
                 ],
             ]
         );

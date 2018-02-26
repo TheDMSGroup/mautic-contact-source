@@ -15,8 +15,7 @@ use Doctrine\ORM\EntityManager;
 use Mautic\CoreBundle\EventListener\CommonStatsSubscriber;
 
 /**
- * Class StatsSubscriber
- * @package MauticPlugin\MauticContactSourceBundle\EventListener
+ * Class StatsSubscriber.
  */
 class StatsSubscriber extends CommonStatsSubscriber
 {

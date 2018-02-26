@@ -11,9 +11,9 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Controller\Api;
 
+use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
 use Symfony\Component\HttpFoundation\Request;
-use FOS\RestBundle\Util\Codes;
 
 /**
  * Class ContactSourceApiController.
@@ -22,16 +22,16 @@ use FOS\RestBundle\Util\Codes;
  */
 class ApiController extends CommonApiController
 {
-
     /**
      * Primary API endpoint for sources to post contacts.
      *
      * @param Request $request
-     * @param null $sourceId
-     * @param $main
-     * @param null $campaignId
-     * @param $object
-     * @param $action
+     * @param null    $sourceId
+     * @param         $main
+     * @param null    $campaignId
+     * @param         $object
+     * @param         $action
+     *
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handlerAction(
@@ -45,34 +45,32 @@ class ApiController extends CommonApiController
         $start = microtime(true);
 
         $object = strtolower($object);
-        if ($object == 'contact') {
-
+        if ('contact' == $object) {
             /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
             $ApiModel = $this->get('mautic.contactsource.model.api')
                 ->setRequest($request)
                 ->setContainer($this->container)
-                ->setSourceId((int)$sourceId)
-                ->setCampaignId((int)$campaignId)
-                ->setVerbose((bool)$request->headers->get('verbose'))
+                ->setSourceId((int) $sourceId)
+                ->setCampaignId((int) $campaignId)
+                ->setVerbose((bool) $request->headers->get('verbose'))
                 ->validateAndImportContact();
 
             $result = $ApiModel->getResult();
-
-        } elseif ($object == 'contacts') {
+        } elseif ('contacts' == $object) {
             $result = [
-                'errors' => ['Sorry, the bulk import option is not yet available.'],
+                'errors'     => ['Sorry, the bulk import option is not yet available.'],
                 'statusCode' => Codes::HTTP_NOT_IMPLEMENTED,
             ];
         } else {
             $result = [
-                'errors' => ['Sorry, posting a ' . $object . ' is not yet available. Did you mean "contact"?'],
+                'errors'     => ['Sorry, posting a '.$object.' is not yet available. Did you mean "contact"?'],
                 'statusCode' => Codes::HTTP_NOT_IMPLEMENTED,
             ];
         }
 
         $result['time'] = [
             'completed' => new \DateTime(),
-            'duration' => microtime(true) - $start,
+            'duration'  => microtime(true) - $start,
         ];
         ksort($result);
 
@@ -84,5 +82,4 @@ class ApiController extends CommonApiController
 
         return $this->handleView($view);
     }
-
 }

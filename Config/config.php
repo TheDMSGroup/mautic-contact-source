@@ -16,12 +16,12 @@ return [
     'author'      => 'Mautic',
 
     'routes' => [
-        'main' => [
-            'mautic_contactsource_index' => [
+        'main'   => [
+            'mautic_contactsource_index'           => [
                 'path'       => '/contactsource/{page}',
                 'controller' => 'MauticContactSourceBundle:ContactSource:index',
             ],
-            'mautic_contactsource_action' => [
+            'mautic_contactsource_action'          => [
                 'path'       => '/contactsource/{objectAction}/{objectId}',
                 'controller' => 'MauticContactSourceBundle:ContactSource:execute',
             ],
@@ -34,11 +34,11 @@ return [
             ],
         ],
         'public' => [
-            'mautic_contactsource_contact' => [
-                'path'           => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',
-                'controller'     => 'MauticContactSourceBundle:Api\Api:handler',
-                'method'         => ['POST', 'PUT'],
-                'defaults'       => [
+            'mautic_contactsource_contact'       => [
+                'path'       => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',
+                'controller' => 'MauticContactSourceBundle:Api\Api:handler',
+                'method'     => ['POST', 'PUT'],
+                'defaults'   => [
                     'object'     => 'contact',
                     'action'     => 'add',
                     'main'       => 'campaign',
@@ -46,14 +46,14 @@ return [
                     'sourceId'   => '',
                 ],
                 'arguments'  => [
-                    'translator'
-                ]
+                    'translator',
+                ],
             ],
             'mautic_contactsource_documentation' => [
-                'path'           => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',
-                'controller'     => 'MauticContactSourceBundle:Public:handler',
-                'method'         => 'GET',
-                'defaults'       => [
+                'path'       => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',
+                'controller' => 'MauticContactSourceBundle:Public:handler',
+                'method'     => 'GET',
+                'defaults'   => [
                     'object'     => 'contact',
                     'action'     => 'add',
                     'main'       => 'campaign',
@@ -66,7 +66,7 @@ return [
 
     'services' => [
         'events' => [
-            'mautic.contactsource.subscriber.stat' => [
+            'mautic.contactsource.subscriber.stat'          => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\StatSubscriber',
                 'arguments' => [
                     'mautic.contactsource.model.contactsource',
@@ -85,32 +85,32 @@ return [
                     'mautic.contactsource.model.contactsource',
                 ],
             ],
-            'mautic.contactsource.stats.subscriber' => [
+            'mautic.contactsource.stats.subscriber'         => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\StatsSubscriber',
                 'arguments' => [
                     'doctrine.orm.entity_manager',
                 ],
             ],
         ],
-        'forms' => [
+        'forms'  => [
             'mautic.contactsource.form.type.contactsourceshow_list' => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Type\ContactSourceShowType',
                 'arguments' => 'router',
                 'alias'     => 'contactsourceshow_list',
             ],
-            'mautic.contactsource.form.type.contactsource_list' => [
+            'mautic.contactsource.form.type.contactsource_list'     => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Type\ContactSourceListType',
                 'arguments' => 'mautic.contactsource.model.contactsource',
                 'alias'     => 'contactsource_list',
             ],
-            'mautic.contactsource.form.type.contactsource' => [
+            'mautic.contactsource.form.type.contactsource'          => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Type\ContactSourceType',
                 'alias'     => 'contactsource',
                 'arguments' => 'mautic.security',
             ],
         ],
         'models' => [
-            'mautic.contactsource.model.contactsource' => [
+            'mautic.contactsource.model.contactsource'     => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel',
                 'arguments' => [
                     'mautic.form.model.form',
@@ -120,8 +120,8 @@ return [
                     'mautic.lead.model.lead',
                 ],
             ],
-            'mautic.contactsource.model.api' => [
-                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\Api',
+            'mautic.contactsource.model.api'               => [
+                'class' => 'MauticPlugin\MauticContactSourceBundle\Model\Api',
             ],
             'mautic.contactsource.model.campaign_settings' => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\CampaignSettings',
@@ -129,7 +129,7 @@ return [
                     'mautic.contactsource.model.contactsource',
                 ],
             ],
-            'mautic.contactsource.model.campaign_event' => [
+            'mautic.contactsource.model.campaign_event'    => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\CampaignEventModel',
                 'arguments' => [
                     'mautic.helper.ip_lookup',
@@ -141,8 +141,8 @@ return [
                     'mautic.factory',
                 ],
             ],
-            'mautic.contactsource.model.cache' => [
-                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\Cache',
+            'mautic.contactsource.model.cache'             => [
+                'class' => 'MauticPlugin\MauticContactSourceBundle\Model\Cache',
             ],
         ],
     ],

@@ -8,7 +8,7 @@
  *
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
-if ($tmpl == 'index') {
+if ('index' == $tmpl) {
     $view->extend('MauticContactSourceBundle:ContactSource:index.html.php');
 }
 ?>
@@ -84,7 +84,7 @@ if ($tmpl == 'index') {
                             [
                                 'item'            => $item,
                                 'templateButtons' => [
-                                    'edit' => $view['security']->hasEntityAccess(
+                                    'edit'   => $view['security']->hasEntityAccess(
                                         $permissions['plugin:contactsource:items:editown'],
                                         $permissions['plugin:contactsource:items:editother'],
                                         $item->getCreatedBy()
@@ -96,14 +96,17 @@ if ($tmpl == 'index') {
                                         $item->getCreatedBy()
                                     ),
                                 ],
-                                'routeBase' => 'contactsource',
+                                'routeBase'       => 'contactsource',
                             ]
                         );
                         ?>
                     </td>
                     <td>
                         <div>
-                            <?php echo $view->render('MauticCoreBundle:Helper:publishstatus_icon.html.php', ['item' => $item, 'model' => 'contactsource']); ?>
+                            <?php echo $view->render(
+                                'MauticCoreBundle:Helper:publishstatus_icon.html.php',
+                                ['item' => $item, 'model' => 'contactsource']
+                            ); ?>
                             <a data-toggle="ajax" href="<?php echo $view['router']->path(
                                 'mautic_contactsource_action',
                                 ['objectId' => $item->getId(), 'objectAction' => 'view']
@@ -119,9 +122,12 @@ if ($tmpl == 'index') {
                     </td>
                     <td class="visible-md visible-lg">
                         <?php $category = $item->getCategory(); ?>
-                        <?php $catName  = ($category) ? $category->getTitle() : $view['translator']->trans('mautic.core.form.uncategorized'); ?>
-                        <?php $color    = ($category) ? '#'.$category->getColor() : 'inherit'; ?>
-                        <span style="white-space: nowrap;"><span class="label label-default pa-4" style="border: 1px solid #d5d5d5; background: <?php echo $color; ?>;"> </span> <span><?php echo $catName; ?></span></span>
+                        <?php $catName  = ($category) ? $category->getTitle() : $view['translator']->trans(
+                            'mautic.core.form.uncategorized'
+                        ); ?>
+                        <?php $color = ($category) ? '#'.$category->getColor() : 'inherit'; ?>
+                        <span style="white-space: nowrap;"><span class="label label-default pa-4"
+                                                                 style="border: 1px solid #d5d5d5; background: <?php echo $color; ?>;"> </span> <span><?php echo $catName; ?></span></span>
                     </td>
                     <td class="visible-md visible-lg"><?php echo $item->getToken(); ?></td>
                     <td class="visible-md visible-lg"><?php echo $item->getId(); ?></td>
@@ -143,5 +149,8 @@ if ($tmpl == 'index') {
         ); ?>
     </div>
 <?php else: ?>
-    <?php echo $view->render('MauticCoreBundle:Helper:noresults.html.php', ['tip' => 'mautic.contactsource.noresults.tip']); ?>
+    <?php echo $view->render(
+        'MauticCoreBundle:Helper:noresults.html.php',
+        ['tip' => 'mautic.contactsource.noresults.tip']
+    ); ?>
 <?php endif; ?>

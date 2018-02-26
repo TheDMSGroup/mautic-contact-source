@@ -7,7 +7,7 @@ Mautic.contactsourceDocumentation = function () {
         mQuery('input[name="contactsource[documentation]"]').change(function () {
             var val = mQuery('input[name="contactsource[documentation]"]:checked').val(),
                 $target = mQuery('.description-public');
-            if (val === "1") {
+            if (val === '1') {
                 $target.removeClass('hide');
             }
             else {
@@ -15,8 +15,8 @@ Mautic.contactsourceDocumentation = function () {
             }
         }).first().parent().parent().find('label.active input:first').trigger('change');
 
-        // Hide the right column when Campaigns tab is open to give more room for
-        // table entry.
+        // Hide the right column when Campaigns tab is open to give more room
+        // for table entry.
         var activeTab = '#details';
         mQuery('.contactsource-tab').click(function () {
             var thisTab = mQuery(this).attr('href');

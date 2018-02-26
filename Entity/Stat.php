@@ -23,16 +23,23 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
 class Stat
 {
     // Used for querying stats
-    const TYPE_ACCEPT = 'accepted';
+    const TYPE_ACCEPT    = 'accepted';
+
     const TYPE_DUPLICATE = 'duplicate';
-    const TYPE_ERROR = 'error';
+
+    const TYPE_ERROR     = 'error';
+
     // const TYPE_FILTER = 'filtered';
     const TYPE_INVALID = 'invalid';
+
     // const TYPE_LIMITS = 'limited';
     const TYPE_QUEUED = 'queued';
+
     const TYPE_REJECT = 'rejected';
-    const TYPE_SCRUB = 'scrubbed';
-    const TYPE_SAVED = 'saved';
+
+    const TYPE_SCRUB  = 'scrubbed';
+
+    const TYPE_SAVED  = 'saved';
 
     /** @var int $id */
     private $id;
@@ -142,6 +149,7 @@ class Stat
 
     /**
      * @param $attribution
+     *
      * @return $this
      */
     public function setAttribution($attribution)
@@ -159,9 +167,9 @@ class Stat
         $result = [];
         try {
             $reflection = new \ReflectionClass(__CLASS__);
-            $result = $reflection->getConstants();
+            $result     = $reflection->getConstants();
         } catch (\ReflectionException $e) {
-        };
+        }
 
         return $result;
     }

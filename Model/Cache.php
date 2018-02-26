@@ -11,22 +11,20 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
+use Mautic\CoreBundle\Helper\PhoneNumberHelper;
 use Mautic\CoreBundle\Model\AbstractCommonModel;
-use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use MauticPlugin\MauticContactSourceBundle\Entity\Cache as CacheEntity;
-use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
-use Mautic\CoreBundle\Helper\PhoneNumberHelper;
-use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
+use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
+use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
 
 /**
- * Class Cache
- * @package MauticPlugin\MauticContactSourceBundle\Model
+ * Class Cache.
  */
 class Cache extends AbstractCommonModel
 {
-
     /** @var ContactSource $contactSource */
     protected $contactSource;
 
@@ -38,11 +36,12 @@ class Cache extends AbstractCommonModel
 
     /**
      * Create all necessary cache entities for the given Contact and Contact Source.
+     *
      * @throws \Exception
      */
     public function create()
     {
-        $entities = [];
+        $entities   = [];
         $entities[] = $this->new();
         if (count($entities)) {
             $this->getRepository()->saveEntities($entities);
@@ -95,12 +94,13 @@ class Cache extends AbstractCommonModel
 
     /**
      * @param $phone
+     *
      * @return string
      */
     private function phoneValidate($phone)
     {
         $result = null;
-        $phone = trim($phone);
+        $phone  = trim($phone);
         if (!empty($phone)) {
             if (!$this->phoneHelper) {
                 $this->phoneHelper = new PhoneNumberHelper();
@@ -158,15 +158,16 @@ class Cache extends AbstractCommonModel
     public function getDuplicateRules()
     {
         $jsonHelper = new JSONHelper();
-        $duplicate = $jsonHelper->decodeObject($this->contactSource->getDuplicate(), 'Duplicate');
+        $duplicate  = $jsonHelper->decodeObject($this->contactSource->getDuplicate(), 'Duplicate');
 
         return $this->mergeRules($duplicate);
     }
 
     /**
-     * Validate and merge the rules object (exclusivity/duplicate/limits)
+     * Validate and merge the rules object (exclusivity/duplicate/limits).
      *
      * @param $rules
+     *
      * @return array
      */
     private function mergeRules($rules)
@@ -180,12 +181,12 @@ class Cache extends AbstractCommonModel
                     && !empty($rule->duration)
                 ) {
                     $duration = $rule->duration;
-                    $scope = intval($rule->scope);
-                    $key = $duration.'-'.$scope;
+                    $scope    = intval($rule->scope);
+                    $key      = $duration.'-'.$scope;
                     if (!isset($newRules[$key])) {
-                        $newRules[$key] = [];
+                        $newRules[$key]             = [];
                         $newRules[$key]['matching'] = intval($rule->matching);
-                        $newRules[$key]['scope'] = $scope;
+                        $newRules[$key]['scope']    = $scope;
                         $newRules[$key]['duration'] = $duration;
                     } else {
                         $newRules[$key]['matching'] += intval($rule->matching);
@@ -228,7 +229,9 @@ class Cache extends AbstractCommonModel
 
     /**
      * @param ContactSource $contactSource
+     *
      * @return $this
+     *
      * @throws \Exception
      */
     public function setContactSource(ContactSource $contactSource)
@@ -237,5 +240,4 @@ class Cache extends AbstractCommonModel
 
         return $this;
     }
-
 }

@@ -15,8 +15,7 @@ use Mautic\CoreBundle\Controller\FormController;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Class ContactSourceController
- * @package MauticPlugin\MauticContactSourceBundle\Controller
+ * Class ContactSourceController.
  */
 class ContactSourceController extends FormController
 {
@@ -50,6 +49,7 @@ class ContactSourceController extends FormController
      * Generates new form and processes post data.
      *
      * @return array|\Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse|Response
+     *
      * @throws \Exception
      */
     public function newAction()
@@ -60,9 +60,11 @@ class ContactSourceController extends FormController
     /**
      * Generates edit form and processes post data.
      *
-     * @param $objectId
+     * @param      $objectId
      * @param bool $ignorePost
+     *
      * @return \Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse|Response
+     *
      * @throws \Exception
      */
     public function editAction($objectId, $ignorePost = false)
@@ -119,17 +121,18 @@ class ContactSourceController extends FormController
     /**
      * @param $args
      * @param $view
+     *
      * @return array
      */
     public function customizeViewArguments($args, $view)
     {
-        if ($view == 'view') {
+        if ('view' == $view) {
             /** @var \MauticPlugin\MauticContactSourceBundle\Entity\ContactSource $item */
             $item = $args['viewParameters']['item'];
 
             // For line graphs in the view
             $dateRangeValues = $this->request->get('daterange', []);
-            $dateRangeForm = $this->get('form.factory')->create(
+            $dateRangeForm   = $this->get('form.factory')->create(
                 'daterange',
                 $dateRangeValues,
                 [
@@ -137,7 +140,7 @@ class ContactSourceController extends FormController
                         'mautic_contactsource_action',
                         [
                             'objectAction' => 'view',
-                            'objectId' => $item->getId(),
+                            'objectId'     => $item->getId(),
                         ]
                     ),
                 ]
@@ -152,11 +155,10 @@ class ContactSourceController extends FormController
                 new \DateTime($dateRangeForm->get('date_to')->getData())
             );
 
-            $args['viewParameters']['auditlog'] = $this->getAuditlogs($item);
-            $args['viewParameters']['stats'] = $stats;
-            $args['viewParameters']['events'] = $model->getEngagements($item);
+            $args['viewParameters']['auditlog']      = $this->getAuditlogs($item);
+            $args['viewParameters']['stats']         = $stats;
+            $args['viewParameters']['events']        = $model->getEngagements($item);
             $args['viewParameters']['dateRangeForm'] = $dateRangeForm->createView();
-
         }
 
         return $args;
@@ -170,7 +172,7 @@ class ContactSourceController extends FormController
      */
     protected function getPostActionRedirectArguments(array $args, $action)
     {
-        $updateSelect = ($this->request->getMethod() == 'POST')
+        $updateSelect = ('POST' == $this->request->getMethod())
             ? $this->request->request->get('contactsource[updateSelect]', false, true)
             : $this->request->get(
                 'updateSelect',
@@ -180,13 +182,13 @@ class ContactSourceController extends FormController
             switch ($action) {
                 case 'new':
                 case 'edit':
-                    $passthrough = $args['passthroughVars'];
-                    $passthrough = array_merge(
+                    $passthrough             = $args['passthroughVars'];
+                    $passthrough             = array_merge(
                         $passthrough,
                         [
                             'updateSelect' => $updateSelect,
-                            'id' => $args['entity']->getId(),
-                            'name' => $args['entity']->getName(),
+                            'id'           => $args['entity']->getId(),
+                            'name'         => $args['entity']->getName(),
                         ]
                     );
                     $args['passthroughVars'] = $passthrough;
@@ -202,7 +204,7 @@ class ContactSourceController extends FormController
      */
     protected function getEntityFormOptions()
     {
-        $updateSelect = ($this->request->getMethod() == 'POST')
+        $updateSelect = ('POST' == $this->request->getMethod())
             ? $this->request->request->get('contactsource[updateSelect]', false, true)
             : $this->request->get(
                 'updateSelect',
@@ -218,8 +220,8 @@ class ContactSourceController extends FormController
      *
      * @param string $updateSelect HTML id of the select
      * @param object $entity
-     * @param string $nameMethod name of the entity method holding the name
-     * @param string $groupMethod name of the entity method holding the select group
+     * @param string $nameMethod   name of the entity method holding the name
+     * @param string $groupMethod  name of the entity method holding the select group
      *
      * @return array
      */
@@ -231,8 +233,8 @@ class ContactSourceController extends FormController
     ) {
         $options = [
             'updateSelect' => $updateSelect,
-            'id' => $entity->getId(),
-            'name' => $entity->$nameMethod(),
+            'id'           => $entity->getId(),
+            'name'         => $entity->$nameMethod(),
         ];
 
         return $options;

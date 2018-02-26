@@ -63,5 +63,4 @@ final class ContactSourceEvents
      * @var string
      */
     const TIMELINE_ON_GENERATE = 'mautic.contactsource_timeline_on_generate';
-
 }

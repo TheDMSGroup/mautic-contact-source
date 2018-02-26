@@ -14,15 +14,12 @@ namespace MauticPlugin\MauticContactSourceBundle\Model;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
-use MauticPlugin\MauticContactSourceBundle\Model\ApiPayload;
 
 /**
- * Class Attribution
- * @package MauticPlugin\MauticContactSourceBundle\Model
+ * Class Attribution.
  */
 class Attribution
 {
-
     /** @var ContactSource $contactSource */
     protected $contactSource;
 
@@ -32,18 +29,19 @@ class Attribution
     /** @var Contact */
     protected $contact;
 
-    /** @var double */
+    /** @var float */
     protected $newAttribution;
 
     /**
      * Attribution constructor.
+     *
      * @param ContactSource $contactSource
-     * @param Contact $contact
+     * @param Contact       $contact
      */
     public function __construct(ContactSource $contactSource, Contact $contact)
     {
         $this->contactSource = $contactSource;
-        $this->contact = $contact;
+        $this->contact       = $contact;
     }
 
     /**
@@ -59,19 +57,22 @@ class Attribution
      * This assumes the Payload was successfully delivered (valid = true).
      *
      * @return bool
+     *
      * @throws \Exception
      */
     public function applyAttribution()
     {
-        $update = false;
+        $update              = false;
         $originalAttribution = $this->contact->getFieldValue('attribution');
         $originalAttribution = !empty($originalAttribution) ? $originalAttribution : 0;
-        $newAttribution = 0;
+        $newAttribution      = 0;
 
         if ($this->payload) {
-
-            $jsonHelper = new JSONHelper();
-            $attributionSettings = $jsonHelper->decodeObject($this->contactSource->getAttributionSettings(), 'AttributionSettings');
+            $jsonHelper          = new JSONHelper();
+            $attributionSettings = $jsonHelper->decodeObject(
+                $this->contactSource->getAttributionSettings(),
+                'AttributionSettings'
+            );
 
             if ($attributionSettings && is_object(
                     $attributionSettings->mode
@@ -82,12 +83,11 @@ class Attribution
                 // Attempt to get this field value from the response operations.
                 $responseFieldValue = $this->payload->getAggregateResponseFieldValue($key);
                 if (!empty($responseFieldValue) && is_numeric($responseFieldValue)) {
-
                     // We have a value, apply sign.
                     $sign = isset($attributionSettings->mode->sign) ? $attributionSettings->mode->sign : '+';
-                    if ($sign == '+') {
+                    if ('+' == $sign) {
                         $newAttribution = abs($responseFieldValue);
-                    } elseif ($sign == '-') {
+                    } elseif ('-' == $sign) {
                         $newAttribution = abs($responseFieldValue) * -1;
                     } else {
                         $newAttribution = $responseFieldValue;
@@ -95,9 +95,9 @@ class Attribution
 
                     // Apply maths.
                     $math = isset($attributionSettings->mode->math) ? $attributionSettings->mode->math : null;
-                    if ($math == '/100') {
+                    if ('/100' == $math) {
                         $newAttribution = $newAttribution / 100;
-                    } elseif ($math == '*100') {
+                    } elseif ('*100' == $math) {
                         $newAttribution = $newAttribution * 100;
                     }
                     $update = true;
@@ -110,7 +110,7 @@ class Attribution
             $attributionDefault = $this->contactSource->getAttributionDefault();
             if (!empty($attributionDefault) && is_numeric($attributionDefault)) {
                 $newAttribution = $attributionDefault;
-                $update = true;
+                $update         = true;
             }
         }
 
@@ -138,6 +138,7 @@ class Attribution
 
     /**
      * @param $newAttribution
+     *
      * @return $this
      */
     public function setNewAttribution($newAttribution)

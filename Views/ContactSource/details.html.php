@@ -22,7 +22,7 @@ $view['slots']->set(
         [
             'item'            => $item,
             'templateButtons' => [
-                'edit' => $view['security']->hasEntityAccess(
+                'edit'   => $view['security']->hasEntityAccess(
                     $permissions['plugin:contactsource:items:editown'],
                     $permissions['plugin:contactsource:items:editother'],
                     $item->getCreatedBy()
@@ -33,10 +33,10 @@ $view['slots']->set(
                     $permissions['plugin:contactsource:items:deleteother'],
                     $item->getCreatedBy()
                 ),
-                'close' => $view['security']->isGranted('plugin:contactsource:items:view'),
+                'close'  => $view['security']->isGranted('plugin:contactsource:items:view'),
             ],
-            'routeBase' => 'contactsource',
-            'langVar'   => 'mautic.contactsource',
+            'routeBase'       => 'contactsource',
+            'langVar'         => 'mautic.contactsource',
         ]
     )
 );
@@ -56,7 +56,10 @@ $token = $item->getToken();
                         <div class="text-muted"><?php echo $item->getDescription(); ?></div>
                     </div>
                     <div class="col-xs-2 text-right">
-                        <?php echo $view->render('MauticCoreBundle:Helper:publishstatus_badge.html.php', ['entity' => $item]); ?>
+                        <?php echo $view->render(
+                            'MauticCoreBundle:Helper:publishstatus_badge.html.php',
+                            ['entity' => $item]
+                        ); ?>
                     </div>
                 </div>
             </div>
@@ -68,7 +71,10 @@ $token = $item->getToken();
                     <div class="panel shd-none mb-0">
                         <table class="table table-bordered table-striped mb-0">
                             <tbody>
-                            <?php echo $view->render('MauticCoreBundle:Helper:details.html.php', ['entity' => $item]); ?>
+                            <?php echo $view->render(
+                                'MauticCoreBundle:Helper:details.html.php',
+                                ['entity' => $item]
+                            ); ?>
                             </tbody>
                         </table>
                     </div>
@@ -81,7 +87,9 @@ $token = $item->getToken();
             <!-- form detail collapseable toggler -->
             <div class="hr-expand nm">
                 <span data-toggle="tooltip" title="<?php echo $view['translator']->trans('mautic.core.details'); ?>">
-                    <a href="javascript:void(0)" class="arrow text-muted collapsed" data-toggle="collapse" data-target="#contactsource-details"><span class="caret"></span> <?php echo $view['translator']->trans(
+                    <a href="javascript:void(0)" class="arrow text-muted collapsed" data-toggle="collapse"
+                       data-target="#contactsource-details"><span
+                                class="caret"></span> <?php echo $view['translator']->trans(
                             'mautic.core.details'
                         ); ?></a>
                 </span>
@@ -129,7 +137,7 @@ $token = $item->getToken();
                         <?php echo $view['translator']->trans('mautic.contactsource.timeline.events'); ?>
                     </a>
                 </li>
-                <? /*
+                <?php /*
                 <li class="">
                     <a href="#auditlog-container" role="tab" data-toggle="tab">
                     <span class="label label-primary mr-sm" id="AuditLogCount">
@@ -150,9 +158,9 @@ $token = $item->getToken();
                     <?php echo $view->render(
                         'MauticContactSourceBundle:Timeline:list.html.php',
                         [
-                            'events' => $events,
+                            'events'        => $events,
                             'contactSource' => $item,
-                            'tmpl' => 'index',
+                            'tmpl'          => 'index',
                         ]
                     ); ?>
                 </div>
@@ -188,20 +196,25 @@ $token = $item->getToken();
             <div class="pa-md">
                 <div class="panel bg-info bg-light-lg bdr-w-0 mb-0">
                     <div class="panel-body">
-                        <h5 class="fw-sb mb-sm"><?php echo $view['translator']->trans('mautic.contactsource.form.token'); ?></h5>
+                        <h5 class="fw-sb mb-sm"><?php echo $view['translator']->trans(
+                                'mautic.contactsource.form.token'
+                            ); ?></h5>
                         <p class="mb-sm"><?php echo $token; ?></p>
                     </div>
                 </div>
             </div>
 
             <hr class="hr-w-2" style="width:50%">
-        <? endif; ?>
+        <?php endif; ?>
         <!--/ form HTML -->
 
         <div class="panel bg-transparent shd-none bdr-rds-0 bdr-w-0 mb-0">
 
             <!-- recent activity -->
-            <?php echo $view->render('MauticCoreBundle:Helper:recentactivity.html.php', ['logs' => $auditlog['events']]); ?>
+            <?php echo $view->render(
+                'MauticCoreBundle:Helper:recentactivity.html.php',
+                ['logs' => $auditlog['events']]
+            ); ?>
 
         </div>
     </div>

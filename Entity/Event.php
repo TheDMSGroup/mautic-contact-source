@@ -16,8 +16,7 @@ use Mautic\CoreBundle\Doctrine\Mapping\ClassMetadataBuilder;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 
 /**
- * Class Event
- * @package MauticPlugin\MauticContactSourceBundle\Entity
+ * Class Event.
  */
 class Event
 {
@@ -66,7 +65,7 @@ class Event
     public function __construct()
     {
         $this->dateAdded = new \Datetime();
-        $this->type = 'undefined';
+        $this->type      = 'undefined';
     }
 
     /**
@@ -171,6 +170,7 @@ class Event
 
     /**
      * @param $contactSource
+     *
      * @return $this
      */
     public function setContactSource($contactSource)
@@ -190,6 +190,7 @@ class Event
 
     /**
      * @param $logs
+     *
      * @return $this
      */
     public function setLogs($logs)
@@ -209,6 +210,7 @@ class Event
 
     /**
      * @param $message
+     *
      * @return $this
      */
     public function setMessage($message)
@@ -228,6 +230,7 @@ class Event
 
     /**
      * @param $dateAdded
+     *
      * @return $this
      */
     public function setDateAdded($dateAdded)
@@ -236,6 +239,4 @@ class Event
 
         return $this;
     }
-
-
 }

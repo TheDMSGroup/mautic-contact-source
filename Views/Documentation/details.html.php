@@ -18,13 +18,13 @@
 
     <?php if (isset($stylesheets) && is_array($stylesheets)) : ?>
         <?php foreach ($stylesheets as $css): ?>
-            <link rel="stylesheet" type="text/css" href="<?php echo $css; ?>" />
+            <link rel="stylesheet" type="text/css" href="<?php echo $css; ?>"/>
         <?php endforeach; ?>
     <?php endif; ?>
 
 </head>
 <body>
 <?php echo $content ?? null; ?>
-<?php // @todo - Documentation screen to go here. ?>
+<?php // @todo - Documentation screen to go here.?>
 </body>
 </html>

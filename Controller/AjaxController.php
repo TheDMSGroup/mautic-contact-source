@@ -14,9 +14,6 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller;
 use Mautic\CampaignBundle\Entity\CampaignRepository;
 use Mautic\CoreBundle\Controller\AjaxController as CommonAjaxController;
 use Mautic\CoreBundle\Controller\AjaxLookupControllerTrait;
-use Mautic\CoreBundle\Helper\InputHelper;
-use Symfony\Component\HttpFoundation\Request;
-use MauticPlugin\MauticContactSourceBundle\Integration\SourceIntegration;
 
 /**
  * Class AjaxController.
@@ -29,6 +26,7 @@ class AjaxController extends CommonAjaxController
      * Retrieve a list of campaigns for use in drop-downs.
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse
+     *
      * @throws \Exception
      */
     protected function getCampaignListAction()
@@ -36,12 +34,12 @@ class AjaxController extends CommonAjaxController
         $output = [];
         /** @var CampaignRepository */
         $campaignRepository = $this->get('mautic.campaign.model.campaign')->getRepository();
-        $campaigns = $campaignRepository->getEntities();
+        $campaigns          = $campaignRepository->getEntities();
         foreach ($campaigns as $campaign) {
-            $published = $campaign->isPublished();
-            $name = $campaign->getName();
-            $category = $campaign->getCategory();
-            $id = $campaign->getId();
+            $published                           = $campaign->isPublished();
+            $name                                = $campaign->getName();
+            $category                            = $campaign->getCategory();
+            $id                                  = $campaign->getId();
             $output[$name.'_'.$category.'_'.$id] = [
                 'value' => $id,
                 'title' => $name.($category ? ' - '.$category : '').(!$published ? ' (unpublished)' : ''),

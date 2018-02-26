@@ -15,37 +15,31 @@ use Exception;
 
 /**
  * Class FilterHelper.
- * @package MauticPlugin\MauticContactSourceBundle\Helper
- *
- * Based loosely on https://github.com/josedacosta/jQueryQueryBuilderBundle
- *
- * This is a simplified jQuery Query Builder parser for when the context is a single entity.
  */
 class FilterHelper
 {
-
     protected $errors = [];
 
     protected $operators = [
-        'equal' => ['accept_values' => true, 'apply_to' => ['string', 'number', 'datetime']],
-        'not_equal' => ['accept_values' => true, 'apply_to' => ['string', 'number', 'datetime']],
-        'in' => ['accept_values' => true, 'apply_to' => ['string', 'number', 'datetime']],
-        'not_in' => ['accept_values' => true, 'apply_to' => ['string', 'number', 'datetime']],
-        'less' => ['accept_values' => true, 'apply_to' => ['number', 'datetime']],
-        'less_or_equal' => ['accept_values' => true, 'apply_to' => ['number', 'datetime']],
-        'greater' => ['accept_values' => true, 'apply_to' => ['number', 'datetime']],
+        'equal'            => ['accept_values' => true, 'apply_to' => ['string', 'number', 'datetime']],
+        'not_equal'        => ['accept_values' => true, 'apply_to' => ['string', 'number', 'datetime']],
+        'in'               => ['accept_values' => true, 'apply_to' => ['string', 'number', 'datetime']],
+        'not_in'           => ['accept_values' => true, 'apply_to' => ['string', 'number', 'datetime']],
+        'less'             => ['accept_values' => true, 'apply_to' => ['number', 'datetime']],
+        'less_or_equal'    => ['accept_values' => true, 'apply_to' => ['number', 'datetime']],
+        'greater'          => ['accept_values' => true, 'apply_to' => ['number', 'datetime']],
         'greater_or_equal' => ['accept_values' => true, 'apply_to' => ['number', 'datetime']],
-        'between' => ['accept_values' => true, 'apply_to' => ['number', 'datetime']],
-        'begins_with' => ['accept_values' => true, 'apply_to' => ['string']],
-        'not_begins_with' => ['accept_values' => true, 'apply_to' => ['string']],
-        'contains' => ['accept_values' => true, 'apply_to' => ['string']],
-        'not_contains' => ['accept_values' => true, 'apply_to' => ['string']],
-        'ends_with' => ['accept_values' => true, 'apply_to' => ['string']],
-        'not_ends_with' => ['accept_values' => true, 'apply_to' => ['string']],
-        'is_empty' => ['accept_values' => false, 'apply_to' => ['string']],
-        'is_not_empty' => ['accept_values' => false, 'apply_to' => ['string']],
-        'is_null' => ['accept_values' => false, 'apply_to' => ['string', 'number', 'datetime']],
-        'is_not_null' => ['accept_values' => false, 'apply_to' => ['string', 'number', 'datetime']],
+        'between'          => ['accept_values' => true, 'apply_to' => ['number', 'datetime']],
+        'begins_with'      => ['accept_values' => true, 'apply_to' => ['string']],
+        'not_begins_with'  => ['accept_values' => true, 'apply_to' => ['string']],
+        'contains'         => ['accept_values' => true, 'apply_to' => ['string']],
+        'not_contains'     => ['accept_values' => true, 'apply_to' => ['string']],
+        'ends_with'        => ['accept_values' => true, 'apply_to' => ['string']],
+        'not_ends_with'    => ['accept_values' => true, 'apply_to' => ['string']],
+        'is_empty'         => ['accept_values' => false, 'apply_to' => ['string']],
+        'is_not_empty'     => ['accept_values' => false, 'apply_to' => ['string']],
+        'is_null'          => ['accept_values' => false, 'apply_to' => ['string', 'number', 'datetime']],
+        'is_not_null'      => ['accept_values' => false, 'apply_to' => ['string', 'number', 'datetime']],
     ];
 
     public function getErrors()
@@ -57,14 +51,15 @@ class FilterHelper
      * Use a jQuery Query Builder JSON to evaluate the context.
      *
      * @param string $json
-     * @param array $context An array of data to be evaluated.
-     * @return bool Return true if the context passes the filters of $json.
+     * @param array  $context an array of data to be evaluated
+     *
+     * @return bool return true if the context passes the filters of $json
+     *
      * @throws Exception
      * @throws \Exception
      */
     public function filter(string $json, array $context = [])
     {
-
         $query = $this->decodeJSON($json);
         if (!isset($query->rules) || !is_array($query->rules) || count($query->rules) < 1) {
             $this->setError('No rules to evaluate.');
@@ -76,10 +71,12 @@ class FilterHelper
     }
 
     /**
-     * Decode the given JSON
+     * Decode the given JSON.
      *
      * @param string incoming json
+     *
      * @throws \Exception
+     *
      * @return stdClass
      */
     private function decodeJSON($json)
@@ -103,16 +100,18 @@ class FilterHelper
     /**
      * Called by parse, loops through all the rules to find out if nested or not.
      *
-     * @param array $rules
-     * @param array $context
+     * @param array  $rules
+     * @param array  $context
      * @param string $condition
+     *
      * @return bool
+     *
      * @throws Exception
      * @throws \Exception
      */
     protected function loopThroughRules(array $rules, array $context = [], $condition = 'AND')
     {
-        $result = true;
+        $result    = true;
         $condition = strtolower($condition);
         $this->validateCondition($condition);
         foreach ($rules as $rule) {
@@ -121,10 +120,10 @@ class FilterHelper
                 $result = $this->loopThroughRules($rule->rules, $context, $condition);
             }
             // Conditions upon which we can stop evaluation.
-            if ($condition == 'and' && !$result) {
+            if ('and' == $condition && !$result) {
                 break;
             } else {
-                if ($condition == 'or' && $result) {
+                if ('or' == $condition && $result) {
                     break;
                 }
             }
@@ -137,14 +136,16 @@ class FilterHelper
      * Make sure that a condition is either 'or' or 'and'.
      *
      * @param $condition
+     *
      * @return string
+     *
      * @throws \Exception
      */
     protected function validateCondition($condition)
     {
         $condition = trim(strtolower($condition));
 
-        if ($condition !== 'and' && $condition !== 'or') {
+        if ('and' !== $condition && 'or' !== $condition) {
             throw new \Exception("Condition can only be one of: 'and', 'or'.");
         }
 
@@ -155,8 +156,10 @@ class FilterHelper
      * Evaluate: The money maker!
      *
      * @param stdClass $rule
-     * @param array $context
+     * @param array    $context
+     *
      * @return bool
+     *
      * @throws Exception
      * @throws \Exception
      */
@@ -192,7 +195,9 @@ class FilterHelper
      * Ensure that the value is correct for the rule, try and set it if it's not.
      *
      * @param stdClass $rule
+     *
      * @return mixed|null|string
+     *
      * @throws Exception
      * @throws \Exception
      */
@@ -213,7 +218,9 @@ class FilterHelper
      * throws an exception if the rule is not correct.
      *
      * @param stdClass $rule
+     *
      * @return mixed
+     *
      * @throws \Exception
      */
     private function getRuleValue($rule)
@@ -227,10 +234,11 @@ class FilterHelper
 
     /**
      * Check if a given rule is correct.
-     * Just before making a query for a rule, we want to make sure that the field, operator and value are set
+     * Just before making a query for a rule, we want to make sure that the field, operator and value are set.
      *
      * @param stdClass $rule
-     * @return bool true if values are correct.
+     *
+     * @return bool true if values are correct
      */
     protected function checkRuleCorrect($rule)
     {
@@ -248,11 +256,12 @@ class FilterHelper
      * Give back the correct value when we don't accept one.
      *
      * @param stdClass $rule
+     *
      * @return null|string
      */
     protected function operatorValueWhenNotAcceptingOne($rule)
     {
-        if ($rule->operator == 'is_empty' || $rule->operator == 'is_not_empty') {
+        if ('is_empty' == $rule->operator || 'is_not_empty' == $rule->operator) {
             return '';
         }
 
@@ -262,10 +271,12 @@ class FilterHelper
     /**
      * Ensure that the value for a field is correct.
      *
-     * @param string $operator
+     * @param string   $operator
      * @param stdClass $rule
-     * @param $value
+     * @param          $value
+     *
      * @return mixed
+     *
      * @throws \Exception
      */
     protected function getCorrectValue($operator, $rule, $value)
@@ -279,6 +290,7 @@ class FilterHelper
      * Determine if an operator (LIKE/IN) requires an array.
      *
      * @param $operator
+     *
      * @return bool
      */
     protected function operatorRequiresArray($operator)
@@ -287,12 +299,14 @@ class FilterHelper
     }
 
     /**
-     * Enforce whether the value for a given field is the correct type
+     * Enforce whether the value for a given field is the correct type.
      *
-     * @param bool $requireArray value must be an array
-     * @param mixed $value the value we are checking against
-     * @param string $field the field that we are enforcing
+     * @param bool   $requireArray value must be an array
+     * @param mixed  $value        the value we are checking against
+     * @param string $field        the field that we are enforcing
+     *
      * @return mixed value after enforcement
+     *
      * @throws \Exception if value is not a correct type
      */
     protected function enforceArrayOrString($requireArray, $value, $field)
@@ -310,9 +324,11 @@ class FilterHelper
      * Ensure that a given field is an array if required.
      *
      * @see enforceArrayOrString
-     * @param boolean $requireArray
-     * @param $value
+     *
+     * @param bool   $requireArray
+     * @param        $value
      * @param string $field
+     *
      * @throws \Exception
      */
     protected function checkFieldIsAnArray($requireArray, $value, $field)
@@ -327,14 +343,17 @@ class FilterHelper
      * In some instances, and array may be given when we want a string.
      *
      * @see enforceArrayOrString
+     *
      * @param string $field
-     * @param $value
+     * @param        $value
+     *
      * @return mixed
+     *
      * @throws \Exception
      */
     protected function convertArrayToFlatValue($field, $value)
     {
-        if (count($value) !== 1) {
+        if (1 !== count($value)) {
             throw new \Exception("Field ($field) should not be an array, but it is.");
         }
 
@@ -345,7 +364,8 @@ class FilterHelper
      * Take a (potentially nested) field name and get the literal value from the contextual array.
      *
      * @param stdClass $rule
-     * @param $context
+     * @param          $context
+     *
      * @return bool
      */
     protected function getValueFromContext($rule, $context)
@@ -363,15 +383,17 @@ class FilterHelper
     }
 
     /**
-     * Convert an incomming rule from jQuery QueryBuilder to the Doctrine Querybuilder
+     * Convert an incomming rule from jQuery QueryBuilder to the Doctrine Querybuilder.
      *
      * (This used to be part of evaluate, where the name made sense, but I pulled it
      * out to reduce some duplicated code inside JoinSupportingQueryBuilder)
      *
      * @param stdClass $rule
-     * @param $contextValue
+     * @param          $contextValue
      * @param stdClass $ruleValue
+     *
      * @return bool
+     *
      * @throws \Exception
      */
     protected function evaluateRuleAgainstContext($rule, $contextValue, $ruleValue)
@@ -391,10 +413,10 @@ class FilterHelper
                 return $contextValue == $min || $contextValue == $max || ($contextValue > $min && $contextValue < $max);
                 break;
             case 'is_null':
-                return $contextValue === null;
+                return null === $contextValue;
                 break;
             case 'is_not_null':
-                return $contextValue !== null;
+                return null !== $contextValue;
                 break;
             case 'equal':
                 return $contextValue == $ruleValue;
@@ -415,16 +437,16 @@ class FilterHelper
                 return $contextValue >= $ruleValue;
                 break;
             case 'begins_with':
-                return strpos($contextValue, $ruleValue) === 0;
+                return 0 === strpos($contextValue, $ruleValue);
                 break;
             case 'not_begins_with':
-                return strpos($contextValue, $ruleValue) !== 0;
+                return 0 !== strpos($contextValue, $ruleValue);
                 break;
             case 'contains':
                 return strpos($contextValue, $ruleValue) > -1;
                 break;
             case 'not_contains':
-                return strpos($contextValue, $ruleValue) === false;
+                return false === strpos($contextValue, $ruleValue);
                 break;
             case 'ends_with':
                 return substr($contextValue, -strlen($ruleValue)) === $ruleValue;
@@ -445,6 +467,7 @@ class FilterHelper
      * Determine if we have nested rules to evaluate.
      *
      * @param stdClass $rule
+     *
      * @return bool
      */
     protected function isNested($rule)
@@ -455,5 +478,4 @@ class FilterHelper
 
         return false;
     }
-
 }

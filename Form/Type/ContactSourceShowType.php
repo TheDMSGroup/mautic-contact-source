@@ -18,8 +18,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 /**
- * Class ContactSourceShowType
- * @package MauticPlugin\MauticContactSourceBundle\Form\Type
+ * Class ContactSourceShowType.
  */
 class ContactSourceShowType extends AbstractType
 {
@@ -46,9 +45,9 @@ class ContactSourceShowType extends AbstractType
             'contactsource',
             'contactsource_list',
             [
-                'label'      => 'mautic.contactsource.contactsourceitem.selectitem',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
+                'label'       => 'mautic.contactsource.contactsourceitem.selectitem',
+                'label_attr'  => ['class' => 'control-label'],
+                'attr'        => [
                     'class'    => 'form-control',
                     'tooltip'  => 'mautic.contactsource.contactsourceitem.selectitem_descr',
                     'onchange' => 'Mautic.disabledContactSourceActions()',
@@ -77,12 +76,12 @@ class ContactSourceShowType extends AbstractType
                 'newContactSourceButton',
                 'button',
                 [
-                    'attr' => [
+                    'attr'  => [
                         'class'   => 'btn btn-primary btn-nospin',
                         'onclick' => 'Mautic.loadNewWindow({
                         "windowUrl": "'.$windowUrl.'"
                     })',
-                        'icon' => 'fa fa-plus',
+                        'icon'    => 'fa fa-plus',
                     ],
                     'label' => 'mautic.contactsource.show.new.item',
                 ]
@@ -103,7 +102,7 @@ class ContactSourceShowType extends AbstractType
                 'editContactSourceButton',
                 'button',
                 [
-                    'attr' => [
+                    'attr'  => [
                         'class'    => 'btn btn-primary btn-nospin',
                         'onclick'  => 'Mautic.loadNewWindow(Mautic.standardContactSourceUrl({"windowUrl": "'.$windowUrlEdit.'"}))',
                         'disabled' => !isset($options['data']['contactsource']),

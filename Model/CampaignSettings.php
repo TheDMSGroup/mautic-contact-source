@@ -11,7 +11,6 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
-use Mautic\CoreBundle\Helper\CoreParametersHelper;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
@@ -19,12 +18,9 @@ use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
 /**
  * Class CampaignSettings
  * For business logic regarding the Campaign Settings field within the ContactSource model.
- *
- * @package MauticPlugin\MauticContactSourceBundle\Model
  */
 class CampaignSettings
 {
-
     /** @var ContactSource */
     protected $contactSource;
 
@@ -45,6 +41,7 @@ class CampaignSettings
 
     /**
      * CampaignSettings constructor.
+     *
      * @param contactSourceModel $contactSourceModel
      */
     public function __construct(
@@ -83,7 +80,9 @@ class CampaignSettings
 
     /**
      * @param ContactSource $contactSource
+     *
      * @return $this
+     *
      * @throws \Exception
      */
     public function setContactSource(ContactSource $contactSource)
@@ -98,7 +97,9 @@ class CampaignSettings
      * Take the stored JSON string and parse for use.
      *
      * @param string $campaignSettings
+     *
      * @return mixed
+     *
      * @throws \Exception
      */
     private function setCampaignSettings(string $campaignSettings)
@@ -107,16 +108,17 @@ class CampaignSettings
             throw new \Exception('Campaign Settings are blank.');
         }
 
-        $jsonHelper = new JSONHelper();
+        $jsonHelper             = new JSONHelper();
         $this->campaignSettings = $jsonHelper->decodeObject($campaignSettings, 'CampaignSettings');
-        
+
         return $this;
     }
 
     /**
      * @return array
      */
-    public function getCampaignSettings() {
+    public function getCampaignSettings()
+    {
         return $this->campaignSettings;
     }
 
@@ -124,9 +126,11 @@ class CampaignSettings
      * Returns an array of campaign objects (as multiple can match).
      *
      * @param $campaignId
+     *
      * @return array
      */
-    public function getCampaignSettingsById($campaignId) {
+    public function getCampaignSettingsById($campaignId)
+    {
         $results = [];
         if (
             $campaignId
@@ -141,6 +145,7 @@ class CampaignSettings
                 }
             }
         }
+
         return $results;
     }
 }

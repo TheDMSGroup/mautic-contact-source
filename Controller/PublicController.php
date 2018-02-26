@@ -11,18 +11,16 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
+use FOS\RestBundle\Util\Codes;
 use Mautic\CoreBundle\Controller\CommonController;
 use Symfony\Component\HttpFoundation\Request;
-use FOS\RestBundle\Util\Codes;
-use MauticPlugin\MauticContactSourceBundle\Model\Api;
 use Symfony\Component\HttpFoundation\Response;
-
 
 class PublicController extends CommonController
 {
     // @todo - Add documentation autogenerator.
-    public function getDocumentationAction($sourceId = null, $campaignId = null){
-
+    public function getDocumentationAction($sourceId = null, $campaignId = null)
+    {
         // @todo - Check Source existence and published status.
 
         // @todo - Check if documentation is turned on, if not 403.
@@ -40,7 +38,7 @@ class PublicController extends CommonController
         return $this->render(
             'MauticContactSourceBundle:Documentation:details.html.php',
             [
-                'documentation' => 'documentation to go here'
+                'documentation' => 'documentation to go here',
             ]
         );
     }
@@ -53,24 +51,23 @@ class PublicController extends CommonController
         $object,
         $action
     ) {
-
         /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
         $ApiModel = $this->get('mautic.contactsource.model.api')
             ->setRequest($request)
             ->setContainer($this->container)
-            ->setSourceId((int)$sourceId)
-            ->setCampaignId((int)$campaignId)
-            ->setDebug((bool)$request->headers->get('debug'))
+            ->setSourceId((int) $sourceId)
+            ->setCampaignId((int) $campaignId)
+            ->setDebug((bool) $request->headers->get('debug'))
             ->handleInputPublic();
 
         $result = $ApiModel->getResult(true);
 
         $response = new Response('', $result['statusCode'] ? $result['statusCode'] : Codes::HTTP_OK);
+
         return $this->render(
             'MauticContactSourceBundle:Documentation:details.html.php',
             $result,
             $response
         );
     }
-
 }

@@ -11,24 +11,20 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Helper;
 
-
 use Mautic\CoreBundle\Translation\Translator;
-use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\LeadEventLog as ContactEventLog;
 use Mautic\LeadBundle\Entity\LeadEventLogRepository as ContactEventLogRepository;
+use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 
 /**
- * Class ContactEventLogHelper
+ * Class ContactEventLogHelper.
  *
- * @todo - To be used to log where a contact was sourced (imported) when it has been created by a contact source.
- *
- * @package MauticPlugin\MauticContactSourceBundle\Helper
+ * @todo    - To be used to log where a contact was sourced (imported) when it has been created by a contact source.
  */
 class ContactEventLogHelper
 {
-
     /** @var ContactModel */
     protected $contactModel;
 
@@ -40,8 +36,8 @@ class ContactEventLogHelper
 
     public function __construct(ContactModel $contactModel, Translator $translator)
     {
-        $this->contactModel = $contactModel;
-        $this->translator = $translator;
+        $this->contactModel        = $contactModel;
+        $this->translator          = $translator;
         $this->ContactEventLogRepo = $contactModel->getEventLogRepository();
     }
 
@@ -49,7 +45,7 @@ class ContactEventLogHelper
      * Save log about errored line.
      *
      * @param ContactEventLog $eventLog
-     * @param string $errorMessage
+     * @param string          $errorMessage
      */
     public function logError(ContactEventLog $eventLog, $errorMessage)
     {
@@ -63,8 +59,9 @@ class ContactEventLogHelper
      * Initialize ContactEventLog object and configure it as the import event.
      *
      * @param ContactSource $source
-     * @param Contact $contact
-     * @param $lineNumber
+     * @param Contact       $contact
+     * @param               $lineNumber
+     *
      * @return ContactEventLog
      */
     public function initEventLog(ContactSource $source, Contact $contact, $lineNumber)
@@ -84,6 +81,4 @@ class ContactEventLogHelper
 
         return $eventLog;
     }
-
-
 }

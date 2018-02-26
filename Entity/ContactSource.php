@@ -43,7 +43,7 @@ class ContactSource extends FormEntity
     /** @var string */
     private $token;
 
-    /** @var boolean */
+    /** @var bool */
     private $documentation;
 
     /** @var string */
@@ -80,10 +80,9 @@ class ContactSource extends FormEntity
         $metadata->addPropertyConstraint(
             'token',
             new NotBlank(
-                ['message' => 'mautic.contactsource.error.token',]
+                ['message' => 'mautic.contactsource.error.token']
             )
         );
-
     }
 
     /**
@@ -107,7 +106,6 @@ class ContactSource extends FormEntity
         $builder->addField('documentation', 'boolean');
 
         $builder->addNullableField('campaign_settings', 'text');
-
     }
 
     /**
@@ -164,7 +162,7 @@ class ContactSource extends FormEntity
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function getDocumentation()
     {
@@ -172,7 +170,7 @@ class ContactSource extends FormEntity
     }
 
     /**
-     * @param boolean $documentation
+     * @param bool $documentation
      *
      * @return $this
      */
@@ -354,5 +352,4 @@ class ContactSource extends FormEntity
 
         return $this;
     }
-
 }

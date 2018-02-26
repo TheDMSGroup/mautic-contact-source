@@ -12,17 +12,17 @@
 namespace MauticPlugin\MauticContactSourceBundle\Helper;
 
 /**
- * Class JSONHelper
- * @package MauticPlugin\MauticContactSourceBundle\Helper
+ * Class JSONHelper.
  */
 class JSONHelper
 {
-
     /**
-     * @param $string
+     * @param        $string
      * @param string $fieldName
-     * @param bool $assoc
+     * @param bool   $assoc
+     *
      * @return mixed
+     *
      * @throws \Exception
      */
     public function decodeArray($string, $fieldName = 'Unknown', $assoc = false)
@@ -32,16 +32,18 @@ class JSONHelper
         }
         $array = self::decode(!empty($string) ? $string : '[]', $fieldName, $assoc);
         if (!$array || !is_array($array)) {
-            throw new \Exception('The field ' . $fieldName . ' is not a JSON array as expected.');
+            throw new \Exception('The field '.$fieldName.' is not a JSON array as expected.');
         }
 
         return $array;
     }
 
     /**
-     * @param $string
+     * @param        $string
      * @param string $fieldName
+     *
      * @return mixed
+     *
      * @throws \Exception
      */
     public function decodeObject($string, $fieldName = 'Unknown')
@@ -51,21 +53,25 @@ class JSONHelper
         }
         $object = self::decode($string, $fieldName);
         if (!$object || !is_object($object)) {
-            throw new \Exception('The field ' . $fieldName . ' is not a JSON object as expected.');
+            throw new \Exception('The field '.$fieldName.' is not a JSON object as expected.');
         }
+
         return $object;
     }
 
     /**
-     * @param $string
-     * @param $fieldName
+     * @param      $string
+     * @param      $fieldName
      * @param bool $assoc
+     *
      * @return mixed
+     *
      * @throws \Exception
      */
-    private function decode($string, $fieldName, $assoc = false) {
+    private function decode($string, $fieldName, $assoc = false)
+    {
         $jsonError = false;
-        $result = json_decode($string, $assoc);
+        $result    = json_decode($string, $assoc);
         switch (json_last_error()) {
             case JSON_ERROR_NONE:
                 break;
@@ -89,8 +95,9 @@ class JSONHelper
                 break;
         }
         if ($jsonError) {
-            throw new \Exception('JSON is invalid in field: ' . $fieldName .' JSON error: '.$jsonError);
+            throw new \Exception('JSON is invalid in field: '.$fieldName.' JSON error: '.$jsonError);
         }
+
         return $result;
     }
 }

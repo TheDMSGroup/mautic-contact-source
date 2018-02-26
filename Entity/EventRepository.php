@@ -16,8 +16,7 @@ use Mautic\CoreBundle\Entity\CommonRepository;
 use Mautic\LeadBundle\Entity\TimelineTrait;
 
 /**
- * Class EventRepository
- * @package MauticPlugin\MauticContactSourceBundle\Entity
+ * Class EventRepository.
  */
 class EventRepository extends CommonRepository
 {
@@ -26,9 +25,10 @@ class EventRepository extends CommonRepository
     /**
      * Fetch the base event data from the database.
      *
-     * @param $contactSourceId
-     * @param $eventType
+     * @param                $contactSourceId
+     * @param                $eventType
      * @param \DateTime|null $dateAdded
+     *
      * @return array
      */
     public function getEvents($contactSourceId, $eventType = null, \DateTime $dateAdded = null)
@@ -39,7 +39,7 @@ class EventRepository extends CommonRepository
 
         $expr = $q->expr()->eq('c.contactsource_id', ':contactSource');
         $q->where($expr)
-            ->setParameter('contactSource', (int)$contactSourceId);
+            ->setParameter('contactSource', (int) $contactSourceId);
 
         if ($dateAdded) {
             $expr->add(
@@ -54,13 +54,15 @@ class EventRepository extends CommonRepository
             );
             $q->setParameter('type', $eventType);
         }
+
         return $q->execute()->fetchAll();
     }
 
     /**
-     * @param $contactSourceId
-     * @param null $contactId
+     * @param       $contactSourceId
+     * @param null  $contactId
      * @param array $options
+     *
      * @return array
      */
     public function getEventsForTimeline($contactSourceId, $contactId = null, array $options = [])
@@ -76,7 +78,6 @@ class EventRepository extends CommonRepository
         )
             ->setParameter('contactSourceId', $contactSourceId);
 
-
         if ($eventType) {
             $query->andWhere(
                 $query->expr()->eq('c.type', ':type')
@@ -85,7 +86,7 @@ class EventRepository extends CommonRepository
         }
 
         if ($contactId) {
-            $query->andWhere('c.contact_id = '.(int)$contactId);
+            $query->andWhere('c.contact_id = '.(int) $contactId);
         }
 
         if (isset($options['search']) && $options['search']) {
@@ -99,7 +100,6 @@ class EventRepository extends CommonRepository
 
         return $this->getTimelineResults($query, $options, 'c.type', 'c.date_added', [], ['date_added']);
     }
-
 
     /**
      * Get a list of entities.

@@ -14,16 +14,15 @@ namespace MauticPlugin\MauticContactSourceBundle\Entity;
 use Mautic\CoreBundle\Entity\CommonRepository;
 
 /**
- * Class ContactSourceRepository
- * @package MauticPlugin\MauticContactSourceBundle\Entity
+ * Class ContactSourceRepository.
  */
 class ContactSourceRepository extends CommonRepository
 {
-
     /**
      * Get a list of entities.
      *
      * @param array $args
+     *
      * @return \Doctrine\ORM\Tools\Pagination\Paginator
      */
     public function getEntities(array $args = [])

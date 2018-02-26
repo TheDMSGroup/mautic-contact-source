@@ -20,7 +20,7 @@ $view['slots']->set(
             'templateButtons' => [
                 'new' => $permissions['plugin:contactsource:items:create'],
             ],
-            'routeBase' => 'contactsource',
+            'routeBase'       => 'contactsource',
         ]
     )
 );

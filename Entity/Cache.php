@@ -25,17 +25,16 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
  */
 class Cache
 {
-
     /** @var int $id */
     private $id;
 
     /** @var Contact $contact */
     private $contact;
 
-    /** @var integer $contactSource */
+    /** @var int $contactSource */
     private $contactSource;
 
-    /** @var integer $category */
+    /** @var int $category */
     private $category;
 
     /** @var string $email */
@@ -172,7 +171,6 @@ class Cache
         );
 
         $builder->setCustomRepositoryClass('MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository');
-
     }
 
     /**
@@ -424,7 +422,7 @@ class Cache
     }
 
     /**
-     * @return integer
+     * @return int
      */
     public function getCategory()
     {
@@ -432,7 +430,7 @@ class Cache
     }
 
     /**
-     * @param integer $category
+     * @param int $category
      *
      * @return $this
      */
@@ -482,5 +480,4 @@ class Cache
 
         return $this;
     }
-
 }

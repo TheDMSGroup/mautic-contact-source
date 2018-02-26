@@ -14,29 +14,32 @@ namespace MauticPlugin\MauticContactSourceBundle\Entity;
 use Mautic\CoreBundle\Entity\CommonRepository;
 use Mautic\CoreBundle\Helper\PhoneNumberHelper;
 use Mautic\LeadBundle\Entity\Lead as Contact;
-use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 
 /**
- * Class CacheRepository
- * @package MauticPlugin\MauticContactSourceBundle\Entity
+ * Class CacheRepository.
  */
 class CacheRepository extends CommonRepository
 {
-
     /**
      * Bitwise operators for $matching.
      */
     const MATCHING_EXPLICIT = 1;
-    const MATCHING_EMAIL = 2;
-    const MATCHING_PHONE = 4;
-    const MATCHING_MOBILE = 8;
-    const MATCHING_ADDRESS = 16;
+
+    const MATCHING_EMAIL    = 2;
+
+    const MATCHING_PHONE    = 4;
+
+    const MATCHING_MOBILE   = 8;
+
+    const MATCHING_ADDRESS  = 16;
 
     /**
      * Bitwise operators for $scope.
      */
-    const SCOPE_GLOBAL = 1;
+    const SCOPE_GLOBAL   = 1;
+
     const SCOPE_CATEGORY = 2;
+
     // For limits only:
     const SCOPE_UTM_SOURCE = 3;
 
@@ -47,10 +50,12 @@ class CacheRepository extends CommonRepository
      * Given a matching pattern and a contact, discern if there is a match in the cache.
      * Used for exclusivity and duplicate checking.
      *
-     * @param Contact $contact
+     * @param Contact       $contact
      * @param ContactSource $contactSource
-     * @param array $rules
+     * @param array         $rules
+     *
      * @return bool|mixed
+     *
      * @throws \Exception
      */
     public function findDuplicate(
@@ -61,14 +66,14 @@ class CacheRepository extends CommonRepository
         // Generate our filters based on the rules provided.
         $filters = [];
         foreach ($rules as $rule) {
-            $orx = [];
+            $orx      = [];
             $matching = $rule['matching'];
-            $scope = $rule['scope'];
+            $scope    = $rule['scope'];
             $duration = $rule['duration'];
 
             // Match explicit
             if ($matching & self::MATCHING_EXPLICIT) {
-                $orx['contact_id'] = (int)$contact->getId();
+                $orx['contact_id'] = (int) $contact->getId();
             }
 
             // Match email
@@ -99,7 +104,7 @@ class CacheRepository extends CommonRepository
             if ($matching & self::MATCHING_ADDRESS) {
                 $address1 = trim(ucwords($contact->getAddress1()));
                 if (!empty($address1)) {
-                    $city = trim(ucwords($contact->getCity()));
+                    $city    = trim(ucwords($contact->getCity()));
                     $zipcode = trim(ucwords($contact->getZipcode()));
 
                     // Only support this level of matching if we have enough for a valid address.
@@ -162,7 +167,7 @@ class CacheRepository extends CommonRepository
                 $oldest = new \DateTime();
                 $oldest->sub(new \DateInterval($duration));
                 $filters[] = [
-                    'orx' => $orx,
+                    'orx'        => $orx,
                     'date_added' => $oldest->format('Y-m-d H:i:s'),
                 ];
             }
@@ -173,6 +178,7 @@ class CacheRepository extends CommonRepository
 
     /**
      * @param $phone
+     *
      * @return string
      *
      * @todo - dedupe this method.
@@ -180,7 +186,7 @@ class CacheRepository extends CommonRepository
     private function phoneValidate($phone)
     {
         $result = null;
-        $phone = trim($phone);
+        $phone  = trim($phone);
         if (!empty($phone)) {
             if (!$this->phoneHelper) {
                 $this->phoneHelper = new PhoneNumberHelper();
@@ -199,6 +205,7 @@ class CacheRepository extends CommonRepository
 
     /**
      * @param array $filters
+     *
      * @return mixed|null
      */
     private function applyFilters($filters = [])
@@ -216,13 +223,13 @@ class CacheRepository extends CommonRepository
             foreach ($filters as $k => $set) {
                 // Expect orx, anx, or neither.
                 if (isset($set['orx'])) {
-                    $expr = $query->expr()->orX();
+                    $expr       = $query->expr()->orX();
                     $properties = $set['orx'];
                 } elseif (isset($set['andx'])) {
-                    $expr = $query->expr()->andX();
+                    $expr       = $query->expr()->andX();
                     $properties = $set['andx'];
                 } else {
-                    $expr = $query->expr();
+                    $expr       = $query->expr();
                     $properties = $set;
                 }
                 foreach ($properties as $property => $value) {
@@ -254,5 +261,4 @@ class CacheRepository extends CommonRepository
 
         return $result;
     }
-
 }

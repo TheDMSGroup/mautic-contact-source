@@ -15,14 +15,13 @@ use Mautic\CoreBundle\Event\CommonEvent;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 
 /**
- * Class ContactSourceEvent
- * @package MauticPlugin\MauticContactSourceBundle\Event
+ * Class ContactSourceEvent.
  */
 class ContactSourceEvent extends CommonEvent
 {
     /**
-     * @param ContactSource      $contactsource
-     * @param bool|false $isNew
+     * @param ContactSource $contactsource
+     * @param bool|false    $isNew
      */
     public function __construct(ContactSource $contactsource, $isNew = false)
     {

@@ -16,9 +16,8 @@ use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CampaignBundle\Event\CampaignDecisionEvent;
 use Mautic\CampaignBundle\Model\EventModel as OriginalCampaignEventModel;
 
-
 /**
- * Class CampaignEventModel
+ * Class CampaignEventModel.
  *
  * Method of triggering campaign events with one or more leads at run-time for real-time sources.
  * Overrides some default behavior to reduce query count for small batches.
@@ -42,9 +41,11 @@ class CampaignEventModel extends OriginalCampaignEventModel
      * @todo - Output usable array by contacts.
      *
      * @param Campaign $campaign
-     * @param $totalEventCount
-     * @param array $contacts
+     * @param          $totalEventCount
+     * @param array    $contacts
+     *
      * @return array|int
+     *
      * @throws \Doctrine\ORM\ORMException
      */
     public function triggerContactStartingEvents(
@@ -57,12 +58,12 @@ class CampaignEventModel extends OriginalCampaignEventModel
         /** @var \Symfony\Component\HttpFoundation\Session\Session $session */
         $session = $this->dispatcher->getContainer()->get('session');
 
-        $contactEvents = [];
+        $contactEvents       = [];
         $contactClientEvents = [];
-        $decisionChildren = [];
-        $campaignId = $campaign->getId();
+        $decisionChildren    = [];
+        $campaignId          = $campaign->getId();
 
-        $repo = $this->getRepository();
+        $repo    = $this->getRepository();
         $logRepo = $this->getLeadEventLogRepository();
 
         if ($this->dispatcher->hasListeners(CampaignEvents::ON_EVENT_DECISION_TRIGGER)) {
@@ -71,7 +72,7 @@ class CampaignEventModel extends OriginalCampaignEventModel
 
             // Filter out decisions
             foreach ($events as $event) {
-                if ($event['eventType'] == 'decision') {
+                if ('decision' == $event['eventType']) {
                     $decisionChildren[$event['id']] = $repo->getEventsByParent($event['id']);
                 }
             }
@@ -82,14 +83,13 @@ class CampaignEventModel extends OriginalCampaignEventModel
         $rootEventCount = count($events);
 
         if (empty($rootEventCount)) {
-
             return [
-                'events' => 0,
-                'evaluated' => 0,
-                'executed' => 0,
+                'events'         => 0,
+                'evaluated'      => 0,
+                'executed'       => 0,
                 'totalEvaluated' => 0,
-                'totalExecuted' => 0,
-                'contactEvents' => [],
+                'totalExecuted'  => 0,
+                'contactEvents'  => [],
             ];
         }
 
@@ -106,25 +106,24 @@ class CampaignEventModel extends OriginalCampaignEventModel
 
         /** @var \Mautic\LeadBundle\Entity\Lead $contact */
         foreach ($contacts as $contact) {
-
             // Set lead in case this is triggered by the system
             $this->leadModel->setSystemCurrentLead($contact);
 
             foreach ($events as $event) {
                 ++$rootEvaluatedCount;
 
-                if ($event['eventType'] == 'decision') {
+                if ('decision' == $event['eventType']) {
                     ++$evaluatedEventCount;
                     ++$totalEventCount;
 
                     $event['campaign'] = [
-                        'id' => $campaign->getId(),
-                        'name' => $campaign->getName(),
+                        'id'        => $campaign->getId(),
+                        'name'      => $campaign->getName(),
                         'createdBy' => $campaign->getCreatedBy(),
                     ];
 
                     if (isset($decisionChildren[$event['id']])) {
-                        $decisionEvent = [
+                        $decisionEvent        = [
                             $campaignId => [
                                 array_merge(
                                     $event,
@@ -230,14 +229,13 @@ class CampaignEventModel extends OriginalCampaignEventModel
         gc_collect_cycles();
 
         return [
-            'events' => $totalStartingEvents,
-            'evaluated' => $rootEvaluatedCount,
-            'executed' => $rootExecutedCount,
-            'totalEvaluated' => $evaluatedEventCount,
-            'totalExecuted' => $executedEventCount,
-            'contactEvents' => $contactEvents,
+            'events'              => $totalStartingEvents,
+            'evaluated'           => $rootEvaluatedCount,
+            'executed'            => $rootExecutedCount,
+            'totalEvaluated'      => $evaluatedEventCount,
+            'totalExecuted'       => $executedEventCount,
+            'contactEvents'       => $contactEvents,
             'contactClientEvents' => $contactClientEvents,
         ];
     }
-
 }

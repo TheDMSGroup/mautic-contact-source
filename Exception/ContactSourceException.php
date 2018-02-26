@@ -14,9 +14,7 @@ namespace MauticPlugin\MauticContactSourceBundle\Exception;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 
 /**
- * Class ContactSourceException
- *
- * @package MauticPlugin\MauticContactSourceBundle\Exception
+ * Class ContactSourceException.
  */
 class ContactSourceException extends \Exception
 {
@@ -34,11 +32,12 @@ class ContactSourceException extends \Exception
 
     /**
      * ContactSourceException constructor.
-     * @param string $message
-     * @param int $code
+     *
+     * @param string          $message
+     * @param int             $code
      * @param \Exception|null $previous
-     * @param null $statType
-     * @param null $field
+     * @param null            $statType
+     * @param null            $field
      */
     public function __construct(
         $message = 'Contact Source error',

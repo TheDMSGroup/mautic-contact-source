@@ -16,23 +16,22 @@ use Mautic\CoreBundle\Helper\Chart\ChartQuery;
 use Mautic\CoreBundle\Helper\Chart\LineChart;
 use Mautic\CoreBundle\Helper\TemplatingHelper;
 use Mautic\CoreBundle\Model\FormModel;
-use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use Mautic\LeadBundle\Entity\Lead as Contact;
+use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use Mautic\PageBundle\Model\TrackableModel;
+use MauticPlugin\MauticContactSourceBundle\ContactSourceEvents;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
-use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Entity\Event as EventEntity;
+use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceEvent;
 use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceTimelineEvent;
-use MauticPlugin\MauticContactSourceBundle\ContactSourceEvents;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
- * Class ContactSourceModel
- * @package MauticPlugin\MauticContactSourceBundle\Model
+ * Class ContactSourceModel.
  */
 class ContactSourceModel extends FormModel
 {
@@ -55,10 +54,10 @@ class ContactSourceModel extends FormModel
      * ContactSourceModel constructor.
      *
      * @param \Mautic\FormBundle\Model\FormModel $formModel
-     * @param TrackableModel $trackableModel
-     * @param TemplatingHelper $templating
-     * @param EventDispatcherInterface $dispatcher
-     * @param ContactModel $contactModel
+     * @param TrackableModel                     $trackableModel
+     * @param TemplatingHelper                   $templating
+     * @param EventDispatcherInterface           $dispatcher
+     * @param ContactModel                       $contactModel
      */
     public function __construct(
         \Mautic\FormBundle\Model\FormModel $formModel,
@@ -67,11 +66,11 @@ class ContactSourceModel extends FormModel
         EventDispatcherInterface $dispatcher,
         ContactModel $contactModel
     ) {
-        $this->formModel = $formModel;
+        $this->formModel      = $formModel;
         $this->trackableModel = $trackableModel;
-        $this->templating = $templating;
-        $this->dispatcher = $dispatcher;
-        $this->contactModel = $contactModel;
+        $this->templating     = $templating;
+        $this->dispatcher     = $dispatcher;
+        $this->contactModel   = $contactModel;
     }
 
     /**
@@ -93,10 +92,10 @@ class ContactSourceModel extends FormModel
     /**
      * {@inheritdoc}
      *
-     * @param object $entity
+     * @param object                              $entity
      * @param \Symfony\Component\Form\FormFactory $formFactory
-     * @param null $action
-     * @param array $options
+     * @param null                                $action
+     * @param array                               $options
      *
      * @throws NotFoundHttpException
      */
@@ -122,7 +121,7 @@ class ContactSourceModel extends FormModel
      */
     public function getEntity($id = null)
     {
-        if ($id === null) {
+        if (null === $id) {
             return new ContactSource();
         }
 
@@ -133,7 +132,7 @@ class ContactSourceModel extends FormModel
      * {@inheritdoc}
      *
      * @param ContactSource $entity
-     * @param bool|false $unlock
+     * @param bool|false    $unlock
      */
     public function saveEntity($entity, $unlock = true)
     {
@@ -156,9 +155,9 @@ class ContactSourceModel extends FormModel
      * Add a stat entry.
      *
      * @param ContactSource $contactSource
-     * @param $type
-     * @param null|Contact $contact
-     * @param int $attribution
+     * @param               $type
+     * @param null|Contact  $contact
+     * @param int           $attribution
      */
     public function addStat(ContactSource $contactSource, $type, $contact = null, $attribution = 0)
     {
@@ -188,14 +187,14 @@ class ContactSourceModel extends FormModel
     }
 
     /**
-     * Add transactional log in contactsource_events
+     * Add transactional log in contactsource_events.
      *
      * @param ContactSource $contactSource
-     * @param $type
-     * @param null $contact
-     * @param null $logs
-     * @param null $message
-     * @param null $integration_entity_id
+     * @param               $type
+     * @param null          $contact
+     * @param null          $logs
+     * @param null          $message
+     * @param null          $integration_entity_id
      */
     public function addEvent(
         ContactSource $contactSource,
@@ -236,13 +235,12 @@ class ContactSourceModel extends FormModel
     }
 
     /**
-     * @param ContactSource $contactSource
+     * @param ContactSource  $contactSource
      * @param                $unit
      * @param \DateTime|null $dateFrom
      * @param \DateTime|null $dateTo
-     *
-     * @param null $dateFormat
-     * @param bool $canViewOthers
+     * @param null           $dateFormat
+     * @param bool           $canViewOthers
      *
      * @return array
      */
@@ -267,14 +265,13 @@ class ContactSourceModel extends FormModel
         }
         $stat = new Stat();
         foreach ($stat->getAllTypes() as $type) {
-
             $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['type' => $type]);
             if (!$canViewOthers) {
                 $this->limitQueryToCreator($q);
             }
             $data = $query->loadAndBuildTimeData($q);
             foreach ($data as $val) {
-                if ($val !== 0) {
+                if (0 !== $val) {
                     $chart->setDataset($this->translator->trans('mautic.contactsource.graph.'.$type), $data);
                     break;
                 }
@@ -287,14 +284,14 @@ class ContactSourceModel extends FormModel
         if (!$canViewOthers) {
             $this->limitQueryToCreator($q);
         }
-        $dbUnit = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
-        $dbUnit = $query->translateTimeUnit($dbUnit);
+        $dbUnit        = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
+        $dbUnit        = $query->translateTimeUnit($dbUnit);
         $dateConstruct = 'DATE_FORMAT(t.date_added, \''.$dbUnit.'\')';
         $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution), 2) AS count')
             ->groupBy($dateConstruct);
         $data = $query->loadAndBuildTimeData($q);
         foreach ($data as $val) {
-            if ($val !== 0) {
+            if (0 !== $val) {
                 $chart->setDataset($this->translator->trans('mautic.contactsource.graph.attribution'), $data);
                 break;
             }
@@ -319,11 +316,12 @@ class ContactSourceModel extends FormModel
      * Get timeline/engagement data.
      *
      * @param ContactSource|null $contactSource
-     * @param array $filters
-     * @param null $orderBy
-     * @param int $page
-     * @param int $limit
-     * @param bool $forTimeline
+     * @param array              $filters
+     * @param null               $orderBy
+     * @param int                $page
+     * @param int                $limit
+     * @param bool               $forTimeline
+     *
      * @return array
      */
     public function getEngagements(
@@ -351,13 +349,13 @@ class ContactSourceModel extends FormModel
             $filters['search'] = null;
         }
         $payload = [
-            'events' => $event->getEvents(),
-            'filters' => $filters,
-            'order' => $orderBy,
-            'types' => $event->getEventTypes(),
-            'total' => $event->getEventCounter()['total'],
-            'page' => $page,
-            'limit' => $limit,
+            'events'   => $event->getEvents(),
+            'filters'  => $filters,
+            'order'    => $orderBy,
+            'types'    => $event->getEventTypes(),
+            'total'    => $event->getEventCounter()['total'],
+            'page'     => $page,
+            'limit'    => $limit,
             'maxPages' => $event->getMaxPage(),
         ];
 
@@ -380,10 +378,10 @@ class ContactSourceModel extends FormModel
     /**
      * Get engagement counts by time unit.
      *
-     * @param Contact $contact
-     * @param \DateTime|null $dateFrom
-     * @param \DateTime|null $dateTo
-     * @param string $unit
+     * @param Contact         $contact
+     * @param \DateTime|null  $dateFrom
+     * @param \DateTime|null  $dateTo
+     * @param string          $unit
      * @param ChartQuery|null $chartQuery
      *
      * @return array

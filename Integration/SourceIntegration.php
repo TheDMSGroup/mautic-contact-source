@@ -14,15 +14,12 @@ namespace MauticPlugin\MauticContactSourceBundle\Integration;
 use Mautic\PluginBundle\Integration\AbstractIntegration;
 
 /**
- * Class SourceIntegration
+ * Class SourceIntegration.
  *
  * This plugin does not add integrations. This is here purely for name/logo/etc.
- *
- * @package MauticPlugin\MauticContactSourceBundle\Integration
  */
 class SourceIntegration extends AbstractIntegration
 {
-
     /**
      * @return string
      */
@@ -57,12 +54,12 @@ class SourceIntegration extends AbstractIntegration
 
     /**
      * @param \Mautic\PluginBundle\Integration\Form|\Symfony\Component\Form\FormBuilder $builder
-     * @param array $data
-     * @param string $formArea
+     * @param array                                                                     $data
+     * @param string                                                                    $formArea
      */
     public function appendToForm(&$builder, $data, $formArea)
     {
-        if ($formArea == 'features') {
+        if ('features' == $formArea) {
             $builder->add(
                 'domain',
                 'text',
@@ -71,7 +68,7 @@ class SourceIntegration extends AbstractIntegration
                     'data'  => !isset($data['domain']) ? false : $data['domain'],
                     'attr'  => [
                         'tooltip' => $this->translator->trans('mautic.contactsource.domain.tooltip'),
-                    ]
+                    ],
                 ]
             );
         }

@@ -25,7 +25,8 @@ Mautic.contactsourceCampaigns = function () {
             complete: function () {
                 var campaignsJSONEditor;
 
-                // Grab the JSON Schema to begin rendering the form with JSONEditor.
+                // Grab the JSON Schema to begin rendering the form with
+                // JSONEditor.
                 mQuery.ajax({
                     dataType: 'json',
                     cache: true,

@@ -8,8 +8,7 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Class ContactSourceListType
- * @package MauticPlugin\MauticContactSourceBundle\Form\Type
+ * Class ContactSourceListType.
  */
 class ContactSourceListType extends AbstractType
 {
@@ -26,7 +25,7 @@ class ContactSourceListType extends AbstractType
     public function __construct(ContactSourceModel $contactSourceModel)
     {
         $this->contactSourceModel = $contactSourceModel;
-        $this->repo       = $this->contactSourceModel->getRepository();
+        $this->repo               = $this->contactSourceModel->getRepository();
     }
 
     /**
@@ -36,7 +35,7 @@ class ContactSourceListType extends AbstractType
     {
         $resolver->setDefaults(
             [
-                'choices' => function (Options $options) {
+                'choices'        => function (Options $options) {
                     $choices = [];
 
                     $list = $this->repo->getContactSourceList($options['data']);
@@ -49,13 +48,13 @@ class ContactSourceListType extends AbstractType
 
                     return $choices;
                 },
-                'expanded'    => false,
-                'multiple'    => true,
-                'required'    => false,
-                'empty_value' => function (Options $options) {
+                'expanded'       => false,
+                'multiple'       => true,
+                'required'       => false,
+                'empty_value'    => function (Options $options) {
                     return (empty($options['choices'])) ? 'mautic.contactsource.no.contactsourceitem.note' : 'mautic.core.form.chooseone';
                 },
-                'disabled' => function (Options $options) {
+                'disabled'       => function (Options $options) {
                     return empty($options['choices']);
                 },
                 'top_level'      => 'variant',
