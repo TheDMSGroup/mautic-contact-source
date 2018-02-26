@@ -13,6 +13,9 @@ namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use FOS\RestBundle\Util\Codes;
 use Mautic\CampaignBundle\Entity\Campaign;
+// use Mautic\LeadBundle\Model\LeadModel;
+use Mautic\CampaignBundle\Model\CampaignModel;
+use Mautic\EmailBundle\Helper\EmailValidator;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
 use Mautic\LeadBundle\Entity\Lead as Contact;
@@ -20,6 +23,13 @@ use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
 use Mautic\LeadBundle\Entity\UtmTag;
+use Mautic\CampaignBundle\Entity\Lead as CampaignContact;
+use Mautic\CampaignBundle\CampaignEvents;
+use Mautic\CampaignBundle\Event\CampaignLeadChangeEvent;
+// use Mautic\LeadBundle\Entity\LeadEventLog as ContactEventLog;
+use Mautic\CoreBundle\Helper\InputHelper;
+use Mautic\CoreBundle\Entity\IpAddress;
+use Mautic\CoreBundle\Helper\DateTimeHelper;
 
 /**
  * Class Api
@@ -50,7 +60,7 @@ class Api
     protected $contact;
 
     /** @var array */
-    protected $errors;
+    protected $errors = [];
 
     /** @var boolean */
     protected $realTime;
@@ -89,7 +99,7 @@ class Api
     protected $campaignId;
 
     /** @var boolean */
-    protected $debug;
+    protected $verbose = false;
 
     /** @var string */
     protected $token;
@@ -99,6 +109,21 @@ class Api
 
     /** @var Container */
     protected $container;
+
+    /** @var array */
+    protected $utmSetters;
+
+    /** @var UtmTag */
+    protected $utmTag;
+
+    /** @var array */
+    protected $allowedFields;
+
+    /** @var \Mautic\EmailBundle\Helper\EmailValidator */
+    protected $emailValidator;
+
+    /** @var array */
+    protected $allowedFieldEntities;
 
     /**
      * Setting container instead of making this container aware for performance (DDoS mitigation)
@@ -147,12 +172,12 @@ class Api
     }
 
     /**
-     * @param bool $debug
+     * @param bool $verbose
      * @return $this
      */
-    public function setDebug($debug = false)
+    public function setVerbose($verbose = false)
     {
-        $this->debug = $debug;
+        $this->verbose = $verbose;
 
         return $this;
     }
@@ -174,6 +199,23 @@ class Api
         }
 
         return $this;
+    }
+
+    /**
+     * @throws ContactSourceException
+     */
+    private function parseSourceId()
+    {
+        $this->sourceId = intval($this->request->get('sourceId'));
+        if (!$this->sourceId) {
+            throw new ContactSourceException(
+                'The sourceId was not supplied. Please provide your sourceId.',
+                Codes::HTTP_BAD_REQUEST,
+                null,
+                Stat::TYPE_INVALID,
+                'sourceId'
+            );
+        }
     }
 
     /**
@@ -286,8 +328,6 @@ class Api
     }
 
     /**
-     * Get our customized Campaign model.
-     *
      * @return CampaignModel|object
      * @throws \Exception
      */
@@ -295,7 +335,7 @@ class Api
     {
         if (!$this->campaignModel) {
             /** @var CampaignModel */
-            $this->campaignModel = $this->container->get('mautic.contactsource.model.campaign');
+            $this->campaignModel = $this->container->get('mautic.campaign.model.campaign');
         }
 
         return $this->campaignModel;
@@ -325,8 +365,12 @@ class Api
             // Unexpected exceptions should send 500.
             $this->statusCode = Codes::HTTP_INTERNAL_SERVER_ERROR;
         }
-        $this->errors[$field ? $field : $code] = $exception->getMessage();
-
+        $key = $field ? $field : $code;
+        if ($key) {
+            $this->errors[$key] = $exception->getMessage();
+        } else {
+            $this->errors[] = $exception->getMessage();
+        }
     }
 
     /**
@@ -353,7 +397,8 @@ class Api
             // as we only care about duplicates within the source. It is unsustainable to check against all contacts
             // ever received by Mautic, so we only check for duplicates received by this source within a time frame.
 
-            $this->saveContact();
+            $this->getContactModel()->saveEntity($this->contact);
+            $this->status = Stat::TYPE_SAVED;
 
             // @todo - Optionally allow a segment to be targeted instead of a campaign in the future? No problem...
             // /** @var \Mautic\LeadBundle\Model\ListModel $leadListModel */
@@ -433,40 +478,17 @@ class Api
     /**
      * @throws ContactSourceException
      */
-    private function parseSourceId()
-    {
-        $this->sourceId = intval($this->sourceId);
-        if (!$this->sourceId) {
-            $this->sourceId = intval($this->request->get('sourceId'));
-            if (!$this->sourceId) {
-                throw new ContactSourceException(
-                    'The sourceId was not supplied. Please provide your sourceId.',
-                    Codes::HTTP_BAD_REQUEST,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'sourceId'
-                );
-            }
-        }
-    }
-
-    /**
-     * @throws ContactSourceException
-     */
     private function parseCampaignId()
     {
-        $this->campaignId = intval($this->campaignId);
+        $this->campaignId = intval($this->request->get('campaignId'));
         if (!$this->campaignId) {
-            $this->campaignId = intval($this->request->get('campaignId'));
-            if (!$this->campaignId) {
-                throw new ContactSourceException(
-                    'The campaignId was not supplied. Please provide your campaignId.',
-                    Codes::HTTP_BAD_REQUEST,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'campaignId'
-                );
-            }
+            throw new ContactSourceException(
+                'The campaignId was not supplied. Please provide your campaignId.',
+                Codes::HTTP_BAD_REQUEST,
+                null,
+                Stat::TYPE_INVALID,
+                'campaignId'
+            );
         }
     }
 
@@ -494,6 +516,9 @@ class Api
         }
     }
 
+    /**
+     * @throws ContactSourceException
+     */
     private function validateToken()
     {
         if ($this->token !== $this->contactSource->getToken()) {
@@ -511,28 +536,14 @@ class Api
      * Generate a new contact entity (not yet saved so that we can use it for validations).
      *
      * @throws ContactSourceException
-     * @throws \Doctrine\ORM\ORMException
      * @throws \Exception
      */
     private function createContact()
     {
         // By this point we have already filtered empty values/keys.
         // Filter out disallowed fields to prevent errors with queries down the line.
-        /** @var \Mautic\LeadBundle\Model\FieldModel $fieldModel */
-        $fieldModel = $this->container->get('mautic.lead.model.field');
-        $allowedFields = $fieldModel->getFieldList(true, true, ['isPublished' => true]);
-        $allowedFields = iterator_to_array(new \RecursiveIteratorIterator(new \RecursiveArrayIterator($allowedFields)));
 
-        // Add IP as an allowed import field.
-        $allowedFields['ip'] = 'IP Address';
-
-        // Get available UTM fields and their setters.
-        $utmTags = new UtmTag();
-        $utmSetters = $utmTags->getFieldSetterList();
-        unset($utmSetters['query']);
-        foreach ($utmSetters as $q => $v) {
-            $allowedFields[$q] = str_replace('Utm', 'UTM', ucwords(str_replace('_', ' ', $q)));
-        }
+        $allowedFields = $this->getAllowedFields();
 
         $disallowedFields = array_diff(array_keys($this->fieldsProvided), array_keys($allowedFields));
         foreach ($disallowedFields as $key) {
@@ -552,20 +563,11 @@ class Api
                 $msg .= ' Did you mean \''.$closest.'\' ('.$allowedFields[$closest].')?';
             }
             $this->errors[$key] = $msg;
-
-            /**
-             * Provide the list of allowed fields in debug mode.
-             * @deprecated
-             */
-            if ($this->debug && !isset($this->errors['allowedFields'])) {
-                ksort($allowedFields);
-                $this->errors['allowedFields'] = $allowedFields;
-            }
         }
 
         // Move UTM tags to another array to avoid use in import, since it doesn't support them.
         $utmTagData = [];
-        foreach ($utmSetters as $k => $v) {
+        foreach ($this->getUtmSetters() as $k => $v) {
             if (isset($this->fieldsProvided[$k])) {
                 $utmTagData[$k] = $this->fieldsProvided[$k];
                 unset($this->fieldsProvided[$k]);
@@ -580,14 +582,9 @@ class Api
 
         // Dynamically generate the field map and import.
         // @todo - Discern and assign owner.
-        $contact = $this->getContactModel()->import(
+        $contact = $this->importContact(
             array_combine(array_keys($this->fieldsProvided), array_keys($this->fieldsProvided)),
             $this->fieldsProvided
-        // $owner,
-        // $list,
-        // $tags,
-        // false,
-        // null
         );
 
         if (!$contact) {
@@ -596,15 +593,23 @@ class Api
 
         // Accepted fields straight from the contact entity.
         $this->fieldsAccepted = $contact->getUpdatedFields();
+        if (!count($this->fieldsAccepted)) {
+            throw new ContactSourceException(
+                'There were no valid fields needed to create a contact for this campaign.',
+                Codes::HTTP_BAD_REQUEST,
+                null,
+                Stat::TYPE_INVALID
+            );
+        }
         if (isset($this->fieldsProvided['ip'])) {
             $this->fieldsAccepted['ip'] = $this->fieldsProvided['ip'];
         }
 
         // Cycle through calling appropriate setters if there is utm data.
         if (count($utmTagData)) {
-            foreach ($utmSetters as $q => $setter) {
+            foreach ($this->getUtmSetters() as $q => $setter) {
                 if (isset($utmTagData[$q])) {
-                    $utmTags->$setter($utmTagData[$q]);
+                    $this->getUtmTag()->$setter($utmTagData[$q]);
                     $this->fieldsAccepted[$q] = $utmTagData[$q];
                 }
             }
@@ -613,15 +618,15 @@ class Api
             if (isset($utmTagData['url'])) {
                 parse_url($utmTagData['url'], PHP_URL_QUERY);
                 parse_str(parse_url($utmTagData['url'], PHP_URL_QUERY), $query);
-                $utmTags->setQuery($query);
+                $this->getUtmTag()->setQuery($query);
             }
 
             // Add date added, critical for inserts.
-            $utmTags->setDateAdded(new \DateTime());
+            $this->getUtmTag()->setDateAdded(new \DateTime());
 
             // Apply to the contact for save later.
-            $utmTags->setLead($contact);
-            $contact->setUtmTags($utmTags);
+            $this->getUtmTag()->setLead($contact);
+            $contact->setUtmTags($this->getUtmTag());
         }
 
         // Done importing fields, let's make sure the entity was made.
@@ -633,7 +638,7 @@ class Api
                 Stat::TYPE_INVALID
             );
         }
-        $contact->setNew(true);
+        $contact->setNew();
 
         // Exclude fields from the accepted array that we overrode.
         if ($this->attribution !== 0) {
@@ -650,6 +655,223 @@ class Api
     }
 
     /**
+     * Retrieve a complete list of supported custom fields for import, including IP and UTM data.
+     *
+     * @param bool $asEntities
+     * @return array|null
+     */
+    public function getAllowedFields($asEntities = false)
+    {
+
+        if ($this->allowedFields === null) {
+            try {
+                /** @var \Mautic\LeadBundle\Model\FieldModel $fieldModel */
+                $fieldModel = $this->container->get('mautic.lead.model.field');
+
+                // Exclude company fields as they cannot be created/related on insert due to performance implications.
+                $this->allowedFieldEntities = $fieldModel->getEntities(
+                    [
+                        'filter' => [
+                            'force' => [
+                                [
+                                    'column' => 'f.isPublished',
+                                    'expr' => 'eq',
+                                    'value' => true,
+                                ],
+                                [
+                                    'column' => 'f.object',
+                                    'expr' => 'notLike',
+                                    'value' => 'company',
+                                ],
+                            ],
+                        ],
+                        'hydration_mode' => 'HYDRATE_ARRAY',
+                    ]
+                );
+
+                // Also build an inclusive array for API and output.
+                $allowedFields = [];
+                foreach ($this->allowedFieldEntities as $field) {
+                    $allowedFields[$field['alias']] = $field['label'];
+                }
+                // Add IP as an allowed import field.
+                $allowedFields['ip'] = 'IP Addresses (comma delimited)';
+
+                // Get available UTM fields and their setters.
+                foreach ($this->getUtmSetters() as $q => $v) {
+                    $allowedFields[$q] = str_replace('Utm', 'UTM', ucwords(str_replace('_', ' ', $q)));
+                }
+
+                uksort($allowedFields, 'strnatcmp');
+
+                $this->allowedFields = $allowedFields;
+
+            } catch (\Exception $exception) {
+                $this->handleException($exception);
+            }
+        }
+
+        return $asEntities ? $this->allowedFieldEntities : $this->allowedFields;
+    }
+
+    /**
+     * Return all utm setters except query which is self-set.
+     *
+     * @return array
+     */
+    private function getUtmSetters()
+    {
+        if ($this->utmSetters === null) {
+            $utmSetters = $this->getUtmTag()->getFieldSetterList();
+            unset($utmSetters['query']);
+            $this->utmSetters = $utmSetters;
+        }
+
+        return $this->utmSetters;
+    }
+
+    /**
+     * @return UtmTag
+     */
+    private function getUtmTag()
+    {
+        if ($this->utmTag === null) {
+            $this->utmTag = new UtmTag();
+        }
+
+        return $this->utmTag;
+    }
+
+    /**
+     * This is a clone of the function \Mautic\LeadBundle\Model\LeadModel::import
+     * With some changes for the sake of performance in real-time posting.
+     *
+     * @param $fields
+     * @param $data
+     * @param null $owner
+     * @param null $list
+     * @param null $tags
+     * @return bool|Contact
+     * @throws \Exception
+     */
+    public function importContact(
+        $fields,
+        $data,
+        $owner = null,
+        $list = null,
+        $tags = null
+    ) {
+        $fields = array_flip($fields);
+        $fieldData = [];
+
+        // Fields have already been cleaned by this point, so we can remove the helper.
+        foreach ($fields as $leadField => $importField) {
+            if (array_key_exists($importField, $data) && !is_null($data[$importField]) && $data[$importField] != '') {
+                $fieldData[$leadField] = $data[$importField];
+            }
+        }
+
+        // Sources will not be able to set this on creation: Companies and their linkages.
+
+        // These contacts are always going to be new.
+        $contact = new Contact();
+
+        if (!empty($fields['dateAdded']) && !empty($data[$fields['dateAdded']])) {
+            $dateAdded = new DateTimeHelper($data[$fields['dateAdded']]);
+            $contact->setDateAdded($dateAdded->getUtcDateTime());
+        }
+        unset($fieldData['dateAdded']);
+
+        if (!empty($fields['dateModified']) && !empty($data[$fields['dateModified']])) {
+            $dateModified = new DateTimeHelper($data[$fields['dateModified']]);
+            $contact->setDateModified($dateModified->getUtcDateTime());
+        }
+        unset($fieldData['dateModified']);
+
+        if (!empty($fields['lastActive']) && !empty($data[$fields['lastActive']])) {
+            $lastActive = new DateTimeHelper($data[$fields['lastActive']]);
+            $contact->setLastActive($lastActive->getUtcDateTime());
+        }
+        unset($fieldData['lastActive']);
+
+        if (!empty($fields['dateIdentified']) && !empty($data[$fields['dateIdentified']])) {
+            $dateIdentified = new DateTimeHelper($data[$fields['dateIdentified']]);
+            $contact->setDateIdentified($dateIdentified->getUtcDateTime());
+        }
+        unset($fieldData['dateIdentified']);
+
+        // Sources will not be able to set this on creation: createdByUser
+        unset($fieldData['createdByUser']);
+
+        // Sources will not be able to set this on creation: modifiedByUser
+        unset($fieldData['modifiedByUser']);
+
+        if (!empty($fields['ip']) && !empty($data[$fields['ip']])) {
+            $addresses = explode(',', $data[$fields['ip']]);
+            foreach ($addresses as $address) {
+                $ipAddress = new IpAddress();
+                $ipAddress->setIpAddress(trim($address));
+                $contact->addIpAddress($ipAddress);
+            }
+        }
+        unset($fieldData['ip']);
+
+        // Sources will not be able to set this on creation: points
+
+        // Sources will not be able to set this on creation: stage
+        unset($fieldData['stage']);
+
+        // Sources will not be able to set this on creation: doNotEmail
+        unset($fieldData['doNotEmail']);
+
+        // Sources will not be able to set this on creation: ownerusername
+        unset($fieldData['ownerusername']);
+
+        if ($owner !== null) {
+            $contact->setOwner($this->getContactModel()->getReference('MauticUserBundle:User', $owner));
+        }
+
+        if ($tags !== null) {
+            $this->getContactModel()->modifyTags($contact, $tags, null, false);
+        }
+
+        foreach ($this->getAllowedFields(true) as $contactField) {
+            if (isset($fieldData[$contactField['alias']])) {
+                if ('NULL' === $fieldData[$contactField['alias']]) {
+                    $fieldData[$contactField['alias']] = null;
+                    continue;
+                }
+                try {
+                    $this->getContactModel()->cleanFields($fieldData, $contactField);
+                    if ('email' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
+                        $this->getEmailValidator()->validate($fieldData[$contactField['alias']], false);
+                    }
+                } catch (\Exception $exception) {
+                    throw new ContactSourceException(
+                        $exception->getMessage(),
+                        Codes::HTTP_BAD_REQUEST,
+                        $exception,
+                        Stat::TYPE_INVALID,
+                        $contactField['alias']
+                    );
+                }
+                continue;
+            } elseif ($contactField['defaultValue']) {
+                // Fill in the default value if any.
+                $fieldData[$contactField['alias']] = ('multiselect' === $contactField['type']) ? [$contactField['defaultValue']] : $contactField['defaultValue'];
+            }
+        }
+
+        // All clear.
+        foreach ($fieldData as $field => $value) {
+            $contact->addUpdatedField($field, $value);
+        }
+        $contact->imported = true;
+
+        return $contact;
+    }
+
+    /**
      * Return our extended contact model.
      *
      * @return ContactModel|object
@@ -658,25 +880,23 @@ class Api
     private function getContactModel()
     {
         if (!$this->contactModel) {
-            $this->contactModel = $this->container->get('mautic.contactsource.model.contact');
+            $this->contactModel = $this->container->get('mautic.lead.model.lead');
         }
 
         return $this->contactModel;
     }
 
     /**
-     * Save the contact entity to the database.
-     *
-     * @return $this
+     * @return EmailValidator|object
      * @throws \Exception
      */
-    private function saveContact()
+    private function getEmailValidator()
     {
-        $this->getContactModel()
-            ->saveEntity($this->contact);
-        $this->status = Stat::TYPE_SAVED;
+        if (!$this->emailValidator) {
+            $this->emailValidator = $this->container->get('mautic.validator.email');
+        }
 
-        return $this;
+        return $this->emailValidator;
     }
 
     /**
@@ -689,12 +909,51 @@ class Api
     {
         if ($this->contact->getId()) {
             // Add the contact directly to the campaign without duplicate checking.
-            $this->getCampaignModel()
-                ->addContact($this->campaign, $this->contact, false, $this->realTime);
+            $this->addContactsToCampaign($this->campaign, [$this->contact], false, $this->realTime);
             $this->status = Stat::TYPE_QUEUED;
         }
 
         return $this;
+    }
+
+    /**
+     * Add contact to a campaign, and optionally run in real-time.
+     *
+     * @param Campaign $campaign
+     * @param array $contacts
+     * @param bool $manuallyAdded
+     * @param bool $realTime
+     * @throws \Exception
+     */
+    public function addContactsToCampaign(
+        Campaign $campaign,
+        $contacts = [],
+        $manuallyAdded = false,
+        $realTime = false
+    ) {
+
+        foreach ($contacts as $contact) {
+            $campaignContact = new CampaignContact();
+            $campaignContact->setCampaign($campaign);
+            $campaignContact->setDateAdded(new \DateTime());
+            $campaignContact->setLead($contact);
+            $campaignContact->setManuallyAdded($manuallyAdded);
+            $saved = $this->getCampaignModel()->saveCampaignLead($campaignContact);
+
+            if (!$realTime) {
+                // Only trigger events if not in realtime where events would be followed directly.
+                if ($saved && $this->hasListeners(CampaignEvents::CAMPAIGN_ON_LEADCHANGE)) {
+                    $event = new CampaignLeadChangeEvent($campaign, $contact, 'added');
+                    $this->dispatcher->dispatch(CampaignEvents::CAMPAIGN_ON_LEADCHANGE, $event);
+                    unset($event);
+                }
+
+                // Detach to save memory
+                $this->em->detach($campaignContact);
+                unset($campaignContact);
+            }
+        }
+        unset($campaign, $campaignContact, $contacts);
     }
 
     /**
@@ -789,6 +1048,8 @@ class Api
      * Invert the original attribution if we have been scrubbed and an attribution was given.
      * Not the end result may NOT balance out to 0, as we may have run through campaign actions that
      * had costs/values associated. We are only reversing the original value we applied.
+     *
+     * @throws \Exception
      */
     private function reverseScrub()
     {
@@ -839,10 +1100,9 @@ class Api
     /**
      * Get the result array of the import process.
      *
-     * @param bool $verbose
      * @return array
      */
-    public function getResult($verbose = false)
+    public function getResult()
     {
         $result = [];
 
@@ -854,7 +1114,7 @@ class Api
         if ($this->campaign) {
             $result['campaign'] = [];
             $result['campaign']['id'] = $this->campaign->getId();
-            if ($verbose) {
+            if ($this->verbose) {
                 $result['campaign']['name'] = $this->campaign->getName();
                 $result['campaign']['description'] = $this->campaign->getDescription();
                 $result['campaign']['category'] = $this->campaign->getCategory();
@@ -866,7 +1126,7 @@ class Api
         if ($this->contactSource) {
             $result['source'] = [];
             $result['source']['id'] = $this->contactSource->getId();
-            if ($verbose) {
+            if ($this->verbose) {
                 $result['source']['name'] = $this->contactSource->getName();
                 $result['source']['description'] = $this->contactSource->getDescriptionPublic();
                 $result['source']['category'] = $this->contactSource->getCategory();
@@ -882,7 +1142,7 @@ class Api
          * Optionally include debug data.
          * @deprecated
          */
-        if ($this->debug) {
+        if ($this->verbose) {
             $result['status'] = $this->status;
             if ($this->events) {
                 $result['events'] = $this->events;
@@ -904,6 +1164,10 @@ class Api
         }
 
         $result['statusCode'] = $this->statusCode;
+
+        if ($this->verbose) {
+            $result['allowedFields'] = $this->getAllowedFields();
+        }
 
         return $result;
     }
