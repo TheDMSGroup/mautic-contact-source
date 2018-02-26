@@ -35,7 +35,7 @@ class AjaxController extends CommonAjaxController
     {
         $output = [];
         /** @var CampaignRepository */
-        $campaignRepository = $this->get('mautic.contactsource.model.campaign')->getRepository();
+        $campaignRepository = $this->get('mautic.campaign.model.campaign')->getRepository();
         $campaigns = $campaignRepository->getEntities();
         foreach ($campaigns as $campaign) {
             $published = $campaign->isPublished();
