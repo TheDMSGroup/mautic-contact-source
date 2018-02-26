@@ -60,7 +60,7 @@
           "propertyOrder": 20,
           "options": {
             "grid_columns": 1,
-            "infoText": "Optionally override the UTM Source field of each contact when first saved. Leave blank to allow the source to post any value. Override occurs after limits are evaluated below."
+            "infoText": "Optionally override the UTM Source field of each contact when first saved. Leave blank to allow the source to post any value. Override occurs after caps are evaluated below."
           }
         },
         "cost": {
@@ -98,17 +98,18 @@
           }
         },
         "limits": {
-          "title": "Limits",
+          "title": "Caps",
           "type": "array",
           "format": "table",
           "propertyOrder": 60,
           "uniqueItems": true,
           "options": {
             "grid_columns": 12,
-            "disable_collapse": true
+            "disable_collapse": true,
+            "infoText": "Limit the number of contacts that can be accepted from this source in a given time frame."
           },
           "items": {
-            "title": "Limit",
+            "title": "Cap",
             "$ref": "#/definitions/limit"
           }
         }
@@ -131,7 +132,7 @@
           "default": 10000,
           "options": {
             "grid_columns": 1,
-            "infoText": "The maximum number of acceptable contacts for this limit."
+            "infoText": "The maximum number of acceptable contacts for this cap."
           }
         },
         "scope": {
@@ -175,7 +176,7 @@
           "format": "select",
           "options": {
             "grid_columns": 2,
-            "infoText": "Specify how long this limit should last, before expiring and allowing the contact to go to other clients within the scope."
+            "infoText": "Specify how long this cap should last, before expiring and allowing the contact to go to other clients within the scope."
           },
           "default": "P30D",
           "enumSource": [
