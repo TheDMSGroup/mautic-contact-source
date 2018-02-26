@@ -1125,10 +1125,10 @@ class Api
             $result['attribution'] = $this->attribution;
         }
         if ($this->campaign) {
-            $result['campaign']       = [];
-            $result['campaign']['id'] = $this->campaign->getId();
+            $result['campaign']         = [];
+            $result['campaign']['id']   = $this->campaign->getId();
+            $result['campaign']['name'] = $this->campaign->getName();
             if ($this->verbose) {
-                $result['campaign']['name']        = $this->campaign->getName();
                 $result['campaign']['description'] = $this->campaign->getDescription();
                 $result['campaign']['category']    = $this->campaign->getCategory();
             }
@@ -1137,10 +1137,10 @@ class Api
             $result['fields'] = $this->fieldsAccepted;
         }
         if ($this->contactSource) {
-            $result['source']       = [];
-            $result['source']['id'] = $this->contactSource->getId();
+            $result['source']         = [];
+            $result['source']['id']   = $this->contactSource->getId();
+            $result['source']['name'] = $this->contactSource->getName();
             if ($this->verbose) {
-                $result['source']['name']          = $this->contactSource->getName();
                 $result['source']['description']   = $this->contactSource->getDescriptionPublic();
                 $result['source']['category']      = $this->contactSource->getCategory();
                 $result['source']['documentation'] = $this->contactSource->getDocumentation();
