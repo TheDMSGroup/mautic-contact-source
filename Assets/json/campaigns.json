@@ -64,13 +64,13 @@
           }
         },
         "cost": {
-          "title": "Cost",
-          "type": "integer",
+          "title": "CPL",
+          "type": "number",
           "propertyOrder": 30,
           "default": 0,
           "options": {
             "grid_columns": 1,
-            "infoText": "How much is paid to this source whenever a contact is accepted?"
+            "infoText": "Cost Per Lead. How much is paid to this source whenever a contact is accepted?"
           }
         },
         "realTime": {
