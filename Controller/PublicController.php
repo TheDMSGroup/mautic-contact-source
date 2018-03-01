@@ -57,7 +57,7 @@ class PublicController extends CommonController
             ->setContainer($this->container)
             ->setSourceId((int) $sourceId)
             ->setCampaignId((int) $campaignId)
-            ->setDebug((bool) $request->headers->get('debug'))
+            ->setVerbose((bool) $request->headers->get('debug'))
             ->handleInputPublic();
 
         $result = $ApiModel->getResult(true);
