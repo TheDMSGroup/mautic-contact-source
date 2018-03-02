@@ -28,12 +28,14 @@ By default your third parties can POST contacts to urls matching this pattern:
 * [Bootstrap Slider](https://github.com/seiyria/bootstrap-slider)
 * [JSON Editor](https://github.com/json-editor/json-editor)
 
+## Features
+- [x] Campaigns: A whitelist of campaigns can be selected for the third party to post into.
+- [x] Campaign Caps: Limit the number of contacts accepted to a campaign within defined time frames.
+- [x] Campaign Finance: Track the cost/revenue of contacts upon ingestion per campaign.
+- [x] Campaign Scrub: Support an optional scrub-rate per campaign which affects the cost/revenue.
+
 ## Todo
 - [ ] Logging: Log statistics on contact ingestion, provide charts when viewing a source in the UI.
-- [ ] Campaigns: A whitelist of campaigns can be selected for the third party to post into.
-- [ ] Campaign Caps: Limit the number of contacts accepted to a campaign within defined time frames.
-- [ ] Campaign Finance: Track the cost/revenue of contacts upon ingestion per campaign.
-- [ ] Campaign Scrub: Support an optional scrub-rate per campaign which affects the cost/revenue.
 - [ ] Campaign Required Fields: The fields being used within a campaign should percolate upward to the Source, updating required fields.
 - [ ] Self-Documentation: Each source (API) created should auto-generate a public documentation page for a third party. 
 - [ ] Notifications: Third parties should be notified when their API changes (such as an added campaign or required field change).
