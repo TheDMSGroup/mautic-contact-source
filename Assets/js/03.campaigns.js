@@ -1,6 +1,6 @@
 // Campaigns field.
 Mautic.contactsourceCampaigns = function () {
-    var $campaigns = mQuery('#contactsource_campaign_settings');
+    var $campaigns = mQuery('#contactsource_campaign_settings:not(.hide):first');
     if (typeof window.contactsourceCampaignsLoaded === 'undefined' && $campaigns.length) {
 
         window.contactsourceCampaignsLoaded = true;
