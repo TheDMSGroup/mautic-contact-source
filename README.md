@@ -1,5 +1,6 @@
+# Mautic Contact Source [![Build Status](https://travis-ci.org/TheDMSGroup/mautic-contact-source.svg?branch=master)](https://travis-ci.org/TheDMSGroup/mautic-contact-source)
+
 ![](./Assets/img/source.png)
-# Mautic Contact Source
 
 Creates API endpoints for receiving contacts from external sources.
 
