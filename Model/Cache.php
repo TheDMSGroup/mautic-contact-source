@@ -42,7 +42,7 @@ class Cache extends AbstractCommonModel
     public function create()
     {
         $entities   = [];
-        $entities[] = $this->new();
+        $entities[] = $this->createEntity();
         if (count($entities)) {
             $this->getRepository()->saveEntities($entities);
         }
@@ -54,7 +54,7 @@ class Cache extends AbstractCommonModel
      *
      * @return CacheEntity
      */
-    private function new()
+    private function createEntity()
     {
         $entity = new CacheEntity();
         $entity->setAddress1(trim(ucwords($this->contact->getAddress1())));
