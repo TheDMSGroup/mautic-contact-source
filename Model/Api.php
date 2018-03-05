@@ -22,13 +22,13 @@ use Mautic\CoreBundle\Helper\DateTimeHelper;
 use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\UtmTag;
+use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
 
-// use Mautic\LeadBundle\Model\LeadModel;
 // use Mautic\LeadBundle\Entity\LeadEventLog as ContactEventLog;
 
 /**
@@ -890,6 +890,7 @@ class Api
     private function getContactModel()
     {
         if (!$this->contactModel) {
+            /* @var ContactModel */
             $this->contactModel = $this->container->get('mautic.lead.model.lead');
         }
 
@@ -952,18 +953,19 @@ class Api
             $campaignContact->setManuallyAdded($manuallyAdded);
             $saved = $this->getCampaignModel()->saveCampaignLead($campaignContact);
 
-            if (!$realTime) {
-                // Only trigger events if not in realtime where events would be followed directly.
-                if ($saved && $this->hasListeners(CampaignEvents::CAMPAIGN_ON_LEADCHANGE)) {
-                    $event = new CampaignLeadChangeEvent($campaign, $contact, 'added');
-                    $this->dispatcher->dispatch(CampaignEvents::CAMPAIGN_ON_LEADCHANGE, $event);
-                    unset($event);
-                }
-
-                // Detach to save memory
-                $this->em->detach($campaignContact);
-                unset($campaignContact);
-            }
+            // @todo - Support non realtime event firing.
+            // if (!$realTime) {
+            //     // Only trigger events if not in realtime where events would be followed directly.
+            //     if ($saved && $this->getCampaignModel()->hasListeners(CampaignEvents::CAMPAIGN_ON_LEADCHANGE)) {
+            //         $event = new CampaignLeadChangeEvent($campaign, $contact, 'added');
+            //         $this->dispatcher->dispatch(CampaignEvents::CAMPAIGN_ON_LEADCHANGE, $event);
+            //         unset($event);
+            //     }
+            //
+            //     // Detach to save memory
+            //     $this->em->detach($campaignContact);
+            //     unset($campaignContact);
+            // }
         }
         unset($campaign, $campaignContact, $contacts);
     }

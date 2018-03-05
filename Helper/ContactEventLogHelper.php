@@ -49,10 +49,11 @@ class ContactEventLogHelper
      */
     public function logError(ContactEventLog $eventLog, $errorMessage)
     {
-        $eventLog->addProperty('error', $this->translator->trans($errorMessage))
+        // @todo - add translator for messages.
+        $eventLog->addProperty('error', $errorMessage)
             ->setAction('failed');
         $this->ContactEventLogRepo->saveEntity($eventLog);
-        $this->logDebug('Line '. 1 .' error: '.'err', []);
+        // $this->logDebug('Line '. 1 .' error: '.'err', []);
     }
 
     /**

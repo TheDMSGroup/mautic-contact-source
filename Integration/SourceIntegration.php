@@ -53,9 +53,9 @@ class SourceIntegration extends AbstractIntegration
     }
 
     /**
-     * @param \Mautic\PluginBundle\Integration\Form|\Symfony\Component\Form\FormBuilder $builder
-     * @param array                                                                     $data
-     * @param string                                                                    $formArea
+     * @param \Symfony\Component\Form\FormBuilder $builder
+     * @param array                               $data
+     * @param string                              $formArea
      */
     public function appendToForm(&$builder, $data, $formArea)
     {

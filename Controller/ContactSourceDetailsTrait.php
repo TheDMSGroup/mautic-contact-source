@@ -13,6 +13,7 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
 use Mautic\CoreBundle\Helper\Chart\ChartQuery;
 use Mautic\CoreBundle\Helper\Chart\LineChart;
+use Mautic\CoreBundle\Helper\InputHelper;
 use Mautic\CoreBundle\Model\AuditLogModel;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel;
