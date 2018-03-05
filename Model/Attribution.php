@@ -12,7 +12,7 @@
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use Mautic\LeadBundle\Entity\Lead as Contact;
-use MauticPlugin\MauticContactClientBundle\Model\ApiPayload;
+use MauticPlugin\MauticContactSourceBundle\Model\ApiPayload;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
 
