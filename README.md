@@ -1,4 +1,4 @@
-# Mautic Contact Source [![Build Status](https://travis-ci.org/TheDMSGroup/mautic-contact-source.svg?branch=master)](https://travis-ci.org/TheDMSGroup/mautic-contact-source)
+# Mautic Contact Source [![Latest Stable Version]](https://packagist.org/packages/thedmsgroup/mautic-contact-source-bundle) [![License]](https://github.com/TheDMSGroup/mautic-contact-source/blob/master/LICENSE) [![Build Status](https://travis-ci.org/TheDMSGroup/mautic-contact-source.svg?branch=master)](https://travis-ci.org/TheDMSGroup/mautic-contact-source)
 
 ![](./Assets/img/source.png)
 
