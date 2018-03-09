@@ -59,6 +59,9 @@ class Stat
     /** @var float $attribution */
     private $attribution;
 
+    /** @var int $campaign */
+    private $campaign_id;
+
     /**
      * @param ORM\ClassMetadata $metadata
      */
@@ -82,6 +85,8 @@ class Stat
         $builder->createField('attribution', 'decimal')
             ->columnDefinition('DECIMAL(19, 4) DEFAULT NULL')
             ->build();
+
+        $builder->addField('campaign_id', 'integer');
 
         $builder->addContact(true, 'SET NULL');
 
@@ -210,6 +215,26 @@ class Stat
     public function setContact(Contact $contact)
     {
         $this->contact = $contact;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCampaign()
+    {
+        return $this->campaign;
+    }
+
+    /**
+     * @param int $campaign_id
+     *
+     * @return Stat
+     */
+    public function setCampaign(int $campaign_id)
+    {
+        $this->campaign = $campaign_id;
 
         return $this;
     }

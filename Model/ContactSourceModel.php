@@ -255,17 +255,9 @@ class ContactSourceModel extends FormModel
         $chart = new LineChart($unit, $dateFrom, $dateTo, $dateFormat);
         $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateTo, $unit);
 
-        $q = $query->prepareTimeDataQuery(
-            'contactsource_stats',
-            'date_added',
-            ['contactsource_id' => $contactSource->getId()]
-        );
-        if (!$canViewOthers) {
-            $this->limitQueryToCreator($q);
-        }
         $stat = new Stat();
         foreach ($stat->getAllTypes() as $type) {
-            $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['type' => $type]);
+            $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['contactsource_id' => $contactSource->getId(), 'type' => $type]);
             if (!$canViewOthers) {
                 $this->limitQueryToCreator($q);
             }
@@ -278,27 +270,74 @@ class ContactSourceModel extends FormModel
             }
         }
 
-        // Add attribution to the chart.
-        // @todo - This should really be in it's own chart in the future.
-        $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['type' => Stat::TYPE_ACCEPT]);
-        if (!$canViewOthers) {
-            $this->limitQueryToCreator($q);
-        }
-        $dbUnit        = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
-        $dbUnit        = $query->translateTimeUnit($dbUnit);
-        $dateConstruct = 'DATE_FORMAT(t.date_added, \''.$dbUnit.'\')';
-        $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution), 2) AS count')
-            ->groupBy($dateConstruct);
-        $data = $query->loadAndBuildTimeData($q);
-        foreach ($data as $val) {
-            if (0 !== $val) {
-                $chart->setDataset($this->translator->trans('mautic.contactsource.graph.attribution'), $data);
-                break;
+        return $chart->render();
+    }
+
+    /**
+     * @param ContactSource  $contactSource
+     * @param                $unit
+     * @param \DateTime|null $dateFrom
+     * @param \DateTime|null $dateTo
+     * @param null           $dateFormat
+     * @param bool           $canViewOthers
+     *
+     * @return array
+     */
+    public function getStatsByCampaign(
+        ContactSource $contactSource,
+        $unit,
+        $type,
+        \DateTime $dateFrom = null,
+        \DateTime $dateTo = null,
+        $dateFormat = null,
+        $canViewOthers = true
+    ) {
+        $chart = new LineChart($unit, $dateFrom, $dateTo, $dateFormat);
+        $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateTo, $unit);
+        $campaigns = $this->getCampaignsBySource($contactSource);
+
+
+        if ('revenue' != $type) {
+            foreach ($campaigns as $campaign) {
+                $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['contactsource_id' => $contactSource->getId(), 'type' => $type, 'campaign_id' => $campaign['id']]);
+                if (!$canViewOthers) {
+                    $this->limitQueryToCreator($q);
+                }
+                $data = $query->loadAndBuildTimeData($q);
+                foreach ($data as $val) {
+                    if (0 !== $val) {
+                        $chart->setDataset($campaign['name'], $data);
+                        break;
+                    }
+                }
+            }
+        } else {
+            // Revenue has a different scale and data source so do it as a one off
+            $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['contactsource_id' => $contactSource->getId(), 'campaign_id' => $campaign['id'], 'type' => Stat::TYPE_ACCEPT]);
+            if (!$canViewOthers) {
+                $this->limitQueryToCreator($q);
+            }
+            $dbUnit        = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
+            $dbUnit        = $query->translateTimeUnit($dbUnit);
+            $dateConstruct = 'DATE_FORMAT(t.date_added, \''.$dbUnit.'\')';
+            $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution), 2) AS count')
+                ->groupBy($dateConstruct);
+            $data = $query->loadAndBuildTimeData($q);
+            foreach ($data as $val) {
+                if (0 !== $val) {
+                    $chart->setDataset($campaign['name'], $data);
+                    break;
+                }
             }
         }
 
+
+
+
+
         return $chart->render();
     }
+
 
     /**
      * Joins the email table and limits created_by to currently logged in user.
@@ -443,5 +482,23 @@ class ContactSourceModel extends FormModel
         } else {
             return null;
         }
+    }
+
+    private function getCampaignsBySource(ContactSource $contactSource){
+        $id = $contactSource->getId();
+
+        $q = $this->em->createQueryBuilder()
+            ->from('MauticContactSourceBundle:Stat', 'cs')
+            ->select('DISTINCT cs.campaign_id, c.name');
+
+        $q->where(
+            $q->expr()->eq('cs.contactSource', ':contactSourceId')
+        )
+            ->setParameter('contactSourceId', $id);
+        $q->join('MauticCampaignBundle:Campaign', 'c', 'WITH', 'cs.campaign_id = c.id');
+
+
+
+        return $q->getQuery()->getArrayResult();
     }
 }
