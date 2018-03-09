@@ -108,6 +108,11 @@ return [
                 'alias'     => 'contactsource',
                 'arguments' => 'mautic.security',
             ],
+            'mautic.contactsource.form.type.chartfilter' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Type\ChartFilterType',
+                'arguments' => 'mautic.factory',
+                'alias'     => 'sourcechartfilter',
+            ],
         ],
         'models' => [
             'mautic.contactsource.model.contactsource'     => [
@@ -143,6 +148,11 @@ return [
             ],
             'mautic.contactsource.model.cache'             => [
                 'class' => 'MauticPlugin\MauticContactSourceBundle\Model\Cache',
+            ],
+        ],
+        'other'  => [
+            'mautic.contactsource.helper.utmsource' => [
+                'class' => 'MauticPlugin\MauticContactSourceBundle\Helper\UtmSourceHelper',
             ],
         ],
     ],

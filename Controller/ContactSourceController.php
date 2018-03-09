@@ -131,10 +131,10 @@ class ContactSourceController extends FormController
             $item = $args['viewParameters']['item'];
 
             // For line graphs in the view
-            $dateRangeValues = $this->request->get('daterange', []);
-            $dateRangeForm   = $this->get('form.factory')->create(
-                'daterange',
-                $dateRangeValues,
+            $chartFilterValues = $this->request->get('sourcechartfilter', []);
+            $chartFilterForm   = $this->get('form.factory')->create(
+                'sourcechartfilter',
+                $chartFilterValues,
                 [
                     'action' => $this->generateUrl(
                         'mautic_contactsource_action',
@@ -148,17 +148,34 @@ class ContactSourceController extends FormController
 
             /** @var \MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel $model */
             $model = $this->getModel('contactsource');
+
+            if (in_array($chartFilterForm->get('type')->getData(), ['All Events', null])) {
+                $stats = $model->getStats(
+                    $item,
+                    null,
+                    new \DateTime($chartFilterForm->get('date_from')->getData()),
+                    new \DateTime($chartFilterForm->get('date_to')->getData())
+                );
+            } else {
+                $stats = $model->getStatsByCampaign(
+                    $item,
+                    null,
+                    $chartFilterForm->get('type')->getData(),
+                    new \DateTime($chartFilterForm->get('date_from')->getData()),
+                    new \DateTime($chartFilterForm->get('date_to')->getData())
+                );
+            }
             $stats = $model->getStats(
                 $item,
                 null,
-                new \DateTime($dateRangeForm->get('date_from')->getData()),
-                new \DateTime($dateRangeForm->get('date_to')->getData())
+                new \DateTime($chartFilterForm->get('date_from')->getData()),
+                new \DateTime($chartFilterForm->get('date_to')->getData())
             );
 
             $args['viewParameters']['auditlog']      = $this->getAuditlogs($item);
             $args['viewParameters']['stats']         = $stats;
             $args['viewParameters']['events']        = $model->getEngagements($item);
-            $args['viewParameters']['dateRangeForm'] = $dateRangeForm->createView();
+            $args['viewParameters']['chartFilterForm'] = $chartFilterForm->createView();
         }
 
         return $args;
