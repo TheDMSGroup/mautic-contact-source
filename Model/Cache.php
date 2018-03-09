@@ -83,7 +83,6 @@ class Cache extends AbstractCommonModel
         $utmSource = $utmHelper->getFirstUtmSource($this->contact);
         $entity->setUtmSource(trim($utmSource));
 
-
         return $entity;
     }
 

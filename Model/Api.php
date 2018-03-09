@@ -420,7 +420,8 @@ class Api
         } catch (\Exception $exception) {
             $this->handleException($exception);
         }
-            $this->logResults();
+        $this->logResults();
+
         return $this;
     }
 
@@ -1204,10 +1205,10 @@ class Api
 
         if ($this->valid) {
             $statLevel = 'INFO';
-            $message   = 'Contact '. $this->contact->getId() . ' was imported successfully from Campaign: ' . $this->campaign->getname();
+            $message   = 'Contact '.$this->contact->getId().' was imported successfully from Campaign: '.$this->campaign->getname();
         } else {
             $statLevel = 'ERROR';
-            $message   = isset($this->errors) && !empty($this->errors) ? $this->toString($errors) : 'An unexpected error occurred.';
+            $message   = isset($this->errors) ? implode(', ', $this->errors) : 'An unexpected error occurred.';
         }
 
         // Session storage for external plugins (should probably be dispatcher instead).
@@ -1217,22 +1218,21 @@ class Api
             $session->set('contactsource_valid', true);
         }
         // get the campaign if exists
-        $campaign = !empty($this->campaignId) ? $this->campaignId: "";
+        $campaign = !empty($this->campaignId) ? $this->campaignId : '';
 
         // Add log entry for statistics / charts.
         $attribution = !empty($this->attribution) ? $this->attribution : 0;
         $clientModel->addStat($this->contactSource, $this->status, $this->contact, $attribution, $campaign);
-        $log = array(
+        $log = [
             'status'          => $this->status,
-            'fieldsAccepted' => $this->fieldsAccepted,
-            'fieldsProvided' => $this->fieldsProvided,
+            'fieldsAccepted'  => $this->fieldsAccepted,
+            'fieldsProvided'  => $this->fieldsProvided,
             'realTime'        => $this->realTime,
             'scrubbed'        => $this->scrubbed,
             'utmSource'       => $this->utmSource,
             'campaign'        => $this->campaign,
             'contact'         => $this->contact,
-
-        );
+        ];
         $logYaml = Yaml::dump($log, 10, 2);
 
         // Add transactional event for deep dive into logs.
@@ -1243,9 +1243,5 @@ class Api
             $logYaml, // kinda just made up a log
             $message
         );
-
-        // File-based logging.
-        $this->getLogger()->log($statLevel, 'Contact Source '.$this->contactSource->getId().': '.$message);
     }
-
 }
