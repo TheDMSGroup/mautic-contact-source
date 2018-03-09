@@ -304,9 +304,9 @@ class ContactSourceModel extends FormModel
                 foreach ($data as $val) {
                     if (0 !== $val) {
                         if (empty($campaign['name'])) {
-                            $campaign['campaign_id'] = 'No Campaign';
+                            $campaign['name'] = 'No Campaign';
                         }
-                        $chart->setDataset($campaign['campaign_id'], $data);
+                        $chart->setDataset($campaign['name'], $data);
                         break;
                     }
                 }
