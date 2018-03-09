@@ -13,14 +13,12 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-cssmin');
 
+    grunt.loadNpmTasks('grunt-beep');
+
     // Define the configuration for all the tasks
     grunt.initConfig({
         uglify: {
             my_target: {
-                options: {
-                    sourceMap: true,
-                    sourceMapName: 'Assets/build/contactsource.min.js.map'
-                },
                 files: {
                     'Assets/build/contactsource.min.js': ['Assets/js/libraries/*.js', 'Assets/js/*.js']
                 }
@@ -43,11 +41,11 @@ module.exports = function (grunt) {
         watch: {
             js: {
                 files: ['Assets/js/libraries/*.js', 'Assets/js/*.js'],
-                tasks: ['uglify']
+                tasks: ['uglify', 'beep']
             },
             css: {
                 files: ['Assets/css/libraries/*.css', 'Assets/css/*.css'],
-                tasks: ['cssmin']
+                tasks: ['cssmin', 'beep']
             }
         }
     });

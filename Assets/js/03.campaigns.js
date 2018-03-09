@@ -32,6 +32,10 @@ Mautic.contactsourceCampaigns = function () {
                     success: function (data) {
                         var schema = data;
 
+                        window.tmpa = schema.definitions.campaign.properties.campaignId.enumSource[0].source;
+                        window.tmpb = campaigns;
+                        console.log('.',schema.definitions.campaign.properties.campaignId, campaigns);
+
                         if (campaigns.length) {
                             schema.definitions.campaign.properties.campaignId.enumSource[0].source = campaigns;
                         }
