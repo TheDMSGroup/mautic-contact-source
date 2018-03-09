@@ -45,7 +45,7 @@ class AjaxController extends CommonAjaxController
                 'title' => $name.($category ? ' - '.$category : '').(!$published ? ' (unpublished)' : ''),
             ];
         }
-        $output['___'] = [
+        $output['   '] = [
             'value' => 0,
             'title' => count($output) ? '-- Select a Campaign --' : '-- Please create a Campaign --',
         ];
