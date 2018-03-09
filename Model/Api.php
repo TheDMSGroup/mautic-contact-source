@@ -1208,7 +1208,7 @@ class Api
             $message   = 'Contact '.$this->contact->getId().' was imported successfully from Campaign: '.$this->campaign->getname();
         } else {
             $statLevel = 'ERROR';
-            $message   = isset($this->errors) && !empty($this->errors) ? $this->toString($errors) : 'An unexpected error occurred.';
+            $message   = isset($this->errors) ? implode(', ', $this->errors) : 'An unexpected error occurred.';
         }
 
         // Session storage for external plugins (should probably be dispatcher instead).
@@ -1243,8 +1243,5 @@ class Api
             $logYaml, // kinda just made up a log
             $message
         );
-
-        // File-based logging.
-        $this->getLogger()->log($statLevel, 'Contact Source '.$this->contactSource->getId().': '.$message);
     }
 }
