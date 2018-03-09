@@ -34,8 +34,8 @@
         "campaignId": {
           "title": "Campaign",
           "propertyOrder": 10,
-          "default": 1,
-          "type": "integer",
+          "default": "0",
+          "type": "string",
           "format": "select",
           "options": {
             "grid_columns": 1,

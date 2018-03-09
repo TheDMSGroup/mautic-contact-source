@@ -45,6 +45,10 @@ class AjaxController extends CommonAjaxController
                 'title' => $name.($category ? ' - '.$category : '').(!$published ? ' (unpublished)' : ''),
             ];
         }
+        $output['___'] = [
+            'value' => 0,
+            'title' => count($output) ? '-- Select a Campaign --' : '-- Please create a Campaign --',
+        ];
         // Sort by name and category if not already, then drop the keys.
         ksort($output);
 
