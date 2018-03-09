@@ -175,7 +175,7 @@ $token = $item->getToken();
 //                             'lead'   => $item,
 //                             'tmpl'   => 'index',
 //                         ]
-//                     ); ?>
+//                     );?>
 <!--                </div>-->
                 <!--/ #auditlog-container -->
 

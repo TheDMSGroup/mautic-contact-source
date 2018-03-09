@@ -142,9 +142,9 @@ class CacheRepository extends CommonRepository
                 // get the original / first utm source code for contact
                 $utmHelper = $this->factory->get('mautic.contactsource.helper.utmsource');
                 $utmSource = $utmHelper->getFirstUtmSource($contact);
-                    if (!empty($utmSource)) {
-                        $orx['utm_source'] = $utmSource;
-                    }
+                if (!empty($utmSource)) {
+                    $orx['utm_source'] = $utmSource;
+                }
             }
 
             // Scope Category

@@ -166,9 +166,9 @@ class ContactSourceController extends FormController
                 );
             }
 
-            $args['viewParameters']['auditlog']      = $this->getAuditlogs($item);
-            $args['viewParameters']['stats']         = $stats;
-            $args['viewParameters']['events']        = $model->getEngagements($item);
+            $args['viewParameters']['auditlog']        = $this->getAuditlogs($item);
+            $args['viewParameters']['stats']           = $stats;
+            $args['viewParameters']['events']          = $model->getEngagements($item);
             $args['viewParameters']['chartFilterForm'] = $chartFilterForm->createView();
         }
 
