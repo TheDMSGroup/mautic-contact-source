@@ -289,10 +289,9 @@ class ContactSourceModel extends FormModel
         $dateFormat = null,
         $canViewOthers = true
     ) {
-        $chart = new LineChart($unit, $dateFrom, $dateTo, $dateFormat);
-        $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateTo, $unit);
+        $chart     = new LineChart($unit, $dateFrom, $dateTo, $dateFormat);
+        $query     = new ChartQuery($this->em->getConnection(), $dateFrom, $dateTo, $unit);
         $campaigns = $this->getCampaignsBySource($contactSource);
-
 
         if ('revenue' != $type) {
             foreach ($campaigns as $campaign) {
@@ -312,7 +311,6 @@ class ContactSourceModel extends FormModel
                 }
             }
         } else {
-
             // Revenue has a different scale and data source so do it as a one off
             $q = $query->prepareTimeDataQuery(
                 'contactsource_stats',
@@ -320,14 +318,14 @@ class ContactSourceModel extends FormModel
                 [
                     'contactsource_id' => $contactSource->getId(),
                     'campaign_id'      => $campaign['campaign_id'],
-                    'type'             => Stat::TYPE_ACCEPT
+                    'type'             => Stat::TYPE_ACCEPT,
                 ]
             );
             if (!$canViewOthers) {
                 $this->limitQueryToCreator($q);
             }
-            $dbUnit = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
-            $dbUnit = $query->translateTimeUnit($dbUnit);
+            $dbUnit        = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
+            $dbUnit        = $query->translateTimeUnit($dbUnit);
             $dateConstruct = 'DATE_FORMAT(t.date_added, \''.$dbUnit.'\')';
             foreach ($campaigns as $campaign) {
                 $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution), 2) AS count')
@@ -349,7 +347,6 @@ class ContactSourceModel extends FormModel
 
         return $chart->render();
     }
-
 
     /**
      * Joins the email table and limits created_by to currently logged in user.
@@ -496,7 +493,8 @@ class ContactSourceModel extends FormModel
         }
     }
 
-    private function getCampaignsBySource(ContactSource $contactSource){
+    private function getCampaignsBySource(ContactSource $contactSource)
+    {
         $id = $contactSource->getId();
 
         $q = $this->em->createQueryBuilder()
@@ -508,8 +506,6 @@ class ContactSourceModel extends FormModel
         )
             ->setParameter('contactSourceId', $id);
         $q->join('MauticCampaignBundle:Campaign', 'c', 'WITH', 'cs.campaign_id = c.id');
-
-
 
         return $q->getQuery()->getArrayResult();
     }
