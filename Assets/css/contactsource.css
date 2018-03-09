@@ -181,3 +181,13 @@
     max-width: 95%;
     margin-top: .5em;
 }
+
+.contactsource_jsoneditor div[data-schemapath*=".realTime"] {
+    padding-top: 28px;
+}
+
+.contactsource_token {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -1,9 +1,7 @@
 // Campaigns field.
 Mautic.contactsourceCampaigns = function () {
     var $campaigns = mQuery('#contactsource_campaign_settings:not(.hide):first');
-    if (typeof window.contactsourceCampaignsLoaded === 'undefined' && $campaigns.length) {
-
-        window.contactsourceCampaignsLoaded = true;
+    if ($campaigns.length) {
 
         // Retrieve the list of available campaigns via Ajax
         var campaigns = {};
@@ -33,6 +31,10 @@ Mautic.contactsourceCampaigns = function () {
                     url: mauticBasePath + '/' + mauticAssetPrefix + 'plugins/MauticContactSourceBundle/Assets/json/campaigns.json',
                     success: function (data) {
                         var schema = data;
+
+                        window.tmpa = schema.definitions.campaign.properties.campaignId.enumSource[0].source;
+                        window.tmpb = campaigns;
+                        console.log('.',schema.definitions.campaign.properties.campaignId, campaigns);
 
                         if (campaigns.length) {
                             schema.definitions.campaign.properties.campaignId.enumSource[0].source = campaigns;
