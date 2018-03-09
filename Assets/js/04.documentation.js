@@ -1,10 +1,11 @@
 // Logic for the documentation switch.
 Mautic.contactsourceDocumentation = function () {
 
-    if (typeof window.contactsourceTypeLoaded === 'undefined') {
-        window.contactsourceTypeLoaded = true;
+    var $documentation = mQuery('input[name="contactsource[documentation]"]');
+    if ($documentation.length) {
+
         // Trigger payload tab visibility based on contactSource documentation.
-        mQuery('input[name="contactsource[documentation]"]').change(function () {
+        $documentation.change(function () {
             var val = mQuery('input[name="contactsource[documentation]"]:checked').val(),
                 $target = mQuery('.description-public');
             if (val === '1') {
