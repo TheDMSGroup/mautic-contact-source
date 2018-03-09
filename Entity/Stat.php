@@ -224,7 +224,7 @@ class Stat
      */
     public function getCampaign()
     {
-        return $this->campaign;
+        return $this->campaign_id;
     }
 
     /**
@@ -234,7 +234,7 @@ class Stat
      */
     public function setCampaign(int $campaign_id)
     {
-        $this->campaign = $campaign_id;
+        $this->campaign_id = $campaign_id;
 
         return $this;
     }

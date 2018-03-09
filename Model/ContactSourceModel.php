@@ -159,12 +159,13 @@ class ContactSourceModel extends FormModel
      * @param null|Contact  $contact
      * @param int           $attribution
      */
-    public function addStat(ContactSource $contactSource, $type, $contact = null, $attribution = 0)
+    public function addStat(ContactSource $contactSource, $type, $contact = null, $attribution = 0, $campaign)
     {
         $stat = new Stat();
         $stat->setContactSource($contactSource)
             ->setDateAdded(new \DateTime())
             ->setType($type)
+            ->setCampaign($campaign)
             ->setAttribution($attribution);
         if ($contact) {
             $stat->setContact($contact);
@@ -201,8 +202,7 @@ class ContactSourceModel extends FormModel
         $type,
         $contact = null,
         $logs = null,
-        $message = null,
-        $integration_entity_id = null
+        $message = null
     ) {
         $event = new EventEntity();
         $event->setContactSource($contactSource)
@@ -216,9 +216,6 @@ class ContactSourceModel extends FormModel
         }
         if ($message) {
             $event->setMessage($message);
-        }
-        if ($integration_entity_id) {
-            $event->setIntegrationEntityId($integration_entity_id);
         }
 
         $this->getEventRepository()->saveEntity($event);
@@ -299,41 +296,56 @@ class ContactSourceModel extends FormModel
 
         if ('revenue' != $type) {
             foreach ($campaigns as $campaign) {
-                $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['contactsource_id' => $contactSource->getId(), 'type' => $type, 'campaign_id' => $campaign['id']]);
+                $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['contactsource_id' => $contactSource->getId(), 'type' => $type, 'campaign_id' => $campaign['campaign_id']]);
                 if (!$canViewOthers) {
                     $this->limitQueryToCreator($q);
                 }
                 $data = $query->loadAndBuildTimeData($q);
                 foreach ($data as $val) {
                     if (0 !== $val) {
-                        $chart->setDataset($campaign['name'], $data);
+                        if (empty($campaign['name'])) {
+                            $campaign['campaign_id'] = 'No Campaign';
+                        }
+                        $chart->setDataset($campaign['campaign_id'], $data);
                         break;
                     }
                 }
             }
         } else {
+
             // Revenue has a different scale and data source so do it as a one off
-            $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['contactsource_id' => $contactSource->getId(), 'campaign_id' => $campaign['id'], 'type' => Stat::TYPE_ACCEPT]);
+            $q = $query->prepareTimeDataQuery(
+                'contactsource_stats',
+                'date_added',
+                [
+                    'contactsource_id' => $contactSource->getId(),
+                    'campaign_id'      => $campaign['campaign_id'],
+                    'type'             => Stat::TYPE_ACCEPT
+                ]
+            );
             if (!$canViewOthers) {
                 $this->limitQueryToCreator($q);
             }
-            $dbUnit        = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
-            $dbUnit        = $query->translateTimeUnit($dbUnit);
+            $dbUnit = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
+            $dbUnit = $query->translateTimeUnit($dbUnit);
             $dateConstruct = 'DATE_FORMAT(t.date_added, \''.$dbUnit.'\')';
-            $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution), 2) AS count')
-                ->groupBy($dateConstruct);
-            $data = $query->loadAndBuildTimeData($q);
-            foreach ($data as $val) {
-                if (0 !== $val) {
-                    $chart->setDataset($campaign['name'], $data);
-                    break;
+            foreach ($campaigns as $campaign) {
+                $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution), 2) AS count')
+                    ->where('campaign_id= :campaign_id')
+                    ->setParameter('campaign_id', $campaign['campaign_id'])
+                    ->groupBy($dateConstruct);
+                $data = $query->loadAndBuildTimeData($q);
+                foreach ($data as $val) {
+                    if (0 !== $val) {
+                        if (empty($campaign['name'])) {
+                            $campaign['name'] = 'No Campaign';
+                        }
+                        $chart->setDataset($campaign['name'], $data);
+                        break;
+                    }
                 }
             }
         }
-
-
-
-
 
         return $chart->render();
     }

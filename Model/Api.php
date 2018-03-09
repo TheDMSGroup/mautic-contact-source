@@ -28,6 +28,7 @@ use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Yaml\Yaml;
 
 // use Mautic\LeadBundle\Entity\LeadEventLog as ContactEventLog;
 
@@ -419,7 +420,7 @@ class Api
         } catch (\Exception $exception) {
             $this->handleException($exception);
         }
-
+            $this->logResults();
         return $this;
     }
 
@@ -1187,4 +1188,64 @@ class Api
 
         return $result;
     }
+
+    /**
+     * Log to:
+     *      contactclient_stats
+     *      contactclient_events
+     *      integration_entity.
+     *
+     * Use LeadTimelineEvent
+     */
+    private function logResults()
+    {
+        /** @var contactClientModel $clientModel */
+        $clientModel = $this->container->get('mautic.contactsource.model.contactsource');
+
+        if ($this->valid) {
+            $statLevel = 'INFO';
+            $message   = 'Contact '. $this->contact->getId() . ' was imported successfully from Campaign: ' . $this->campaign->getname();
+        } else {
+            $statLevel = 'ERROR';
+            $message   = isset($this->errors) && !empty($this->errors) ? $this->toString($errors) : 'An unexpected error occurred.';
+        }
+
+        // Session storage for external plugins (should probably be dispatcher instead).
+        $session          = $this->container->get('session');
+        // Indicates that a single (or more) valid sends have been made.
+        if ($this->valid) {
+            $session->set('contactsource_valid', true);
+        }
+        // get the campaign if exists
+        $campaign = !empty($this->campaignId) ? $this->campaignId: "";
+
+        // Add log entry for statistics / charts.
+        $attribution = !empty($this->attribution) ? $this->attribution : 0;
+        $clientModel->addStat($this->contactSource, $this->status, $this->contact, $attribution, $campaign);
+        $log = array(
+            'status'          => $this->status,
+            'fieldsAccepted' => $this->fieldsAccepted,
+            'fieldsProvided' => $this->fieldsProvided,
+            'realTime'        => $this->realTime,
+            'scrubbed'        => $this->scrubbed,
+            'utmSource'       => $this->utmSource,
+            'campaign'        => $this->campaign,
+            'contact'         => $this->contact,
+
+        );
+        $logYaml = Yaml::dump($log, 10, 2);
+
+        // Add transactional event for deep dive into logs.
+        $clientModel->addEvent(
+            $this->contactSource,
+            $this->status,
+            $this->contact,
+            $logYaml, // kinda just made up a log
+            $message
+        );
+
+        // File-based logging.
+        $this->getLogger()->log($statLevel, 'Contact Source '.$this->contactSource->getId().': '.$message);
+    }
+
 }
