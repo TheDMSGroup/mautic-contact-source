@@ -199,7 +199,7 @@ $token = $item->getToken();
                         <h5 class="fw-sb mb-sm"><?php echo $view['translator']->trans(
                                 'mautic.contactsource.form.token'
                             ); ?></h5>
-                        <p class="mb-sm"><?php echo $token; ?></p>
+                        <p class="mb-sm contactsource_token"><?php echo $token; ?></p>
                     </div>
                 </div>
             </div>
