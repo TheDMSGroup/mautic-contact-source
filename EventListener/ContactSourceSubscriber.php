@@ -212,7 +212,6 @@ class ContactSourceSubscriber extends CommonSubscriber
                         'extra'           => [
                             // 'page' => $this->pageModel->getEntity($row['page_id']),
                             'logs'                => $row['logs'],
-                            'integrationEntityId' => $row['integration_entity_id'],
                         ],
                         'contentTemplate' => 'MauticContactSourceBundle:SubscribedEvents\Timeline:index.html.php',
                         'icon'            => 'fa-plus-square-o',
