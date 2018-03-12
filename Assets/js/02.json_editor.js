@@ -10,7 +10,10 @@ JSONEditor.defaults.themes.custom = JSONEditor.defaults.themes.bootstrap3.extend
     getButton: function (text, icon, title) {
         var el = this._super(text, icon, title);
         if (title.indexOf('Delete') !== -1) {
-            el.className = el.className.replace('btn-default', 'btn-sm btn-xs btn-danger');
+            el.className = el.className.replace('btn-default', 'btn-sm btn-xs btn-danger remove');
+            if (title.indexOf('Delete Campaign') !== -1) {
+                el.innerHTML = el.innerHTML.replace('Campaign', 'Remove Campaign');
+            }
         }
         else if (title.indexOf('Add') !== -1) {
             el.className = el.className.replace('btn-default', 'btn-md btn-primary');
