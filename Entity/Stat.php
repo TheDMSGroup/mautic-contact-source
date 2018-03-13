@@ -75,20 +75,22 @@ class Stat
         $builder->addId();
 
         $builder->createManyToOne('contactSource', 'ContactSource')
-            ->addJoinColumn('contactsource_id', 'id', false, false, 'CASCADE')
+            ->addJoinColumn('contactsource_id', 'id', true, false, null)
             ->build();
 
-        $builder->addField('type', 'string');
+        $builder->addNullableField('type', 'string');
 
         $builder->addNamedField('dateAdded', 'datetime', 'date_added');
 
         $builder->createField('attribution', 'decimal')
-            ->columnDefinition('DECIMAL(19, 4) DEFAULT NULL')
+            ->precision(19)
+            ->scale(4)
+            ->nullable()
             ->build();
 
         $builder->addField('campaign_id', 'integer');
 
-        $builder->addContact(true, 'SET NULL');
+        $builder->addNamedField('contact', 'integer', 'contact_id', true);
 
         $builder->addIndex(
             ['contactsource_id', 'type', 'date_added'],
@@ -208,12 +210,15 @@ class Stat
     }
 
     /**
-     * @param Contact $contact
+     * @param Contact|integer $contact
      *
      * @return Stat
      */
-    public function setContact(Contact $contact)
+    public function setContact($contact)
     {
+        if ($contact instanceof Contact) {
+            $contact = $contact->getId();
+        }
         $this->contact = $contact;
 
         return $this;

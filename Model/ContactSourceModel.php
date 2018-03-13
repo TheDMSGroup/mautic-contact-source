@@ -156,22 +156,24 @@ class ContactSourceModel extends FormModel
      *
      * @param ContactSource $contactSource
      * @param               $type
-     * @param null|Contact  $contact
+     * @param int           $contact
      * @param int           $attribution
+     * @param int           $campaign
      */
-    public function addStat(ContactSource $contactSource, $type, $contact = null, $attribution = 0, $campaign)
+    public function addStat(ContactSource $contactSource, $type, $contact = 0, $attribution = 0, $campaign = 0)
     {
         $stat = new Stat();
         $stat->setContactSource($contactSource)
             ->setDateAdded(new \DateTime())
-            ->setType($type)
-            ->setCampaign($campaign)
-            ->setAttribution($attribution);
+            ->setType($type);
         if ($contact) {
             $stat->setContact($contact);
         }
         if ($attribution) {
             $stat->setAttribution($attribution);
+        }
+        if ($campaign) {
+            $stat->setCampaign($campaign);
         }
 
         $this->getStatRepository()->saveEntity($stat);
@@ -195,7 +197,6 @@ class ContactSourceModel extends FormModel
      * @param null          $contact
      * @param null          $logs
      * @param null          $message
-     * @param null          $integration_entity_id
      */
     public function addEvent(
         ContactSource $contactSource,

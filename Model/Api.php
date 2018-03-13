@@ -388,6 +388,7 @@ class Api
     public function validateAndImportContact()
     {
         $this->valid = false;
+        $this->status = Stat::TYPE_ERROR;
 
         try {
             $this->handleInputPrivate();
@@ -1200,8 +1201,8 @@ class Api
      */
     private function logResults()
     {
-        /** @var contactClientModel $clientModel */
-        $clientModel = $this->container->get('mautic.contactsource.model.contactsource');
+        /** @var ContactSourceModel $sourceModel */
+        $sourceModel = $this->container->get('mautic.contactsource.model.contactsource');
 
         if ($this->valid) {
             $statLevel = 'INFO';
@@ -1218,11 +1219,11 @@ class Api
             $session->set('contactsource_valid', true);
         }
         // get the campaign if exists
-        $campaign = !empty($this->campaignId) ? $this->campaignId : '';
+        $campaignId = !empty($this->campaignId) ? $this->campaignId : 0;
 
         // Add log entry for statistics / charts.
         $attribution = !empty($this->attribution) ? $this->attribution : 0;
-        $clientModel->addStat($this->contactSource, $this->status, $this->contact, $attribution, $campaign);
+        $sourceModel->addStat($this->contactSource, $this->status, $this->contact, $attribution, $campaignId);
         $log = [
             'status'          => $this->status,
             'fieldsAccepted'  => $this->fieldsAccepted,
@@ -1236,7 +1237,7 @@ class Api
         $logYaml = Yaml::dump($log, 10, 2);
 
         // Add transactional event for deep dive into logs.
-        $clientModel->addEvent(
+        $sourceModel->addEvent(
             $this->contactSource,
             $this->status,
             $this->contact,
