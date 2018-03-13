@@ -387,7 +387,7 @@ class Api
      */
     public function validateAndImportContact()
     {
-        $this->valid = false;
+        $this->valid  = false;
         $this->status = Stat::TYPE_ERROR;
 
         try {
