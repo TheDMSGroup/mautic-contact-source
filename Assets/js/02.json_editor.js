@@ -12,7 +12,8 @@ JSONEditor.defaults.themes.custom = JSONEditor.defaults.themes.bootstrap3.extend
         if (title.indexOf('Delete') !== -1) {
             el.className = el.className.replace('btn-default', 'btn-sm btn-xs btn-danger remove');
             if (title.indexOf('Delete Campaign') !== -1) {
-                el.innerHTML = el.innerHTML.replace('Campaign', 'Remove Campaign');
+                el.innerHTML = el.innerHTML.replace('Campaign', 'Remove Source from Campaign');
+              //  el.closest('h3').addClass('moveRight');
             }
         }
         else if (title.indexOf('Add') !== -1) {
@@ -60,7 +61,9 @@ JSONEditor.defaults.themes.custom = JSONEditor.defaults.themes.bootstrap3.extend
         }
         else {
             el.appendChild(text);
+                el.className='moveRight';
         }
+
         return el;
     }
 });

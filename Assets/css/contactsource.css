@@ -191,3 +191,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+div[data-schemapath*="root.campaigns."] h3.moveRight {
+    text-align:right;
+}
