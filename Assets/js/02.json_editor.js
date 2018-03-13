@@ -51,7 +51,7 @@ JSONEditor.defaults.themes.custom = JSONEditor.defaults.themes.bootstrap3.extend
                 }
             }
         };
-        el.style.cursor = 'pointer';
+        // el.style.cursor = 'pointer';
         if (typeof text === 'string') {
             el.textContent = text;
         }
@@ -159,12 +159,38 @@ JSONEditor.defaults.options.disable_edit_json = true;
 JSONEditor.defaults.options.disable_properties = true;
 JSONEditor.defaults.options.disable_array_delete_all_rows = true;
 JSONEditor.defaults.options.disable_array_delete_last_row = true;
+JSONEditor.defaults.options.remove_empty_properties = false;
 JSONEditor.defaults.options.required_by_default = true;
 JSONEditor.defaults.options.expand_height = true;
 
 // Custom validators.
 JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
     var errors = [];
+
+    // When a textarea with option "codeMirror" is true, render codeMirror.
+    if (schema.format === 'textarea' && typeof schema.options !== 'undefined' && schema.options.codeMirror === true) {
+        mQuery('textarea[name=\'' + path.replace('root.', 'root[').split('.').join('][') + ']\']:first:visible:not(.codeMirror-checked)')
+            .each(function () {
+                var $input = mQuery(this);
+                CodeMirror.fromTextArea($input[0], {
+                    mode: {
+                        name: 'javascript',
+                        json: true
+                    },
+                    theme: 'material',
+                    gutters: ['CodeMirror-lint-markers'],
+                    lint: 'json',
+                    lintOnChange: true,
+                    matchBrackets: true,
+                    autoCloseBrackets: true,
+                    lineNumbers: true,
+                    extraKeys: {'Ctrl-Space': 'autocomplete'},
+                    lineWrapping: true
+                });
+            }).addClass('codeMirror-checked');
+    }
+
+    // Annual/fixed date support (not currently used).
     if (schema.format === 'datestring') {
         if (!/^[0-9|yY]{4}-[0-9]{1,2}-[0-9]{1,2}$/.test(value) && !/^[0-9]{1,2}-[0-9]{1,2}$/.test(value)) {
             // Errors must be an object with `path`, `property`, and `message`
@@ -174,6 +200,33 @@ JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
                 message: 'Dates should be in ISO format as YYYY-MM-DD or MM-DD for repeating dates'
             });
         }
+    }
+
+    // Single fixed date selector.
+    if (schema.format === 'date') {
+        mQuery('input[name=\'' + path.replace('root.', 'root[').split('.').join('][') + ']\']:not(.date-checked)').each(function () {
+            Mautic.activateDateTimeInputs(mQuery(this), 'date');
+
+            var changed = false;
+            // Make sure an event fires passing value through
+            mQuery(this).on('change', function (o) {
+                if (!changed) {
+                    if ('createEvent' in document) {
+                        changed = true;
+                        var event = document.createEvent('HTMLEvents');
+                        event.initEvent('change', false, true);
+                        mQuery(this)[0].dispatchEvent(event);
+                    }
+                    else {
+                        mQuery(this)[0].fireEvent('onchange');
+                    }
+                }
+                else {
+                    changed = false;
+                }
+            });
+
+        }).addClass('date-checked');
     }
     // Activate the jQuery Chosen plugin for all select fields with more than
     // 8 elements. Use "format": "select" to activate.
@@ -224,8 +277,7 @@ JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
                     'max': max,
                     'value': value,
                     'step': step
-                },
-                changed = false;
+                };
             if (min === 0 && max === 100) {
                 options.formatter = function (val) {
                     return val + '%';
@@ -233,22 +285,95 @@ JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
             }
             var slider = new Slider(mQuery(this)[0], options);
             slider.on('change', function (o) {
-                if (!changed) {
-                    if ('createEvent' in document) {
-                        // changed = true;
-                        var event = document.createEvent('HTMLEvents');
-                        event.initEvent('change', false, true);
-                        $slider[0].dispatchEvent(event);
-                    }
-                    else {
-                        $slider[0].fireEvent('onchange');
-                    }
+                if ('createEvent' in document) {
+                    var event = document.createEvent('HTMLEvents');
+                    event.initEvent('change', false, true);
+                    $slider[0].dispatchEvent(event);
                 }
                 else {
-                    changed = false;
+                    $slider[0].fireEvent('onchange');
                 }
             });
         }).addClass('slider-checked');
+    }
+    // Add support for a token text field.
+    if (schema.type === 'string' && typeof schema.options !== 'undefined' && typeof schema.options.tokenSource !== 'undefined' && schema.options.tokenSource.length) {
+        function tagEditor ($text, tokenSource) {
+            var allowedTagArr = [];
+            $text.tagEditor({
+                placeholder: (typeof schema.options.tokenPlaceholder !== 'undefined' ? schema.options.tokenPlaceholder : null),
+                allowedTags: function () {
+                    if (!allowedTagArr.length && typeof window.JSONEditor.tokenCache[tokenSource] !== 'undefined') {
+                        mQuery.each(window.JSONEditor.tokenCache[tokenSource], function (key, value) {
+                            allowedTagArr.push('{{' + key + '}}');
+                        });
+                    }
+                    return allowedTagArr;
+                },
+                autocomplete: {
+                    minLength: 2,
+                    source: function (request, response) {
+                        var tokens = [];
+                        if (typeof window.JSONEditor.tokenCache[tokenSource] !== 'undefined') {
+                            var regex = new RegExp(request.term.replace(/\{|\}/g, ''), 'i');
+                            mQuery.each(window.JSONEditor.tokenCache[tokenSource], function (key, value) {
+                                if (regex.test(key) || regex.test(value)) {
+                                    tokens.push({
+                                        label: value,
+                                        value: '{{' + key + '}}'
+                                    });
+                                }
+                            });
+                        }
+                        response(tokens);
+                    },
+                    delay: 120
+                },
+                onChange: function (el, ed, tag_list) {
+                    if ('createEvent' in document) {
+                        var event = document.createEvent('HTMLEvents');
+                        event.initEvent('change', false, true);
+                        $text[0].dispatchEvent(event);
+                        // console.log('Entered: ' + tag_list.join(''));
+                    }
+                    else {
+                        $text[0].fireEvent('onchange');
+                    }
+                },
+                beforeTagSave: function () {},
+                beforeTagDelete: function () {}
+            });
+        }
+
+        if (typeof window.JSONEditor.tokenCache === 'undefined') {
+            window.JSONEditor.tokenCache = {};
+        }
+
+        mQuery('input[type=\'text\'][name=\'' + path.replace('root.', 'root[').split('.').join('][') + ']\']:first:not(.tokens-checked)').each(function () {
+            var $text = mQuery(this),
+                tokenSource = schema.options.tokenSource;
+            $text.data('tokenSource', tokenSource);
+
+            if (typeof window.JSONEditor.tokenCache[tokenSource] === 'undefined') {
+                window.JSONEditor.tokenCache[tokenSource] = {};
+                mQuery.ajax({
+                    url: mauticAjaxUrl,
+                    type: 'POST',
+                    data: {
+                        action: tokenSource
+                    },
+                    cache: true,
+                    dataType: 'json',
+                    success: function (response) {
+                        if (typeof response.tokens !== 'undefined') {
+                            window.JSONEditor.tokenCache[tokenSource] = response.tokens;
+                        }
+                    }
+                });
+            }
+            tagEditor($text, tokenSource);
+
+        }).addClass('tokens-checked');
     }
 
     return errors;
