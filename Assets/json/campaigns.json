@@ -23,7 +23,7 @@
   },
   "definitions": {
     "campaign": {
-      "headerTemplate": "Campaign ID {{self.campaignId}}",
+      "headerTemplate": " " ,
       "type": "object",
       "format": "grid",
       "options": {
