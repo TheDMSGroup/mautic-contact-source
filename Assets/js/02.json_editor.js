@@ -13,7 +13,7 @@ JSONEditor.defaults.themes.custom = JSONEditor.defaults.themes.bootstrap3.extend
             el.className = el.className.replace('btn-default', 'btn-sm btn-xs btn-danger remove');
             if (title.indexOf('Delete Campaign') !== -1) {
                 el.innerHTML = el.innerHTML.replace('Campaign', 'Remove Source from Campaign');
-              //  el.closest('h3').addClass('moveRight');
+                //  el.closest('h3').addClass('moveRight');
             }
         }
         else if (title.indexOf('Add') !== -1) {
@@ -61,7 +61,7 @@ JSONEditor.defaults.themes.custom = JSONEditor.defaults.themes.bootstrap3.extend
         }
         else {
             el.appendChild(text);
-                el.className='moveRight';
+            el.className = 'moveRight';
         }
 
         return el;
@@ -290,12 +290,12 @@ JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
                 };
             }
             var sliderValue = document.createElement('span');
-            sliderValue.id = "sliderValue";
-            sliderValue.className = "slidervalue";
+            sliderValue.id = 'sliderValue';
+            sliderValue.className = 'slidervalue';
             sliderValue.innerHTML = value + '%';
 
             var scrubRate = mQuery('div[data-schemapath="root.campaigns.0.scrubRate"] div span');
-            if (scrubRate[0].contains(document.getElementById("sliderValue")) == false) {
+            if (scrubRate[0].contains(document.getElementById('sliderValue')) == false) {
                 scrubRate[0].appendChild(sliderValue);
             }
 
@@ -309,8 +309,7 @@ JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
                 else {
                     $slider[0].fireEvent('onchange');
                 }
-                console.log(slider);
-                sliderValue = document.getElementById("sliderValue");
+                sliderValue = document.getElementById('sliderValue');
                 sliderValue.innerHTML = document.getElementsByClassName('tooltip-inner')[0].innerText;
             });
         }).addClass('slider-checked');
