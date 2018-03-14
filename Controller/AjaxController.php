@@ -36,13 +36,17 @@ class AjaxController extends CommonAjaxController
         $campaignRepository = $this->get('mautic.campaign.model.campaign')->getRepository();
         $campaigns          = $campaignRepository->getEntities();
         foreach ($campaigns as $campaign) {
+            $id                                  = $campaign->getId();
             $published                           = $campaign->isPublished();
             $name                                = $campaign->getName();
             $category                            = $campaign->getCategory();
-            $id                                  = $campaign->getId();
+            $category                            = $category ? $category->getName() : '';
             $output[$name.'_'.$category.'_'.$id] = [
-                'value' => $id,
-                'title' => $name.($category ? ' - '.$category : '').(!$published ? ' (unpublished)' : ''),
+                'category'  => $category,
+                'published' => $published,
+                'name'      => $name,
+                'title'     => $name.($category ? '  ('.$category.')' : '').(!$published ? '  (unpublished)' : ''),
+                'value'     => $id,
             ];
         }
         $output['   '] = [
