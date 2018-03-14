@@ -88,7 +88,7 @@ class Stat
             ->nullable()
             ->build();
 
-        $builder->addField('campaign_id', 'integer');
+        $builder->addNullableField('campaign_id', 'integer');
 
         $builder->addNamedField('contact', 'integer', 'contact_id', true);
 
