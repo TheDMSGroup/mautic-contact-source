@@ -53,7 +53,7 @@ class Stat
     /** @var \DateTime $dateAdded */
     private $dateAdded;
 
-    /** @var integer $contact */
+    /** @var int $contact */
     private $contact;
 
     /** @var float $attribution */
@@ -202,7 +202,7 @@ class Stat
     }
 
     /**
-     * @return integer
+     * @return int
      */
     public function getContact()
     {
