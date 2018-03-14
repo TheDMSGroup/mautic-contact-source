@@ -48,9 +48,6 @@ Mautic.contactsourceCampaigns = function () {
                             disable_collapse: true
                         });
 
-                        //display campaign name instead of ID
-                        console.log();
-
                         $campaigns.change(function () {
                             // Load the initial value if applicable.
                             var raw = mQuery(this).val(),
