@@ -195,3 +195,15 @@
 div[data-schemapath*="root.campaigns."] h3.moveRight {
     text-align:right;
 }
+
+span#sliderValue {
+    width: auto;
+    padding-left: 10px;
+    padding-right:10px;
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+.slider div.tooltip {
+    display:none;
+}
