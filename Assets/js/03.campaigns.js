@@ -2,7 +2,6 @@
 Mautic.contactsourceCampaigns = function () {
     var $campaigns = mQuery('#contactsource_campaign_settings:not(.hide):first');
     if ($campaigns.length) {
-
         // Retrieve the list of available campaigns via Ajax
         var campaigns = {};
         mQuery.ajax({
@@ -34,8 +33,6 @@ Mautic.contactsourceCampaigns = function () {
 
                         window.tmpa = schema.definitions.campaign.properties.campaignId.enumSource[0].source;
                         window.tmpb = campaigns;
-                        console.log('.',schema.definitions.campaign.properties.campaignId, campaigns);
-
                         if (campaigns.length) {
                             schema.definitions.campaign.properties.campaignId.enumSource[0].source = campaigns;
                         }

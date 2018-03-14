@@ -83,7 +83,7 @@ class Event
         $builder->addId();
 
         $builder->createManyToOne('contactSource', 'ContactSource')
-            ->addJoinColumn('contactsource_id', 'id', false, false, 'CASCADE')
+            ->addJoinColumn('contactsource_id', 'id', true, false, null)
             ->build();
 
         $builder->createField('type', 'string')
@@ -101,7 +101,7 @@ class Event
 
         $builder->addDateAdded();
 
-        $builder->addContact();
+        $builder->addContact(true, null);
     }
 
     /**
