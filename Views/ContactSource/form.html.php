@@ -36,12 +36,12 @@ echo $view['form']->start($form);
                 <ul class="nav nav-tabs pr-md pl-md mt-10">
                     <li class="active">
                         <a href="#details" role="tab" data-toggle="tab" class="contactsource-tab">
-                            <?php echo $view['translator']->trans('mautic.contactsource.form.group.details'); ?>
+                            <i class="fa fa-cog fa-lg pull-left"></i><?php echo $view['translator']->trans('mautic.contactsource.form.group.details'); ?>
                         </a>
                     </li>
                     <li>
                         <a href="#campaigns" role="tab" data-toggle="tab" class="contactsource-tab">
-                            <?php echo $view['translator']->trans('mautic.contactsource.form.group.campaigns'); ?>
+                            <i class="fa fa-clock-o fa-lg pull-left"></i><?php echo $view['translator']->trans('mautic.contactsource.form.group.campaigns'); ?>
                         </a>
                     </li>
                 </ul>
@@ -67,7 +67,7 @@ echo $view['form']->start($form);
                                     <?php echo $view['form']->row($form['description']); ?>
                                 </div>
                             </div>
-                            <div class="row description-public">
+                            <div class="row description-public hide">
                                 <div class="col-md-12">
                                     <?php echo $view['form']->row($form['description_public']); ?>
                                 </div>
