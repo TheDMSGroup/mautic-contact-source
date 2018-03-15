@@ -53,7 +53,7 @@ class Stat
     /** @var \DateTime $dateAdded */
     private $dateAdded;
 
-    /** @var Contact $contact */
+    /** @var int $contact */
     private $contact;
 
     /** @var float $attribution */
@@ -88,7 +88,7 @@ class Stat
             ->nullable()
             ->build();
 
-        $builder->addField('campaign_id', 'integer');
+        $builder->addNullableField('campaign_id', 'integer');
 
         $builder->addNamedField('contact', 'integer', 'contact_id', true);
 
@@ -202,7 +202,7 @@ class Stat
     }
 
     /**
-     * @return Contact
+     * @return int
      */
     public function getContact()
     {
