@@ -23,7 +23,7 @@
   },
   "definitions": {
     "campaign": {
-      "headerTemplate": " ",
+      "headerTemplate": " " ,
       "type": "object",
       "format": "grid",
       "options": {
@@ -102,6 +102,7 @@
           "type": "array",
           "format": "table",
           "propertyOrder": 60,
+          "uniqueItems": true,
           "options": {
             "grid_columns": 12,
             "disable_collapse": true,
@@ -119,10 +120,9 @@
       "headerTemplate": "{{self.quantity}} {{self.scope}} {{self.value}}",
       "type": "object",
       "id": "cache",
-      "default": {
+      "default" :{
         "scope": "1",
-        "value": "",
-        "duration": "P30D"
+        "duration": "P1D"
       },
       "options": {
         "collapsed": false,
@@ -142,7 +142,6 @@
         "scope": {
           "title": "Scope",
           "propertyOrder": 20,
-          "default": 1,
           "options": {
             "grid_columns": 2,
             "infoText": "How wide do you want this duplicate check to reach?"
@@ -182,7 +181,6 @@
             "grid_columns": 2,
             "infoText": "Specify how long this cap should last, before expiring and allowing the contact to go to other clients within the scope."
           },
-          "default": "P30D",
           "enumSource": [
             {
               "source": [
