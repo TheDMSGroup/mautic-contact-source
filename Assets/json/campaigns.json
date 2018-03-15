@@ -152,7 +152,7 @@
               "source": [
                 {
                   "value": 1,
-                  "title": "total contacts"
+                  "title": "contacts for this campaign"
                 },
                 {
                   "value": 3,
@@ -165,7 +165,7 @@
           ]
         },
         "value": {
-          "title": "UTM Source",
+          "title": "Original UTM Source",
           "type": "string",
           "propertyOrder": 30,
           "options": {
