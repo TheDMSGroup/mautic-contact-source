@@ -23,7 +23,7 @@
   },
   "definitions": {
     "campaign": {
-      "headerTemplate": " ",
+      "headerTemplate": " " ,
       "type": "object",
       "format": "grid",
       "options": {
@@ -53,15 +53,6 @@
               "value": "{{item.value}}"
             }
           ]
-        },
-        "utmSource": {
-          "title": "UTM Source",
-          "type": "string",
-          "propertyOrder": 20,
-          "options": {
-            "grid_columns": 1,
-            "infoText": "Optionally override the UTM Source field of each contact when first saved. Leave blank to allow the source to post any value. Override occurs after caps are evaluated below."
-          }
         },
         "cost": {
           "title": "CPL",
@@ -102,6 +93,7 @@
           "type": "array",
           "format": "table",
           "propertyOrder": 60,
+          "uniqueItems": true,
           "options": {
             "grid_columns": 12,
             "disable_collapse": true,
@@ -119,10 +111,9 @@
       "headerTemplate": "{{self.quantity}} {{self.scope}} {{self.value}}",
       "type": "object",
       "id": "cache",
-      "default": {
-        "scope": "1",
-        "value": "",
-        "duration": "P30D"
+      "default" :{
+        "scope": "3",
+        "duration": "P1D"
       },
       "options": {
         "collapsed": false,
@@ -142,7 +133,6 @@
         "scope": {
           "title": "Scope",
           "propertyOrder": 20,
-          "default": 1,
           "options": {
             "grid_columns": 2,
             "infoText": "How wide do you want this duplicate check to reach?"
@@ -152,7 +142,7 @@
               "source": [
                 {
                   "value": 1,
-                  "title": "total contacts"
+                  "title": "contacts for this campaign"
                 },
                 {
                   "value": 3,
@@ -165,7 +155,7 @@
           ]
         },
         "value": {
-          "title": "UTM Source",
+          "title": "Original UTM Source",
           "type": "string",
           "propertyOrder": 30,
           "options": {
@@ -182,7 +172,6 @@
             "grid_columns": 2,
             "infoText": "Specify how long this cap should last, before expiring and allowing the contact to go to other clients within the scope."
           },
-          "default": "P30D",
           "enumSource": [
             {
               "source": [

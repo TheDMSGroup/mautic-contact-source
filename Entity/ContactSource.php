@@ -29,6 +29,9 @@ class ContactSource extends FormEntity
     private $id;
 
     /** @var string */
+    private $utmSource;
+
+    /** @var string */
     private $description;
 
     /** @var string */
@@ -101,6 +104,8 @@ class ContactSource extends FormEntity
 
         $builder->addPublishDates();
 
+        $builder->addNullableField('utmSource', 'string');
+
         $builder->addField('token', 'string');
 
         $builder->addField('documentation', 'boolean');
@@ -127,6 +132,7 @@ class ContactSource extends FormEntity
                 [
                     'description',
                     'description_public',
+                    'utmSource',
                     'token',
                     'documentation',
                     'publishUp',
@@ -283,6 +289,28 @@ class ContactSource extends FormEntity
         $this->isChanged('name', $name);
 
         $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUtmSource()
+    {
+        return $this->utmSource;
+    }
+
+    /**
+     * @param mixed $utmSource
+     *
+     * @return ContactSource
+     */
+    public function setUtmSource($utmSource)
+    {
+        $this->isChanged('utmSource', $utmSource);
+
+        $this->utmSource = $utmSource;
 
         return $this;
     }

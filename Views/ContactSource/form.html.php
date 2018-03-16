@@ -52,14 +52,17 @@ echo $view['form']->start($form);
                     <div class="pa-md">
                         <div class="form-group mb-0">
                             <div class="row">
-                                <div class="col-md-5">
+                                <div class="col-md-4">
                                     <?php echo $view['form']->row($form['name']); ?>
                                 </div>
                                 <div class="col-md-2">
                                     <?php echo $view['form']->row($form['documentation']); ?>
                                 </div>
-                                <div class="col-md-5">
+                                <div class="col-md-4">
                                     <?php echo $view['form']->row($form['token']); ?>
+                                </div>
+                                <div class="col-md-2">
+                                    <?php echo $view['form']->row($form['utmSource']); ?>
                                 </div>
                             </div>
                             <div class="row">
