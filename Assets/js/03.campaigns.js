@@ -75,31 +75,32 @@ Mautic.contactsourceCampaigns = function () {
                                     $campaigns.val(raw);
                                 }
                             }
-                            // UTM Source defaults.
-                            $campaignsJSONEditor.find('input[type="text"][name$="[utmSource]"]:not(.utmsource-checked)')
-                                .off('change').on('change', function () {
-                                var $utmSource = mQuery(this),
-                                    utmSource = $utmSource.val();
-                                $utmSource.parent().parent().parent().parent().find('input[type="text"][name$="[value]"]').each(function () {
-                                    var $value = mQuery(this),
-                                        $scope = mQuery(this).parent().parent().parent().find('select[name$="[scope]"]:first'),
-                                        scope = parseInt($scope.val());
-                                    if (utmSource.length && scope === 3) {
-                                        if ($value.val().length === 0) {
-                                            $value.val(utmSource);
-                                        }
-                                    }
-                                    $scope.not('.scope-checked').off('change').on('change', function () {
-                                        scope = parseInt($scope.val());
-                                        if (scope === 3) {
-                                            $value.show();
-                                        }
-                                        else if (scope === 1) {
-                                            $value.val('').hide();
-                                        }
-                                    }).addClass('scope-checked').trigger('change');
-                                });
-                            }).addClass('.utmsource-checked').trigger('change');
+
+                            // // UTM Source defaults.
+                            // $campaignsJSONEditor.find('input[type="text"][name$="[utmSource]"]:not(.utmsource-checked)')
+                            //     .off('change').on('change', function () {
+                            //     var $utmSource = mQuery(this),
+                            //         utmSource = $utmSource.val();
+                            //     $utmSource.parent().parent().parent().parent().find('input[type="text"][name$="[value]"]').each(function () {
+                            //         var $value = mQuery(this),
+                            //             $scope = mQuery(this).parent().parent().parent().find('select[name$="[scope]"]:first'),
+                            //             scope = parseInt($scope.val());
+                            //         if (utmSource.length && scope === 3) {
+                            //             if ($value.val().length === 0) {
+                            //                 $value.val(utmSource);
+                            //             }
+                            //         }
+                            //         $scope.not('.scope-checked').off('change').on('change', function () {
+                            //             scope = parseInt($scope.val());
+                            //             if (scope === 3) {
+                            //                 $value.show();
+                            //             }
+                            //             else if (scope === 1) {
+                            //                 $value.val('').hide();
+                            //             }
+                            //         }).addClass('scope-checked').trigger('change');
+                            //     });
+                            // }).addClass('.utmsource-checked').trigger('change');
                         });
 
                         $campaigns.addClass('hide');

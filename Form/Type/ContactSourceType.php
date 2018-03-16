@@ -58,6 +58,20 @@ class ContactSourceType extends AbstractType
         );
 
         $builder->add(
+            'utmSource',
+            'text',
+            [
+                'label'      => 'mautic.contactsource.form.utmsource',
+                'label_attr' => ['class' => 'control-label'],
+                'attr'       => [
+                    'class' => 'form-control',
+                    'tooltip' => 'mautic.contactsource.form.utmsource_public.tooltip',
+                ],
+                'required'   => false,
+            ]
+        );
+
+        $builder->add(
             'description',
             'textarea',
             [

@@ -54,15 +54,6 @@
             }
           ]
         },
-        "utmSource": {
-          "title": "UTM Source",
-          "type": "string",
-          "propertyOrder": 20,
-          "options": {
-            "grid_columns": 1,
-            "infoText": "Optionally override the UTM Source field of each contact when first saved. Leave blank to allow the source to post any value. Override occurs after caps are evaluated below."
-          }
-        },
         "cost": {
           "title": "CPL",
           "type": "number",
@@ -121,7 +112,7 @@
       "type": "object",
       "id": "cache",
       "default" :{
-        "scope": "1",
+        "scope": "3",
         "duration": "P1D"
       },
       "options": {
