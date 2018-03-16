@@ -3,7 +3,8 @@ Mautic.contactsourceCampaigns = function () {
     var $campaigns = mQuery('#contactsource_campaign_settings:not(.hide):first');
     if ($campaigns.length) {
         // Retrieve the list of available campaigns via Ajax
-        var campaigns = {};
+        var campaigns = {},
+            campaignsJSONEditor;
         mQuery.ajax({
             url: mauticAjaxUrl,
             type: 'POST',
@@ -20,7 +21,6 @@ Mautic.contactsourceCampaigns = function () {
                 Mautic.processAjaxError(request, textStatus, errorThrown);
             },
             complete: function () {
-                var campaignsJSONEditor;
 
                 // Grab the JSON Schema to begin rendering the form with
                 // JSONEditor.
@@ -75,11 +75,36 @@ Mautic.contactsourceCampaigns = function () {
                                     $campaigns.val(raw);
                                 }
                             }
+
+                            // // UTM Source defaults.
+                            // $campaignsJSONEditor.find('input[type="text"][name$="[utmSource]"]:not(.utmsource-checked)')
+                            //     .off('change').on('change', function () {
+                            //     var $utmSource = mQuery(this),
+                            //         utmSource = $utmSource.val();
+                            //     $utmSource.parent().parent().parent().parent().find('input[type="text"][name$="[value]"]').each(function () {
+                            //         var $value = mQuery(this),
+                            //             $scope = mQuery(this).parent().parent().parent().find('select[name$="[scope]"]:first'),
+                            //             scope = parseInt($scope.val());
+                            //         if (utmSource.length && scope === 3) {
+                            //             if ($value.val().length === 0) {
+                            //                 $value.val(utmSource);
+                            //             }
+                            //         }
+                            //         $scope.not('.scope-checked').off('change').on('change', function () {
+                            //             scope = parseInt($scope.val());
+                            //             if (scope === 3) {
+                            //                 $value.show();
+                            //             }
+                            //             else if (scope === 1) {
+                            //                 $value.val('').hide();
+                            //             }
+                            //         }).addClass('scope-checked').trigger('change');
+                            //     });
+                            // }).addClass('.utmsource-checked').trigger('change');
                         });
 
                         $campaigns.addClass('hide');
                         $campaignsJSONEditor.show();
-                        // mQuery('label[for=contactsource_campaign_settings]').addClass('hide');
                     }
                 });
 

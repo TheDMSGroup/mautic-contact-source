@@ -287,7 +287,7 @@ class Api
         $this->realTime    = (bool) isset($campaignSettings->realTime) && $campaignSettings->realTime;
         $this->scrubRate   = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
         $this->attribution = isset($campaignSettings->cost) ? (abs(intval($campaignSettings->cost)) * -1) : 0;
-        $this->utmSource   = !empty($campaignSettings->utmSource) ? $campaignSettings->utmSource : null;
+        $this->utmSource   = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
         // Apply field overrides
         if (0 !== $this->attribution) {
             $this->fieldsProvided['attribution'] = $this->attribution;
@@ -1151,7 +1151,7 @@ class Api
                 $result['source']['documentation'] = $this->contactSource->getDocumentation();
             }
         }
-        if ($this->utmSource) {
+        if ($this->verbose && $this->utmSource) {
             $result['utmSource'] = $this->utmSource;
         }
         $result['success'] = $this->valid;
