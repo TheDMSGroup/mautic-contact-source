@@ -153,17 +153,21 @@ class CacheRepository extends CommonRepository
                         }
                     }
                 }
-                if (isset($set['contactclient_id']) && isset($set['date_added'])) {
+                if (isset($set['contactsource_id']) && isset($set['date_added'])) {
                     $query->add(
                         'where',
                         $query->expr()->andX(
-                            $query->expr()->eq($alias.'.contactclient_id', ':contactClientId'.$k),
+                            $query->expr()->eq($alias.'.contactsource_id', ':contactSourceId'.$k),
                             $query->expr()->gte($alias.'.date_added', ':dateAdded'.$k),
                             (isset($expr) ? $expr : null)
                         )
                     );
-                    $query->setParameter('contactClientId'.$k, $set['contactclient_id']);
+                    $query->setParameter('contactSourceId'.$k, $set['contactsource_id']);
                     $query->setParameter('dateAdded'.$k, $set['date_added']);
+                }
+                $result = $query->execute()->fetch();
+                if ($returnCount) {
+                    $result = intval(reset($result));
                 }
             }
         }
