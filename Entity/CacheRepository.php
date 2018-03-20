@@ -32,7 +32,7 @@ class CacheRepository extends CommonRepository
 
     const SCOPE_CATEGORY    = 2;
 
-    const SCOPE_GLOBAL      = 1;
+    const SCOPE_CAMPAIGN    = 1;
 
     const SCOPE_UTM_SOURCE  = 3;
 
@@ -78,7 +78,7 @@ class CacheRepository extends CommonRepository
                 }
             }
 
-            // Match duration (always, including global scope)
+            // Match duration (always, including campaign scope)
             $oldest = new \DateTime();
             $oldest->sub(new \DateInterval($duration));
             $filters[] = [
@@ -162,27 +162,6 @@ class CacheRepository extends CommonRepository
                     );
                     $query->setParameter('contactSourceId'.$k, $set['contactsource_id']);
                     $query->setParameter('dateAdded'.$k, $set['date_added']);
-                } elseif (isset($set['exclusive_expire_date'])) {
-                    // Expiration/Exclusions will require an extra outer AND expression.
-                    if (!isset($exprOuter)) {
-                        $exprOuter  = $query->expr()->orX();
-                        $expireDate = $set['exclusive_expire_date'];
-                    }
-                    $exprOuter->add(
-                        $query->expr()->orX($expr)
-                    );
-                }
-
-                // Expiration can always be applied globally.
-                if (isset($exprOuter) && isset($expireDate)) {
-                    $query->add(
-                        'where',
-                        $query->expr()->andX(
-                            $query->expr()->gte($alias.'.exclusive_expire_date', ':exclusiveExpireDate'),
-                            $exprOuter
-                        )
-                    );
-                    $query->setParameter('exclusiveExpireDate', $expireDate);
                 }
 
                 $result = $query->execute()->fetch();
@@ -197,7 +176,6 @@ class CacheRepository extends CommonRepository
 
     /**
      * Given a matching pattern and a contact, discern if there is a match in the cache.
-     * Used for exclusivity and duplicate checking.
      *
      * @param Contact       $contact
      * @param ContactSource $contactSource
