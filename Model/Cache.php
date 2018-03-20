@@ -153,7 +153,7 @@ class Cache extends AbstractCommonModel
         );
         if ($duplicate) {
             throw new ContactSourceException(
-                'Skipping duplicate Contact.',
+                'Rejecting duplicate Contact.',
                 0,
                 null,
                 Stat::TYPE_DUPLICATE,
@@ -197,7 +197,8 @@ class Cache extends AbstractCommonModel
                 ) {
                     $duration = $rule->duration;
                     $scope    = intval($rule->scope);
-                    $key      = $duration.'-'.$scope;
+                    $value    = isset($rule->value) ? strval($rule->value) : '';
+                    $key      = $duration.'-'.$scope.'-'.$value;
                     if (!isset($newRules[$key])) {
                         $newRules[$key] = [];
                         if (!empty($rule->matching)) {
@@ -205,6 +206,7 @@ class Cache extends AbstractCommonModel
                         }
                         $newRules[$key]['scope']    = $scope;
                         $newRules[$key]['duration'] = $duration;
+                        $newRules[$key]['value']    = $value;
                     } elseif (!empty($rule->matching)) {
                         $newRules[$key]['matching'] += intval($rule->matching);
                     }
@@ -226,18 +228,23 @@ class Cache extends AbstractCommonModel
     /**
      * Using the duplicate rules, evaluate if the current contact matches any entry in the cache.
      *
+     * @param array $limitRules
+     *
      * @throws ContactSourceException
      * @throws \Exception
      */
-    public function evaluateLimits()
+    public function evaluateLimits($limitRules = [])
     {
+        $rules = new \stdClass();
+        $rules->rules = $limitRules;
+        $rules = $this->mergeRules($rules, false);
         $limits = $this->getRepository()->findLimit(
             $this->contactSource,
-            $this->getLimitRules()
+            $rules
         );
         if ($limits) {
             throw new ContactSourceException(
-                'Skipping Contact due to an exceeded limit.',
+                'Rejecting Contact due to an exceeded limit/budget/cap.',
                 0,
                 null,
                 Stat::TYPE_LIMITS,
@@ -245,19 +252,6 @@ class Cache extends AbstractCommonModel
                 $limits
             );
         }
-    }
-
-    /**
-     * Given the Contact and Contact Source, get the rules used to evaluate limits.
-     *
-     * @throws \Exception
-     */
-    public function getLimitRules()
-    {
-        $jsonHelper = new JSONHelper();
-        $limits     = $jsonHelper->decodeObject($this->contactSource->getLimits(), 'Limits');
-
-        return $this->mergeRules($limits, false);
     }
 
     /**
