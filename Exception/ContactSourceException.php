@@ -15,6 +15,9 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
 
 /**
  * Class ContactSourceException.
+ *
+ * This form of exception indicates that we may re-try the send at a later date or time.
+ * Also can indicate a Stat type for logging.
  */
 class ContactSourceException extends \Exception
 {
@@ -27,31 +30,37 @@ class ContactSourceException extends \Exception
     /** @var string */
     private $statType;
 
-    /** @var string */
-    private $field;
+    /** @var bool */
+    private $retry;
+
+    /** @var array */
+    private $data;
 
     /**
+     * ContactSourceException constructor.
+     *
      * ContactSourceException constructor.
      *
      * @param string          $message
      * @param int             $code
      * @param \Exception|null $previous
-     * @param null            $statType
-     * @param null            $field
+     * @param string          $statType
+     * @param bool            $retry
+     * @param array           $data
      */
     public function __construct(
-        $message = 'Contact Source error',
+        $message = 'Contact Source retry error',
         $code = 0,
         \Exception $previous = null,
-        $statType = null,
-        $field = null
+        $statType = '',
+        $retry = true,
+        $data = []
     ) {
         if ($statType) {
             $this->setStatType($statType);
         }
-        if ($field) {
-            $this->setField($field);
-        }
+        $this->retry = $retry;
+        $this->data  = $data;
         parent::__construct($message, $code, $previous);
     }
 
@@ -76,6 +85,14 @@ class ContactSourceException extends \Exception
     }
 
     /**
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
      * @return string
      */
     public function getStatType()
@@ -96,26 +113,6 @@ class ContactSourceException extends \Exception
     }
 
     /**
-     * @return string
-     */
-    public function getField()
-    {
-        return $this->field;
-    }
-
-    /**
-     * @param string $field
-     *
-     * @return ContactSourceException
-     */
-    public function setField($field)
-    {
-        $this->field = $field;
-
-        return $this;
-    }
-
-    /**
      * @return Contact
      */
     public function getContact()
@@ -131,6 +128,26 @@ class ContactSourceException extends \Exception
     public function setContact(Contact $contact)
     {
         $this->contact = $contact;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getRetry()
+    {
+        return $this->retry;
+    }
+
+    /**
+     * @param bool $retry
+     *
+     * @return ContactSourceException
+     */
+    public function setRetry($retry)
+    {
+        $this->retry = $retry;
 
         return $this;
     }

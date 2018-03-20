@@ -235,10 +235,10 @@ class Cache extends AbstractCommonModel
      */
     public function evaluateLimits($limitRules = [])
     {
-        $rules = new \stdClass();
+        $rules        = new \stdClass();
         $rules->rules = $limitRules;
-        $rules = $this->mergeRules($rules, false);
-        $limits = $this->getRepository()->findLimit(
+        $rules        = $this->mergeRules($rules, false);
+        $limits       = $this->getRepository()->findLimit(
             $this->contactSource,
             $rules
         );
