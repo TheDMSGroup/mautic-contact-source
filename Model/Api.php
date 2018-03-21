@@ -28,8 +28,6 @@ use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Yaml\Yaml;
 
-// use Mautic\LeadBundle\Entity\LeadEventLog as ContactEventLog;
-
 /**
  * Class Api.
  */
@@ -400,15 +398,13 @@ class Api
             // (This would best be done by cron, and cached somewhere as a list like campaign_required_fields)
             // (presuppose the overridden fields, if any)
 
-            // Limits - Evaluate Source & Campaign limits using the Cache.
-            $this->getCacheModel()->evaluateLimits($this->limits);
+            $this->evaluateLimits();
 
             // @todo - Duplicates - Evaluate Source duplicates against the cache. This is different than contact duplicates,
             // as we only care about duplicates within the source. It is unsustainable to check against all contacts
             // ever received by Mautic, so we only check for duplicates received by this source within a time frame.
 
-            $this->getContactModel()->saveEntity($this->contact);
-            $this->status = Stat::TYPE_SAVED;
+            $this->saveContact();
 
             // @todo - Optionally allow a segment to be targeted instead of a campaign in the future? No problem...
             // /** @var \Mautic\LeadBundle\Model\ListModel $leadListModel */
@@ -917,6 +913,20 @@ class Api
     }
 
     /**
+     * Evaluate Source & Campaign limits using the Cache.
+     *
+     * @throws ContactSourceException
+     * @throws \Exception
+     */
+    private function evaluateLimits()
+    {
+        $limitRules        = new \stdClass();
+        $limitRules->rules = $this->limits;
+
+        $this->getCacheModel()->evaluateLimits($limitRules, $this->campaignId);
+    }
+
+    /**
      * @return Cache
      *
      * @throws \Exception
@@ -931,6 +941,27 @@ class Api
         }
 
         return $this->cacheModel;
+    }
+
+    /**
+     * @throws ContactSourceException
+     */
+    private function saveContact()
+    {
+        $exception = null;
+        try {
+            $this->getContactModel()->saveEntity($this->contact);
+        } catch (\Exception $exception) {
+        }
+        if ($exception || $this->contact->isNew()) {
+            throw new ContactSourceException(
+                'Could not confirm the contact was saved.',
+                Codes::HTTP_INTERNAL_SERVER_ERROR,
+                $exception,
+                Stat::TYPE_ERROR
+            );
+        }
+        $this->status = Stat::TYPE_SAVED;
     }
 
     /**

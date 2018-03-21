@@ -230,18 +230,18 @@ class Cache extends AbstractCommonModel
      * Using the duplicate rules, evaluate if the current contact matches any entry in the cache.
      *
      * @param array $limitRules
+     * @param int   $campaignId
      *
      * @throws ContactSourceException
      * @throws \Exception
      */
-    public function evaluateLimits($limitRules = [])
+    public function evaluateLimits($limitRules = [], $campaignId = 0)
     {
-        $rules        = new \stdClass();
-        $rules->rules = $limitRules;
-        $rules        = $this->mergeRules($rules, false);
+        $limitRules   = $this->mergeRules($limitRules, false);
         $limits       = $this->getRepository()->findLimit(
             $this->contactSource,
-            $rules
+            $limitRules,
+            $campaignId
         );
         if ($limits) {
             throw new ContactSourceException(

@@ -30,11 +30,11 @@ class CacheRepository extends CommonRepository
 
     const MATCHING_PHONE    = 4;
 
-    const SCOPE_CATEGORY    = 2;
-
     const SCOPE_CAMPAIGN    = 1;
 
-    const SCOPE_UTM_SOURCE  = 3;
+    const SCOPE_CATEGORY    = 2;
+
+    const SCOPE_UTM_SOURCE  = 4;
 
     /** @var PhoneNumberHelper */
     protected $phoneHelper;
@@ -44,29 +44,30 @@ class CacheRepository extends CommonRepository
      *
      * @param ContactSource $contactSource
      * @param array         $rules
+     * @param int           $campaignId
      *
-     * @return bool|mixed
+     * @return array|null
      *
      * @throws \Exception
      */
     public function findLimit(
         ContactSource $contactSource,
-        $rules = []
+        $rules = [],
+        $campaignId = 0
     ) {
         $filters = [];
         $result  = null;
         foreach ($rules as $rule) {
-            $orx      = [];
+            $andx     = [];
             $value    = $rule['value'];
             $scope    = $rule['scope'];
             $duration = $rule['duration'];
             $quantity = $rule['quantity'];
 
-            // Scope UTM Source
-            if ($scope & self::SCOPE_UTM_SOURCE) {
-                $utmSource = trim($value);
-                if (!empty($utmSource)) {
-                    $orx['utm_source'] = trim($value);
+            // Scope Campaign
+            if ($scope & self::SCOPE_CAMPAIGN) {
+                if ($campaignId) {
+                    $andx['campaign_id'] = $campaignId;
                 }
             }
 
@@ -74,7 +75,15 @@ class CacheRepository extends CommonRepository
             if ($scope & self::SCOPE_CATEGORY) {
                 $category = intval($value);
                 if ($category) {
-                    $orx['category_id'] = $category;
+                    $andx['category_id'] = $category;
+                }
+            }
+
+            // Scope UTM Source
+            if ($scope & self::SCOPE_UTM_SOURCE) {
+                $utmSource = trim($value);
+                if (!empty($utmSource)) {
+                    $andx['utm_source'] = trim($value);
                 }
             }
 
@@ -82,7 +91,7 @@ class CacheRepository extends CommonRepository
             $oldest = new \DateTime();
             $oldest->sub(new \DateInterval($duration));
             $filters[] = [
-                'orx'              => $orx,
+                'andx'             => $andx,
                 'date_added'       => $oldest->format('Y-m-d H:i:s'),
                 'contactsource_id' => $contactSource->getId(),
             ];
