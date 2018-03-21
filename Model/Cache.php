@@ -11,6 +11,7 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
+use FOS\RestBundle\Util\Codes;
 use Mautic\CoreBundle\Helper\PhoneNumberHelper;
 use Mautic\CoreBundle\Model\AbstractCommonModel;
 use Mautic\LeadBundle\Entity\Lead as Contact;
@@ -154,7 +155,7 @@ class Cache extends AbstractCommonModel
         if ($duplicate) {
             throw new ContactSourceException(
                 'Rejecting duplicate Contact.',
-                0,
+                Codes::HTTP_CONFLICT,
                 null,
                 Stat::TYPE_DUPLICATE,
                 false,
@@ -244,8 +245,8 @@ class Cache extends AbstractCommonModel
         );
         if ($limits) {
             throw new ContactSourceException(
-                'Rejecting Contact due to an exceeded limit/budget/cap.',
-                0,
+                'A cap has been exceeded.',
+                Codes::HTTP_TOO_MANY_REQUESTS,
                 null,
                 Stat::TYPE_LIMITS,
                 false,

@@ -30,37 +30,37 @@ class ContactSourceException extends \Exception
     /** @var string */
     private $statType;
 
-    /** @var bool */
-    private $retry;
-
     /** @var array */
     private $data;
 
+    /** @var string */
+    private $field;
+
     /**
-     * ContactSourceException constructor.
-     *
      * ContactSourceException constructor.
      *
      * @param string          $message
      * @param int             $code
      * @param \Exception|null $previous
-     * @param string          $statType
-     * @param bool            $retry
+     * @param null            $statType
+     * @param null            $field
      * @param array           $data
      */
     public function __construct(
-        $message = 'Contact Source retry error',
+        $message = 'Contact Source error',
         $code = 0,
         \Exception $previous = null,
-        $statType = '',
-        $retry = true,
+        $statType = null,
+        $field = null,
         $data = []
     ) {
         if ($statType) {
             $this->setStatType($statType);
         }
-        $this->retry = $retry;
-        $this->data  = $data;
+        if ($field) {
+            $this->setField($field);
+        }
+        $this->data = $data;
         parent::__construct($message, $code, $previous);
     }
 
@@ -113,6 +113,26 @@ class ContactSourceException extends \Exception
     }
 
     /**
+     * @return string
+     */
+    public function getField()
+    {
+        return $this->field;
+    }
+
+    /**
+     * @param string $field
+     *
+     * @return ContactSourceException
+     */
+    public function setField($field)
+    {
+        $this->field = $field;
+
+        return $this;
+    }
+
+    /**
      * @return Contact
      */
     public function getContact()
@@ -128,26 +148,6 @@ class ContactSourceException extends \Exception
     public function setContact(Contact $contact)
     {
         $this->contact = $contact;
-
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getRetry()
-    {
-        return $this->retry;
-    }
-
-    /**
-     * @param bool $retry
-     *
-     * @return ContactSourceException
-     */
-    public function setRetry($retry)
-    {
-        $this->retry = $retry;
 
         return $this;
     }
