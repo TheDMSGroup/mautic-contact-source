@@ -466,7 +466,7 @@ class Cache
      *
      * @return $this
      */
-    public function setCategsetCategory($category)
+    public function setCategory($category)
     {
         $this->category = $category;
 

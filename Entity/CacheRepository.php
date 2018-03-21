@@ -87,13 +87,15 @@ class CacheRepository extends CommonRepository
                 }
             }
 
+            // Always add the contactsource.
+            $andx['contactsource_id'] = $contactSource->getId();
+
             // Match duration (always, including campaign scope)
             $oldest = new \DateTime();
             $oldest->sub(new \DateInterval($duration));
             $filters[] = [
                 'andx'             => $andx,
                 'date_added'       => $oldest->format('Y-m-d H:i:s'),
-                'contactsource_id' => $contactSource->getId(),
             ];
 
             // Run the query to get the count.
@@ -162,16 +164,14 @@ class CacheRepository extends CommonRepository
                         }
                     }
                 }
-                if (isset($set['contactsource_id']) && isset($set['date_added'])) {
+                if (isset($set['date_added'])) {
                     $query->add(
                         'where',
                         $query->expr()->andX(
-                            $query->expr()->eq($alias.'.contactsource_id', ':contactSourceId'.$k),
                             $query->expr()->gte($alias.'.date_added', ':dateAdded'.$k),
                             (isset($expr) ? $expr : null)
                         )
                     );
-                    $query->setParameter('contactSourceId'.$k, $set['contactsource_id']);
                     $query->setParameter('dateAdded'.$k, $set['date_added']);
                 }
                 $result = $query->execute()->fetch();

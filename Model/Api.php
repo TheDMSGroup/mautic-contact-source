@@ -953,7 +953,7 @@ class Api
             $this->getContactModel()->saveEntity($this->contact);
         } catch (\Exception $exception) {
         }
-        if ($exception || $this->contact->isNew()) {
+        if ($exception || !$this->contact->getId()) {
             throw new ContactSourceException(
                 'Could not confirm the contact was saved.',
                 Codes::HTTP_INTERNAL_SERVER_ERROR,
