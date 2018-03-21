@@ -118,7 +118,7 @@ class Cache
 
         $builder->addNamedField('category', 'integer', 'category_id', true);
 
-        $builder->addNamedField('category', 'integer', 'campaign_id', true);
+        $builder->addNamedField('campaign', 'integer', 'campaign_id', true);
 
         $builder->addDateAdded();
 
