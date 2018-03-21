@@ -11,6 +11,7 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
+use FOS\RestBundle\Util\Codes;
 use Mautic\CoreBundle\Helper\PhoneNumberHelper;
 use Mautic\CoreBundle\Model\AbstractCommonModel;
 use Mautic\LeadBundle\Entity\Lead as Contact;
@@ -34,15 +35,20 @@ class Cache extends AbstractCommonModel
     /** @var PhoneNumberHelper */
     protected $phoneHelper;
 
+    /** @var \Symfony\Component\DependencyInjection\Container */
+    protected $container;
+
     /**
      * Create all necessary cache entities for the given Contact and Contact Source.
      *
+     * @param int $campaignId
+     *
      * @throws \Exception
      */
-    public function create()
+    public function create($campaignId = 0)
     {
         $entities   = [];
-        $entities[] = $this->createEntity();
+        $entities[] = $this->createEntity($campaignId);
         if (count($entities)) {
             $this->getRepository()->saveEntities($entities);
         }
@@ -52,9 +58,13 @@ class Cache extends AbstractCommonModel
      * Create a new cache entity with the existing Contact and contactSource.
      * Normalize the fields as much as possible to aid in exclusive/duplicate/limit correlation.
      *
+     * @param int $campaignId
+     *
      * @return CacheEntity
+     *
+     * @throws \Exception
      */
-    private function createEntity()
+    private function createEntity($campaignId = 0)
     {
         $entity = new CacheEntity();
         $entity->setAddress1(trim(ucwords($this->contact->getAddress1())));
@@ -62,6 +72,9 @@ class Cache extends AbstractCommonModel
         $category = $this->contactSource->getCategory();
         if ($category) {
             $entity->setCategory($category->getId());
+        }
+        if ($campaignId) {
+            $entity->setCampaign($campaignId);
         }
         $entity->setCity(trim(ucwords($this->contact->getCity())));
         $entity->setContact($this->contact->getId());
@@ -79,9 +92,11 @@ class Cache extends AbstractCommonModel
             $entity->setMobile($mobile);
         }
         // get the original / first utm source code for contact
-        $utmHelper = $this->factory->get('mautic.contactsource.helper.utmsource');
+        $utmHelper = $this->getContainer()->get('mautic.contactsource.helper.utmsource');
         $utmSource = $utmHelper->getFirstUtmSource($this->contact);
-        $entity->setUtmSource(trim($utmSource));
+        if (!empty($utmSource)) {
+            $entity->setUtmSource(trim($utmSource));
+        }
 
         return $entity;
     }
@@ -112,6 +127,18 @@ class Cache extends AbstractCommonModel
     }
 
     /**
+     * @return \Symfony\Component\DependencyInjection\Container
+     */
+    private function getContainer()
+    {
+        if (!$this->container) {
+            $this->container = $this->dispatcher->getContainer();
+        }
+
+        return $this->container;
+    }
+
+    /**
      * @return \MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository
      */
     public function getRepository()
@@ -134,12 +161,12 @@ class Cache extends AbstractCommonModel
         );
         if ($duplicate) {
             throw new ContactSourceException(
-                'Skipping duplicate. A contact matching this one was already accepted by this source: '.
-                json_encode($duplicate),
-                0,
+                'Rejecting duplicate Contact.',
+                Codes::HTTP_CONFLICT,
                 null,
                 Stat::TYPE_DUPLICATE,
-                false
+                false,
+                $duplicate
             );
         }
     }
@@ -160,30 +187,43 @@ class Cache extends AbstractCommonModel
     /**
      * Validate and merge the rules object (exclusivity/duplicate/limits).
      *
-     * @param $rules
+     * @param      $rules
+     * @param bool $requireMatching
      *
      * @return array
      */
-    private function mergeRules($rules)
+    private function mergeRules($rules, $requireMatching = true)
     {
         $newRules = [];
         if (isset($rules->rules) && is_array($rules->rules)) {
             foreach ($rules->rules as $rule) {
+                // Exclusivity and Duplicates have matching, Limits may not.
                 if (
-                    !empty($rule->matching)
+                    (!$requireMatching || !empty($rule->matching))
                     && !empty($rule->scope)
                     && !empty($rule->duration)
                 ) {
                     $duration = $rule->duration;
                     $scope    = intval($rule->scope);
-                    $key      = $duration.'-'.$scope;
+                    $value    = isset($rule->value) ? strval($rule->value) : '';
+                    $key      = $duration.'-'.$scope.'-'.$value;
                     if (!isset($newRules[$key])) {
-                        $newRules[$key]             = [];
-                        $newRules[$key]['matching'] = intval($rule->matching);
+                        $newRules[$key] = [];
+                        if (!empty($rule->matching)) {
+                            $newRules[$key]['matching'] = intval($rule->matching);
+                        }
                         $newRules[$key]['scope']    = $scope;
                         $newRules[$key]['duration'] = $duration;
-                    } else {
+                        $newRules[$key]['value']    = $value;
+                    } elseif (!empty($rule->matching)) {
                         $newRules[$key]['matching'] += intval($rule->matching);
+                    }
+                    if (isset($rule->quantity)) {
+                        if (!isset($newRules[$key]['quantity'])) {
+                            $newRules[$key]['quantity'] = intval($rule->quantity);
+                        } else {
+                            $newRules[$key]['quantity'] = min($newRules[$key]['quantity'], intval($rule->quantity));
+                        }
                     }
                 }
             }
@@ -191,6 +231,35 @@ class Cache extends AbstractCommonModel
         krsort($newRules);
 
         return $newRules;
+    }
+
+    /**
+     * Using the duplicate rules, evaluate if the current contact matches any entry in the cache.
+     *
+     * @param array $limitRules
+     * @param int   $campaignId
+     *
+     * @throws ContactSourceException
+     * @throws \Exception
+     */
+    public function evaluateLimits($limitRules = [], $campaignId = 0)
+    {
+        $limitRules   = $this->mergeRules($limitRules, false);
+        $limits       = $this->getRepository()->findLimit(
+            $this->contactSource,
+            $limitRules,
+            $campaignId
+        );
+        if ($limits) {
+            throw new ContactSourceException(
+                'A cap has been exceeded.',
+                Codes::HTTP_TOO_MANY_REQUESTS,
+                null,
+                Stat::TYPE_LIMITS,
+                false,
+                $limits
+            );
+        }
     }
 
     /**

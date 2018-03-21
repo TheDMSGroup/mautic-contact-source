@@ -29,17 +29,17 @@ class Stat
 
     const TYPE_ERROR     = 'error';
 
-    // const TYPE_FILTER = 'filtered';
-    const TYPE_INVALID = 'invalid';
+    const TYPE_INVALID   = 'invalid';
 
-    // const TYPE_LIMITS = 'limited';
-    const TYPE_QUEUED = 'queued';
+    const TYPE_LIMITS    = 'limited';
 
-    const TYPE_REJECT = 'rejected';
+    const TYPE_QUEUED    = 'queued';
 
-    const TYPE_SCRUB  = 'scrubbed';
+    const TYPE_REJECT    = 'rejected';
 
-    const TYPE_SAVED  = 'saved';
+    const TYPE_SAVED     = 'saved';
+
+    const TYPE_SCRUB     = 'scrubbed';
 
     /** @var int $id */
     private $id;

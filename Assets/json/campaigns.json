@@ -112,7 +112,7 @@
       "type": "object",
       "id": "cache",
       "default" :{
-        "scope": "3",
+        "scope": "5",
         "duration": "P1D"
       },
       "options": {
@@ -135,18 +135,19 @@
           "propertyOrder": 20,
           "options": {
             "grid_columns": 2,
-            "infoText": "How wide do you want this duplicate check to reach?"
+            "infoText": "How wide do you want this limit to reach?"
           },
           "enumSource": [
             {
+              "#comment": "Wider scopes are currently excluded from this list, such as by category and utm_source (without campaign), to keep the interface simple",
               "source": [
                 {
                   "value": 1,
-                  "title": "contacts for this campaign"
+                  "title": "conversions for this campaign"
                 },
                 {
-                  "value": 3,
-                  "title": "contacts where the original UTM Source is"
+                  "value": 5,
+                  "title": "conversions for this campaign and original source"
                 }
               ],
               "title": "{{item.title}}",
