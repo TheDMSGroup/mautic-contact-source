@@ -1144,7 +1144,7 @@ class Api
             $this->getCacheModel()
                 ->setContact($this->contact)
                 ->setContactSource($this->contactSource)
-                ->create();
+                ->create($this->campaignId);
         }
     }
 

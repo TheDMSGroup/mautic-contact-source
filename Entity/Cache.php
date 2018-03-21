@@ -70,6 +70,9 @@ class Cache
     /** @var \DateTime $dateAdded */
     private $dateAdded;
 
+    /** @var int $campaignId */
+    private $campaign;
+
     /**
      * Cache constructor.
      */
@@ -114,6 +117,8 @@ class Cache
         $builder->addNamedField('contact', 'integer', 'contact_id');
 
         $builder->addNamedField('category', 'integer', 'category_id', true);
+
+        $builder->addNamedField('category', 'integer', 'campaign_id', true);
 
         $builder->addDateAdded();
 
@@ -168,6 +173,13 @@ class Cache
                 'country',
             ],
             'contactsource_cache_country'
+        );
+
+        $builder->addIndex(
+            [
+                'campaign_id',
+            ],
+            'contactsource_cache_campaign_id'
         );
 
         $builder->setCustomRepositoryClass('MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository');
@@ -404,6 +416,26 @@ class Cache
     /**
      * @return int
      */
+    public function getCampaign()
+    {
+        return $this->campaign;
+    }
+
+    /**
+     * @param int $campaign
+     *
+     * @return $this
+     */
+    public function setCampaign($campaign)
+    {
+        $this->campaign = $campaign;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
     public function getContactSource()
     {
         return $this->contactSource;
@@ -434,7 +466,7 @@ class Cache
      *
      * @return $this
      */
-    public function setCategory($category)
+    public function setCategsetCategory($category)
     {
         $this->category = $category;
 

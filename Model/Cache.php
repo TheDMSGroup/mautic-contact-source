@@ -41,12 +41,14 @@ class Cache extends AbstractCommonModel
     /**
      * Create all necessary cache entities for the given Contact and Contact Source.
      *
+     * @param int $campaignId
+     *
      * @throws \Exception
      */
-    public function create()
+    public function create($campaignId = 0)
     {
         $entities   = [];
-        $entities[] = $this->createEntity();
+        $entities[] = $this->createEntity($campaignId);
         if (count($entities)) {
             $this->getRepository()->saveEntities($entities);
         }
@@ -56,11 +58,13 @@ class Cache extends AbstractCommonModel
      * Create a new cache entity with the existing Contact and contactSource.
      * Normalize the fields as much as possible to aid in exclusive/duplicate/limit correlation.
      *
+     * @param int $campaignId
+     *
      * @return CacheEntity
      *
      * @throws \Exception
      */
-    private function createEntity()
+    private function createEntity($campaignId = 0)
     {
         $entity = new CacheEntity();
         $entity->setAddress1(trim(ucwords($this->contact->getAddress1())));
@@ -68,6 +72,9 @@ class Cache extends AbstractCommonModel
         $category = $this->contactSource->getCategory();
         if ($category) {
             $entity->setCategory($category->getId());
+        }
+        if ($campaignId) {
+            $entity->setCampaign($campaignId);
         }
         $entity->setCity(trim(ucwords($this->contact->getCity())));
         $entity->setContact($this->contact->getId());
