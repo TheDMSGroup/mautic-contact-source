@@ -15,6 +15,9 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
 
 /**
  * Class ContactSourceException.
+ *
+ * This form of exception indicates that we may re-try the send at a later date or time.
+ * Also can indicate a Stat type for logging.
  */
 class ContactSourceException extends \Exception
 {
@@ -27,6 +30,9 @@ class ContactSourceException extends \Exception
     /** @var string */
     private $statType;
 
+    /** @var array */
+    private $data;
+
     /** @var string */
     private $field;
 
@@ -38,13 +44,15 @@ class ContactSourceException extends \Exception
      * @param \Exception|null $previous
      * @param null            $statType
      * @param null            $field
+     * @param array           $data
      */
     public function __construct(
         $message = 'Contact Source error',
         $code = 0,
         \Exception $previous = null,
         $statType = null,
-        $field = null
+        $field = null,
+        $data = []
     ) {
         if ($statType) {
             $this->setStatType($statType);
@@ -52,6 +60,7 @@ class ContactSourceException extends \Exception
         if ($field) {
             $this->setField($field);
         }
+        $this->data = $data;
         parent::__construct($message, $code, $previous);
     }
 
@@ -73,6 +82,14 @@ class ContactSourceException extends \Exception
         $this->contactId = $contactId;
 
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
     }
 
     /**

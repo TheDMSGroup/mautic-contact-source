@@ -33,6 +33,7 @@ By default your third parties can POST contacts to urls matching this pattern:
 - [x] Campaign Caps: Limit the number of contacts accepted to a campaign within defined time frames.
 - [x] Campaign Finance: Track the cost/revenue of contacts upon ingestion per campaign.
 - [x] Campaign Scrub: Support an optional scrub-rate per campaign which affects the cost/revenue.
+- [x] Caps: Rules to limit the quantity of successful contacts can be received.
 
 ## Todo
 - [ ] Logging: Log statistics on contact ingestion, provide charts when viewing a source in the UI.

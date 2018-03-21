@@ -12,10 +12,8 @@
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use FOS\RestBundle\Util\Codes;
-use Mautic\CampaignBundle\CampaignEvents;
 use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CampaignBundle\Entity\Lead as CampaignContact;
-use Mautic\CampaignBundle\Event\CampaignLeadChangeEvent;
 use Mautic\CampaignBundle\Model\CampaignModel;
 use Mautic\CoreBundle\Entity\IpAddress;
 use Mautic\CoreBundle\Helper\DateTimeHelper;
@@ -30,8 +28,6 @@ use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Yaml\Yaml;
 
-// use Mautic\LeadBundle\Entity\LeadEventLog as ContactEventLog;
-
 /**
  * Class Api.
  */
@@ -39,6 +35,9 @@ class Api
 {
     /** @var string */
     protected $status;
+
+    /** @var int */
+    protected $limits;
 
     /** @var int */
     protected $statusCode;
@@ -285,6 +284,7 @@ class Api
         }
         // Establish parameters from campaign settings.
         $this->realTime    = (bool) isset($campaignSettings->realTime) && $campaignSettings->realTime;
+        $this->limits      = isset($campaignSettings->limits) ? $campaignSettings->limits : [];
         $this->scrubRate   = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
         $this->attribution = isset($campaignSettings->cost) ? (abs(intval($campaignSettings->cost)) * -1) : 0;
         $this->utmSource   = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
@@ -394,19 +394,17 @@ class Api
             $this->handleInputPrivate();
             $this->createContact();
 
-            // @todo - Evaluate required fields based on all the fields that are used in the campaign.
+            // @todo - Requirements - Evaluate required fields based on all the fields that are used in the campaign.
             // (This would best be done by cron, and cached somewhere as a list like campaign_required_fields)
             // (presuppose the overridden fields, if any)
 
-            // @todo - Evaluate Source & Campaign limits using the Cache (method doesn't yet exist for either contact/client).
-            // $this->getCacheModel()->evaluateLimits();
+            $this->evaluateLimits();
 
-            // @todo - Evaluate Source duplicates against the cache. This is different than contact duplicates,
+            // @todo - Duplicates - Evaluate Source duplicates against the cache. This is different than contact duplicates,
             // as we only care about duplicates within the source. It is unsustainable to check against all contacts
             // ever received by Mautic, so we only check for duplicates received by this source within a time frame.
 
-            $this->getContactModel()->saveEntity($this->contact);
-            $this->status = Stat::TYPE_SAVED;
+            $this->saveContact();
 
             // @todo - Optionally allow a segment to be targeted instead of a campaign in the future? No problem...
             // /** @var \Mautic\LeadBundle\Model\ListModel $leadListModel */
@@ -915,6 +913,58 @@ class Api
     }
 
     /**
+     * Evaluate Source & Campaign limits using the Cache.
+     *
+     * @throws ContactSourceException
+     * @throws \Exception
+     */
+    private function evaluateLimits()
+    {
+        $limitRules        = new \stdClass();
+        $limitRules->rules = $this->limits;
+
+        $this->getCacheModel()->evaluateLimits($limitRules, $this->campaignId);
+    }
+
+    /**
+     * @return Cache
+     *
+     * @throws \Exception
+     */
+    private function getCacheModel()
+    {
+        if (!$this->cacheModel) {
+            /* @var \MauticPlugin\MauticContactSourceBundle\Model\Cache $cacheModel */
+            $this->cacheModel = $this->container->get('mautic.contactsource.model.cache');
+            $this->cacheModel->setContact($this->contact);
+            $this->cacheModel->setContactSource($this->contactSource);
+        }
+
+        return $this->cacheModel;
+    }
+
+    /**
+     * @throws ContactSourceException
+     */
+    private function saveContact()
+    {
+        $exception = null;
+        try {
+            $this->getContactModel()->saveEntity($this->contact);
+        } catch (\Exception $exception) {
+        }
+        if ($exception || !$this->contact->getId()) {
+            throw new ContactSourceException(
+                'Could not confirm the contact was saved.',
+                Codes::HTTP_INTERNAL_SERVER_ERROR,
+                $exception,
+                Stat::TYPE_ERROR
+            );
+        }
+        $this->status = Stat::TYPE_SAVED;
+    }
+
+    /**
      * Feed a contact to a campaign. If real-time is enabled, skip event dispatching to prevent recursion.
      *
      * @return $this
@@ -1094,25 +1144,64 @@ class Api
             $this->getCacheModel()
                 ->setContact($this->contact)
                 ->setContactSource($this->contactSource)
-                ->create();
+                ->create($this->campaignId);
         }
     }
 
     /**
-     * @return Cache
+     * Log to:
+     *      contactclient_stats
+     *      contactclient_events
+     *      integration_entity.
      *
-     * @throws \Exception
+     * Use LeadTimelineEvent
      */
-    private function getCacheModel()
+    private function logResults()
     {
-        if (!$this->cacheModel) {
-            /* @var \MauticPlugin\MauticContactSourceBundle\Model\Cache $cacheModel */
-            $this->cacheModel = $this->container->get('mautic.contactsource.model.cache');
-            $this->cacheModel->setContact($this->contact);
-            $this->cacheModel->setContactSource($this->contactSource);
+        /** @var ContactSourceModel $sourceModel */
+        $sourceModel = $this->container->get('mautic.contactsource.model.contactsource');
+
+        if ($this->valid) {
+            $statLevel = 'INFO';
+            $message   = 'Contact '.$this->contact->getId(
+                ).' was imported successfully from Campaign: '.$this->campaign->getname();
+        } else {
+            $statLevel = 'ERROR';
+            $message   = isset($this->errors) ? implode(', ', $this->errors) : 'An unexpected error occurred.';
         }
 
-        return $this->cacheModel;
+        // Session storage for external plugins (should probably be dispatcher instead).
+        $session = $this->container->get('session');
+        // Indicates that a single (or more) valid sends have been made.
+        if ($this->valid) {
+            $session->set('contactsource_valid', true);
+        }
+        // get the campaign if exists
+        $campaignId = !empty($this->campaignId) ? $this->campaignId : 0;
+
+        // Add log entry for statistics / charts.
+        $attribution = !empty($this->attribution) ? $this->attribution : 0;
+        $sourceModel->addStat($this->contactSource, $this->status, $this->contact, $attribution, $campaignId);
+        $log     = [
+            'status'         => $this->status,
+            'fieldsAccepted' => $this->fieldsAccepted,
+            'fieldsProvided' => $this->fieldsProvided,
+            'realTime'       => $this->realTime,
+            'scrubbed'       => $this->scrubbed,
+            'utmSource'      => $this->utmSource,
+            'campaign'       => $this->campaign,
+            'contact'        => $this->contact,
+        ];
+        $logYaml = Yaml::dump($log, 10, 2);
+
+        // Add transactional event for deep dive into logs.
+        $sourceModel->addEvent(
+            $this->contactSource,
+            $this->status,
+            $this->contact,
+            $logYaml, // kinda just made up a log
+            $message
+        );
     }
 
     /**
@@ -1189,60 +1278,5 @@ class Api
         }
 
         return $result;
-    }
-
-    /**
-     * Log to:
-     *      contactclient_stats
-     *      contactclient_events
-     *      integration_entity.
-     *
-     * Use LeadTimelineEvent
-     */
-    private function logResults()
-    {
-        /** @var ContactSourceModel $sourceModel */
-        $sourceModel = $this->container->get('mautic.contactsource.model.contactsource');
-
-        if ($this->valid) {
-            $statLevel = 'INFO';
-            $message   = 'Contact '.$this->contact->getId().' was imported successfully from Campaign: '.$this->campaign->getname();
-        } else {
-            $statLevel = 'ERROR';
-            $message   = isset($this->errors) ? implode(', ', $this->errors) : 'An unexpected error occurred.';
-        }
-
-        // Session storage for external plugins (should probably be dispatcher instead).
-        $session          = $this->container->get('session');
-        // Indicates that a single (or more) valid sends have been made.
-        if ($this->valid) {
-            $session->set('contactsource_valid', true);
-        }
-        // get the campaign if exists
-        $campaignId = !empty($this->campaignId) ? $this->campaignId : 0;
-
-        // Add log entry for statistics / charts.
-        $attribution = !empty($this->attribution) ? $this->attribution : 0;
-        $sourceModel->addStat($this->contactSource, $this->status, $this->contact, $attribution, $campaignId);
-        $log = [
-            'status'          => $this->status,
-            'fieldsAccepted'  => $this->fieldsAccepted,
-            'fieldsProvided'  => $this->fieldsProvided,
-            'realTime'        => $this->realTime,
-            'scrubbed'        => $this->scrubbed,
-            'utmSource'       => $this->utmSource,
-            'campaign'        => $this->campaign,
-            'contact'         => $this->contact,
-        ];
-        $logYaml = Yaml::dump($log, 10, 2);
-
-        // Add transactional event for deep dive into logs.
-        $sourceModel->addEvent(
-            $this->contactSource,
-            $this->status,
-            $this->contact,
-            $logYaml, // kinda just made up a log
-            $message
-        );
     }
 }

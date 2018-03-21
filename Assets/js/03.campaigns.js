@@ -73,6 +73,16 @@ Mautic.contactsourceCampaigns = function () {
                                 if (raw.length) {
                                     // Set the textarea.
                                     $campaigns.val(raw);
+
+                                    // Hide the Value when the scope is global.
+                                    mQuery('select[name$="[scope]"]:not(.scope-checked)').off('change').on('change', function () {
+                                        var $value = mQuery(this).parent().parent().parent().find('input[name$="[value]"]');
+                                        if (parseInt(mQuery(this).val()) === 1) {
+                                            $value.addClass('hide');
+                                        } else {
+                                            $value.removeClass('hide');
+                                        }
+                                    }).addClass('scope-checked').trigger('change');
                                 }
                             }
 
