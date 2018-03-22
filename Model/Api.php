@@ -23,8 +23,10 @@ use Mautic\LeadBundle\Entity\UtmTag;
 use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
+use MauticPlugin\MauticContactSourceBundle\Event\ContactLedgerContextEvent;
 use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Yaml\Yaml;
 
@@ -71,6 +73,9 @@ class Api
 
     /** @var string */
     protected $utmSource;
+
+    /** @var EventDispatcherInterface */
+    protected $dispatcher;
 
     /** @var bool */
     protected $scrubbed;
@@ -122,6 +127,16 @@ class Api
 
     /** @var array */
     protected $allowedFieldEntities;
+
+    /**
+     * Api constructor.
+     *
+     * @param EventDispatcherInterface $dispatcher
+     */
+    public function __construct(EventDispatcherInterface $dispatcher)
+    {
+        $this->dispatcher = $dispatcher;
+    }
 
     /**
      * Setting container instead of making this container aware for performance (DDoS mitigation).
@@ -286,7 +301,7 @@ class Api
         $this->realTime    = (bool) isset($campaignSettings->realTime) && $campaignSettings->realTime;
         $this->limits      = isset($campaignSettings->limits) ? $campaignSettings->limits : [];
         $this->scrubRate   = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
-        $this->attribution = isset($campaignSettings->cost) ? (abs(intval($campaignSettings->cost)) * -1) : 0;
+        $this->attribution = isset($campaignSettings->cost) ? (abs(floatval($campaignSettings->cost)) * -1) : 0;
         $this->utmSource   = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
         // Apply field overrides
         if (0 !== $this->attribution) {
@@ -949,6 +964,7 @@ class Api
     private function saveContact()
     {
         $exception = null;
+        $this->dispatchContextCreate();
         try {
             $this->getContactModel()->saveEntity($this->contact);
         } catch (\Exception $exception) {
@@ -962,6 +978,20 @@ class Api
             );
         }
         $this->status = Stat::TYPE_SAVED;
+    }
+
+    /**
+     * Provide context to Ledger plugin (or others) about this contact for save events.
+     */
+    private function dispatchContextCreate()
+    {
+        $event = new ContactLedgerContextEvent(
+            $this->campaign, $this->contactSource, $this->status, 'New contact is being created', $this->contact
+        );
+        $this->dispatcher->dispatch(
+            'mauticplugin.contactledger.context_create',
+            $event
+        );
     }
 
     /**
