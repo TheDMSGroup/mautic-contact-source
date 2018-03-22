@@ -129,29 +129,6 @@ class ContactSourceModel extends FormModel
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @param ContactSource $entity
-     * @param bool|false    $unlock
-     */
-    public function saveEntity($entity, $unlock = true)
-    {
-        parent::saveEntity($entity, $unlock);
-
-        $this->getRepository()->saveEntity($entity);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return \MauticPlugin\MauticContactSourceBundle\Entity\ContactSourceRepository
-     */
-    public function getRepository()
-    {
-        return $this->em->getRepository('MauticContactSourceBundle:ContactSource');
-    }
-
-    /**
      * Add a stat entry.
      *
      * @param ContactSource $contactSource
@@ -182,11 +159,78 @@ class ContactSourceModel extends FormModel
     /**
      * {@inheritdoc}
      *
+     * @param ContactSource $entity
+     * @param bool|false    $unlock
+     */
+    public function saveEntity($entity, $unlock = true)
+    {
+        parent::saveEntity($entity, $unlock);
+
+        $this->getRepository()->saveEntity($entity);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return \MauticPlugin\MauticContactSourceBundle\Entity\ContactSourceRepository
+     */
+    public function getRepository()
+    {
+        return $this->em->getRepository('MauticContactSourceBundle:ContactSource');
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @return \MauticPlugin\MauticContactSourceBundle\Entity\StatRepository
      */
     public function getStatRepository()
     {
         return $this->em->getRepository('MauticContactSourceBundle:Stat');
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return bool|ContactSourceEvent
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException
+     */
+    protected function dispatchEvent($action, &$entity, $isNew = false, Event $event = null)
+    {
+        if (!$entity instanceof ContactSource) {
+            throw new MethodNotAllowedHttpException(['ContactSource']);
+        }
+
+        switch ($action) {
+            case 'pre_save':
+                $name = ContactSourceEvents::PRE_SAVE;
+                break;
+            case 'post_save':
+                $name = ContactSourceEvents::POST_SAVE;
+                break;
+            case 'pre_delete':
+                $name = ContactSourceEvents::PRE_DELETE;
+                break;
+            case 'post_delete':
+                $name = ContactSourceEvents::POST_DELETE;
+                break;
+            default:
+                return null;
+        }
+
+        if ($this->dispatcher->hasListeners($name)) {
+            if (empty($event)) {
+                $event = new ContactSourceEvent($entity, $isNew);
+                $event->setEntityManager($this->em);
+            }
+
+            $this->dispatcher->dispatch($name, $event);
+
+            return $event;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -255,7 +299,11 @@ class ContactSourceModel extends FormModel
 
         $stat = new Stat();
         foreach ($stat->getAllTypes() as $type) {
-            $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['contactsource_id' => $contactSource->getId(), 'type' => $type]);
+            $q = $query->prepareTimeDataQuery(
+                'contactsource_stats',
+                'date_added',
+                ['contactsource_id' => $contactSource->getId(), 'type' => $type]
+            );
             if (!$canViewOthers) {
                 $this->limitQueryToCreator($q);
             }
@@ -269,6 +317,18 @@ class ContactSourceModel extends FormModel
         }
 
         return $chart->render();
+    }
+
+    /**
+     * Joins the email table and limits created_by to currently logged in user.
+     *
+     * @param QueryBuilder $q
+     */
+    public function limitQueryToCreator(QueryBuilder $q)
+    {
+        $q->join('t', MAUTIC_TABLE_PREFIX.'contactsource', 'm', 'e.id = t.contactsource_id')
+            ->andWhere('m.created_by = :userId')
+            ->setParameter('userId', $this->userHelper->getUser()->getId());
     }
 
     /**
@@ -296,7 +356,15 @@ class ContactSourceModel extends FormModel
 
         if ('revenue' != $type) {
             foreach ($campaigns as $campaign) {
-                $q = $query->prepareTimeDataQuery('contactsource_stats', 'date_added', ['contactsource_id' => $contactSource->getId(), 'type' => $type, 'campaign_id' => $campaign['campaign_id']]);
+                $q = $query->prepareTimeDataQuery(
+                    'contactsource_stats',
+                    'date_added',
+                    [
+                        'contactsource_id' => $contactSource->getId(),
+                        'type'             => $type,
+                        'campaign_id'      => $campaign['campaign_id'],
+                    ]
+                );
                 if (!$canViewOthers) {
                     $this->limitQueryToCreator($q);
                 }
@@ -349,16 +417,21 @@ class ContactSourceModel extends FormModel
         return $chart->render();
     }
 
-    /**
-     * Joins the email table and limits created_by to currently logged in user.
-     *
-     * @param QueryBuilder $q
-     */
-    public function limitQueryToCreator(QueryBuilder $q)
+    private function getCampaignsBySource(ContactSource $contactSource)
     {
-        $q->join('t', MAUTIC_TABLE_PREFIX.'contactsource', 'm', 'e.id = t.contactsource_id')
-            ->andWhere('m.created_by = :userId')
-            ->setParameter('userId', $this->userHelper->getUser()->getId());
+        $id = $contactSource->getId();
+
+        $q = $this->em->createQueryBuilder()
+            ->from('MauticContactSourceBundle:Stat', 'cs')
+            ->select('DISTINCT cs.campaign_id, c.name');
+
+        $q->where(
+            $q->expr()->eq('cs.contactSource', ':contactSourceId')
+        )
+            ->setParameter('contactSourceId', $id);
+        $q->join('MauticCampaignBundle:Campaign', 'c', 'WITH', 'cs.campaign_id = c.id');
+
+        return $q->getQuery()->getArrayResult();
     }
 
     /**
@@ -448,66 +521,5 @@ class ContactSourceModel extends FormModel
         $this->dispatcher->dispatch(ContactSourceEvents::TIMELINE_ON_GENERATE, $event);
 
         return $event->getEventCounter();
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return bool|ContactSourceEvent
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException
-     */
-    protected function dispatchEvent($action, &$entity, $isNew = false, Event $event = null)
-    {
-        if (!$entity instanceof ContactSource) {
-            throw new MethodNotAllowedHttpException(['ContactSource']);
-        }
-
-        switch ($action) {
-            case 'pre_save':
-                $name = ContactSourceEvents::PRE_SAVE;
-                break;
-            case 'post_save':
-                $name = ContactSourceEvents::POST_SAVE;
-                break;
-            case 'pre_delete':
-                $name = ContactSourceEvents::PRE_DELETE;
-                break;
-            case 'post_delete':
-                $name = ContactSourceEvents::POST_DELETE;
-                break;
-            default:
-                return null;
-        }
-
-        if ($this->dispatcher->hasListeners($name)) {
-            if (empty($event)) {
-                $event = new ContactSourceEvent($entity, $isNew);
-                $event->setEntityManager($this->em);
-            }
-
-            $this->dispatcher->dispatch($name, $event);
-
-            return $event;
-        } else {
-            return null;
-        }
-    }
-
-    private function getCampaignsBySource(ContactSource $contactSource)
-    {
-        $id = $contactSource->getId();
-
-        $q = $this->em->createQueryBuilder()
-            ->from('MauticContactSourceBundle:Stat', 'cs')
-            ->select('DISTINCT cs.campaign_id, c.name');
-
-        $q->where(
-            $q->expr()->eq('cs.contactSource', ':contactSourceId')
-        )
-            ->setParameter('contactSourceId', $id);
-        $q->join('MauticCampaignBundle:Campaign', 'c', 'WITH', 'cs.campaign_id = c.id');
-
-        return $q->getQuery()->getArrayResult();
     }
 }
