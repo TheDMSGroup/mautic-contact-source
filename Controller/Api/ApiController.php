@@ -47,7 +47,8 @@ class ApiController extends CommonApiController
         $object = strtolower($object);
         if ('contact' == $object) {
             /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
-            $ApiModel = $this->get('mautic.contactsource.model.api')
+            $ApiModel = $this->get('mautic.contactsource.model.api');
+            $ApiModel
                 ->setRequest($request)
                 ->setContainer($this->container)
                 ->setSourceId((int) $sourceId)

@@ -21,7 +21,7 @@ use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\UtmTag;
 use Mautic\LeadBundle\Model\LeadModel as ContactModel;
-use MauticPlugin\MauticContactClientBundle\Event\ContactLedgerContextEvent;
+use MauticPlugin\MauticContactSourceBundle\Event\ContactLedgerContextEvent;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
