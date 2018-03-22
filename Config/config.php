@@ -126,7 +126,10 @@ return [
                 ],
             ],
             'mautic.contactsource.model.api'               => [
-                'class' => 'MauticPlugin\MauticContactSourceBundle\Model\Api',
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\Api',
+                'arguments' => [
+                    'event_dispatcher',
+                ],
             ],
             'mautic.contactsource.model.campaign_settings' => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\CampaignSettings',

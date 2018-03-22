@@ -42,7 +42,7 @@ class ContactSourceException extends \Exception
      * @param string          $message
      * @param int             $code
      * @param \Exception|null $previous
-     * @param null            $statType
+     * @param string          $statType
      * @param null            $field
      * @param array           $data
      */
@@ -50,17 +50,14 @@ class ContactSourceException extends \Exception
         $message = 'Contact Source error',
         $code = 0,
         \Exception $previous = null,
-        $statType = null,
+        $statType = '',
         $field = null,
         $data = []
     ) {
-        if ($statType) {
-            $this->setStatType($statType);
-        }
-        if ($field) {
-            $this->setField($field);
-        }
-        $this->data = $data;
+        $this->statType = $statType;
+        $this->field    = $field;
+        $this->data     = $data;
+
         parent::__construct($message, $code, $previous);
     }
 
