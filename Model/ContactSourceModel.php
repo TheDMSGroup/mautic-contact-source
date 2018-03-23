@@ -131,18 +131,20 @@ class ContactSourceModel extends FormModel
     /**
      * Add a stat entry.
      *
-     * @param ContactSource $contactSource
-     * @param               $type
-     * @param int           $contact
-     * @param int           $attribution
-     * @param int           $campaign
+     * @param ContactSource|null $contactSource
+     * @param                    $type
+     * @param int                $contact
+     * @param int                $attribution
+     * @param int                $campaign
      */
-    public function addStat(ContactSource $contactSource, $type, $contact = 0, $attribution = 0, $campaign = 0)
+    public function addStat(ContactSource $contactSource = null, $type, $contact = 0, $attribution = 0, $campaign = 0)
     {
         $stat = new Stat();
-        $stat->setContactSource($contactSource)
-            ->setDateAdded(new \DateTime())
-            ->setType($type);
+        if ($contactSource) {
+            $stat->setContactSource($contactSource);
+        }
+        $stat->setDateAdded(new \DateTime());
+        $stat->setType($type);
         if ($contact) {
             $stat->setContact($contact);
         }
@@ -243,7 +245,7 @@ class ContactSourceModel extends FormModel
      * @param null          $message
      */
     public function addEvent(
-        ContactSource $contactSource,
+        ContactSource $contactSource = null,
         $type,
         $contact = null,
         $logs = null,
