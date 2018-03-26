@@ -102,10 +102,10 @@ class CampaignSettings
      *
      * @throws \Exception
      */
-    private function setCampaignSettings(string $campaignSettings)
+    private function setCampaignSettings(string $campaignSettings = null)
     {
         if (!$campaignSettings) {
-            throw new \Exception('Campaign Settings are blank.');
+            throw new \Exception('Campaigns have not been mapped to this source.');
         }
 
         $jsonHelper             = new JSONHelper();
