@@ -44,6 +44,16 @@ class ContactSourceRepository extends CommonRepository
     }
 
     /**
+     * {@inheritdoc}
+     *
+     * @return string
+     */
+    public function getTableAlias()
+    {
+        return 'f';
+    }
+
+    /**
      * @param \Doctrine\ORM\QueryBuilder|\Doctrine\DBAL\Query\QueryBuilder $q
      * @param                                                              $filter
      *
@@ -51,7 +61,11 @@ class ContactSourceRepository extends CommonRepository
      */
     protected function addCatchAllWhereClause($q, $filter)
     {
-        return $this->addStandardCatchAllWhereClause($q, $filter, ['f.name', 'f.website']);
+        return $this->addStandardCatchAllWhereClause(
+            $q,
+            $filter,
+            ['f.name', 'f.description', 'f.description_public', 'f.token', 'f.utm_source']
+        );
     }
 
     /**
@@ -81,16 +95,6 @@ class ContactSourceRepository extends CommonRepository
         return [
             [$this->getTableAlias().'.name', 'ASC'],
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return string
-     */
-    public function getTableAlias()
-    {
-        return 'f';
     }
 
     /**
