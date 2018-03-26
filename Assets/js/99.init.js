@@ -23,5 +23,9 @@ Mautic.contactsourceOnLoad = function () {
                 }
             }
         });
+
+        if (mQuery('#contactsource-timeline').length) {
+            Mautic.contactsourceTimelineOnLoad();
+        }
     });
 };

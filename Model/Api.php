@@ -1194,7 +1194,7 @@ class Api
     }
 
     /**
-     * Use LeadTimelineEvent
+     * Use LeadTimelineEvent.
      */
     private function logResults()
     {
