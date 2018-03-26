@@ -62,6 +62,9 @@ class Api
     /** @var array */
     protected $errors = [];
 
+    /** @var array */
+    protected $eventErrors = [];
+
     /** @var bool */
     protected $realTime;
 
@@ -379,7 +382,7 @@ class Api
                 $this->status = $status;
             }
             $field = $exception->getField();
-            if (is_integer($code)) {
+            if (is_integer($code) && $code) {
                 // We'll use these as HTTP status codes.
                 $this->statusCode = $code;
             }
@@ -1121,14 +1124,19 @@ class Api
                 && !empty($campaignResult['contactClientEvents'][$this->contact->getId()])
             ) {
                 $this->events = $campaignResult['contactClientEvents'][$this->contact->getId()];
-                foreach ($campaignResult['contactClientEvents'][$this->contact->getId()] as $event) {
-                    if ('Client' == $event['integration']) {
-                        if (isset($event['valid']) && $event['valid']) {
-                            // One valid Contact Client was found to accept the lead.
-                            $this->status = Stat::TYPE_ACCEPT;
-                            $this->valid  = true;
-                            break;
+                foreach ($campaignResult['contactClientEvents'][$this->contact->getId()] as $eventId => $event) {
+                    if (!empty($event['error'])) {
+                        $eventName = !empty($event['name']) ? $event['name'] : '';
+                        if (!is_array($event['error'])) {
+                            $event['error'] = [$event['error']];
                         }
+                        $this->eventErrors[$eventId] = $eventName.' ('.$eventId.'): '.implode(', ', $event['error']);
+                    }
+                    if (isset($event['valid']) && $event['valid']) {
+                        // One valid Contact Client was found to accept the lead.
+                        $this->status = Stat::TYPE_ACCEPT;
+                        $this->valid  = true;
+                        break;
                     }
                 }
             }
@@ -1186,12 +1194,7 @@ class Api
     }
 
     /**
-     * Log to:
-     *      contactclient_stats
-     *      contactclient_events
-     *      integration_entity.
-     *
-     * Use LeadTimelineEvent
+     * Use LeadTimelineEvent.
      */
     private function logResults()
     {
@@ -1204,7 +1207,10 @@ class Api
                 ).' was imported successfully from Campaign: '.$this->campaign->getname();
         } else {
             $statLevel = 'ERROR';
-            $message   = isset($this->errors) ? implode(', ', $this->errors) : 'An unexpected error occurred.';
+            $message   = isset($this->errors) ? implode(PHP_EOL, $this->errors) : '';
+            if ($this->eventErrors) {
+                $message = implode(PHP_EOL.'  ', $this->eventErrors);
+            }
         }
 
         // Session storage for external plugins (should probably be dispatcher instead).
@@ -1228,6 +1234,7 @@ class Api
             'utmSource'      => $this->utmSource,
             'campaign'       => $this->campaign,
             'contact'        => $this->contact,
+            'events'         => $this->events,
         ];
         $logYaml = Yaml::dump($log, 10, 2);
 
