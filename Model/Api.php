@@ -72,7 +72,7 @@ class Api
     protected $scrubRate;
 
     /** @var int */
-    protected $attribution;
+    protected $attribution = 0;
 
     /** @var string */
     protected $utmSource;
@@ -307,9 +307,6 @@ class Api
         $this->attribution = isset($campaignSettings->cost) ? (abs(floatval($campaignSettings->cost)) * -1) : 0;
         $this->utmSource   = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
         // Apply field overrides
-        if (0 !== $this->attribution) {
-            $this->fieldsProvided['attribution'] = $this->attribution;
-        }
         if ($this->utmSource) {
             $this->fieldsProvided['utm_source'] = $this->utmSource;
         }
@@ -432,7 +429,7 @@ class Api
             $this->addContactToCampaign();
             $this->processOffline();
             $this->processRealTime();
-            $this->refund();
+            $this->applyAttribution();
             $this->createCache();
         } catch (\Exception $exception) {
             $this->handleException($exception);
@@ -675,9 +672,6 @@ class Api
         $contact->setNew();
 
         // Exclude fields from the accepted array that we overrode.
-        if (0 !== $this->attribution) {
-            unset($this->fieldsAccepted['attribution']);
-        }
         if ($this->utmSource) {
             unset($this->fieldsAccepted['utm_source']);
         }
@@ -735,6 +729,9 @@ class Api
                 foreach ($this->getUtmSetters() as $q => $v) {
                     $allowedFields[$q] = str_replace('Utm', 'UTM', ucwords(str_replace('_', ' ', $q)));
                 }
+
+                unset($allowedFields['attribution']);
+                unset($allowedFields['attribution_date']);
 
                 uksort($allowedFields, 'strnatcmp');
 
@@ -1158,42 +1155,36 @@ class Api
     }
 
     /**
-     * Invert the original attribution if we did not accept the lead (for any reason) and an attribution was given.
-     * The end result may NOT balance out to 0, as we may have run through campaign actions that
-     * had costs/values associated. We are only reversing the original attribution value.
+     * Apply attribution if we accepted the lead.
      *
      * @throws \Exception
      */
-    private function refund()
+    private function applyAttribution()
     {
         if (0 == $this->attribution) {
             return;
         }
-        if ($this->status !== Stat::TYPE_ACCEPT) {
+
+        if (Stat::TYPE_ACCEPT === $this->status) {
             $originalAttribution = $this->contact->getAttribution();
-            $newAttribution      = $originalAttribution + ($this->attribution * -1);
+            // Attribution is always a negative number to represent cost.
+            $newAttribution      = $originalAttribution + $this->attribution;
             if ($newAttribution != $originalAttribution) {
                 $this->contact->addUpdatedField(
                     'attribution',
                     $newAttribution
                 );
                 $this->dispatchContextCreate();
-                try {
-                    $this->getContactModel()->saveEntity($this->contact);
-                } catch (\Exception $exception) {
-                    throw new ContactSourceException(
-                        'Could not confirm the contact was saved (ref).',
-                        Codes::HTTP_INTERNAL_SERVER_ERROR,
-                        $exception,
-                        Stat::TYPE_ERROR
-                    );
-                }
+                $this->getContactModel()->saveEntity($this->contact);
             }
+        } else {
+            // Since we did NOT accept the lead, invalidate attribution.
+            $this->attribution = 0;
         }
     }
 
     /**
-     * Create cache entry if a contact was created, used for duplicate checking and limits (with final attribution).
+     * Create cache entry if a contact was created, used for duplicate checking and limits.
      *
      * @throws \Exception
      */
@@ -1237,8 +1228,7 @@ class Api
         $campaignId = !empty($this->campaignId) ? $this->campaignId : 0;
 
         // Add log entry for statistics / charts.
-        $attribution = !empty($this->attribution) ? $this->attribution : 0;
-        $sourceModel->addStat($this->contactSource, $this->status, $this->contact, $attribution, $campaignId);
+        $sourceModel->addStat($this->contactSource, $this->status, $this->contact, $this->attribution, $campaignId);
         $log     = [
             'status'         => $this->status,
             'fieldsAccepted' => $this->fieldsAccepted,

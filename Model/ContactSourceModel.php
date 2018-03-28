@@ -399,7 +399,7 @@ class ContactSourceModel extends FormModel
             $dbUnit        = $query->translateTimeUnit($dbUnit);
             $dateConstruct = 'DATE_FORMAT(t.date_added, \''.$dbUnit.'\')';
             foreach ($campaigns as $campaign) {
-                $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution), 2) AS count')
+                $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution) * -1, 2) AS count')
                     ->where('campaign_id= :campaign_id')
                     ->setParameter('campaign_id', $campaign['campaign_id'])
                     ->groupBy($dateConstruct);
