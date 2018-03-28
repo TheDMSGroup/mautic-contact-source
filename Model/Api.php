@@ -973,7 +973,8 @@ class Api
      */
     private function saveContact()
     {
-        $exception = null;
+        $exception    = null;
+        $this->status = Stat::TYPE_SAVING;
         $this->dispatchContextCreate();
         try {
             $this->getContactModel()->saveEntity($this->contact);
@@ -999,7 +1000,7 @@ class Api
             $this->campaign, $this->contactSource, $this->status, 'New contact is being created', $this->contact
         );
         $this->dispatcher->dispatch(
-            'mauticplugin.contactledger.context_create',
+            'mautic.contactledger.context_create',
             $event
         );
     }
