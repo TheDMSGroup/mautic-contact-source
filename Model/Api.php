@@ -432,7 +432,7 @@ class Api
             $this->addContactToCampaign();
             $this->processOffline();
             $this->processRealTime();
-            $this->reverseScrub();
+            $this->refund();
             $this->createCache();
         } catch (\Exception $exception) {
             $this->handleException($exception);
@@ -609,7 +609,7 @@ class Api
         }
 
         // Must have at least ONE valid contact field (some are to be ignored since we provide them or they are core).
-        $ignore = ['ip', 'attribution', 'utm_source'];
+        $ignore = ['ip', 'attribution', 'attribution_date', 'utm_source'];
         if (!count(array_diff_key($this->fieldsProvided, array_flip($ignore)))) {
             return null;
         }
@@ -1158,15 +1158,18 @@ class Api
     }
 
     /**
-     * Invert the original attribution if we have been scrubbed and an attribution was given.
-     * Not the end result may NOT balance out to 0, as we may have run through campaign actions that
-     * had costs/values associated. We are only reversing the original value we applied.
+     * Invert the original attribution if we did not accept the lead (for any reason) and an attribution was given.
+     * The end result may NOT balance out to 0, as we may have run through campaign actions that
+     * had costs/values associated. We are only reversing the original attribution value.
      *
      * @throws \Exception
      */
-    private function reverseScrub()
+    private function refund()
     {
-        if ($this->isScrubbed() && 0 !== $this->attribution) {
+        if (0 == $this->attribution) {
+            return;
+        }
+        if ($this->status !== Stat::TYPE_ACCEPT) {
             $originalAttribution = $this->contact->getAttribution();
             $newAttribution      = $originalAttribution + ($this->attribution * -1);
             if ($newAttribution != $originalAttribution) {
@@ -1174,7 +1177,17 @@ class Api
                     'attribution',
                     $newAttribution
                 );
-                $this->getContactModel()->saveEntity($this->contact);
+                $this->dispatchContextCreate();
+                try {
+                    $this->getContactModel()->saveEntity($this->contact);
+                } catch (\Exception $exception) {
+                    throw new ContactSourceException(
+                        'Could not confirm the contact was saved (ref).',
+                        Codes::HTTP_INTERNAL_SERVER_ERROR,
+                        $exception,
+                        Stat::TYPE_ERROR
+                    );
+                }
             }
         }
     }
