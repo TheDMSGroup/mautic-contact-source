@@ -39,6 +39,8 @@ class Stat
 
     const TYPE_SAVED     = 'saved';
 
+    const TYPE_SAVING    = 'saving';
+
     const TYPE_SCRUB     = 'scrubbed';
 
     /** @var int $id */
