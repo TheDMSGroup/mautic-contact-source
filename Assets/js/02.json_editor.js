@@ -289,17 +289,11 @@ JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
                     return val + '%';
                 };
             }
-            var sliderValue = document.createElement('span');
-            sliderValue.id = 'sliderValue';
-            sliderValue.className = 'slidervalue';
-            sliderValue.innerHTML = value + '%';
 
-            var scrubRate = mQuery('div[data-schemapath="root.campaigns.0.scrubRate"] div span');
-            if (scrubRate[0].contains(document.getElementById('sliderValue')) == false) {
-                scrubRate[0].appendChild(sliderValue);
-            }
+            var $sliderValue = mQuery('<span class="slidervalue">' + value + '%' + '</span>')
+                .insertAfter($slider.parent().find('span:first')),
+                slider = new Slider(mQuery(this)[0], options);
 
-            var slider = new Slider(mQuery(this)[0], options);
             slider.on('change', function (o) {
                 if ('createEvent' in document) {
                     var event = document.createEvent('HTMLEvents');
@@ -309,8 +303,7 @@ JSONEditor.defaults.custom_validators.push(function (schema, value, path) {
                 else {
                     $slider[0].fireEvent('onchange');
                 }
-                sliderValue = document.getElementById('sliderValue');
-                sliderValue.innerHTML = document.getElementsByClassName('tooltip-inner')[0].innerText;
+                $sliderValue.text(o.newValue + '%');
             });
         }).addClass('slider-checked');
     }
