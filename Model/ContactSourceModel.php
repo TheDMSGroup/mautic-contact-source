@@ -336,6 +336,7 @@ class ContactSourceModel extends FormModel
     /**
      * @param ContactSource  $contactSource
      * @param                $unit
+     * @param                $type
      * @param \DateTime|null $dateFrom
      * @param \DateTime|null $dateTo
      * @param null           $dateFormat
@@ -356,7 +357,7 @@ class ContactSourceModel extends FormModel
         $query     = new ChartQuery($this->em->getConnection(), $dateFrom, $dateTo, $unit);
         $campaigns = $this->getCampaignsBySource($contactSource);
 
-        if ('revenue' != $type) {
+        if ('cost' != $type) {
             foreach ($campaigns as $campaign) {
                 $q = $query->prepareTimeDataQuery(
                     'contactsource_stats',
@@ -388,7 +389,6 @@ class ContactSourceModel extends FormModel
                 'date_added',
                 [
                     'contactsource_id' => $contactSource->getId(),
-                    'campaign_id'      => $campaign['campaign_id'],
                     'type'             => Stat::TYPE_ACCEPT,
                 ]
             );
@@ -398,10 +398,10 @@ class ContactSourceModel extends FormModel
             $dbUnit        = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
             $dbUnit        = $query->translateTimeUnit($dbUnit);
             $dateConstruct = 'DATE_FORMAT(t.date_added, \''.$dbUnit.'\')';
-            foreach ($campaigns as $campaign) {
+            foreach ($campaigns as $key => $campaign) {
                 $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution) * -1, 2) AS count')
-                    ->where('campaign_id= :campaign_id')
-                    ->setParameter('campaign_id', $campaign['campaign_id'])
+                    ->where('campaign_id= :campaign_id'.$key)
+                    ->setParameter('campaign_id'.$key, $campaign['campaign_id'])
                     ->groupBy($dateConstruct);
                 $data = $query->loadAndBuildTimeData($q);
                 foreach ($data as $val) {
