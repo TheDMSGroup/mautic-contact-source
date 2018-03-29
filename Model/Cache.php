@@ -38,6 +38,9 @@ class Cache extends AbstractCommonModel
     /** @var \Symfony\Component\DependencyInjection\Container */
     protected $container;
 
+    /** @var string */
+    protected $timezone;
+
     /**
      * Create all necessary cache entities for the given Contact and Contact Source.
      *
@@ -157,7 +160,8 @@ class Cache extends AbstractCommonModel
         $duplicate = $this->getRepository()->findDuplicate(
             $this->contact,
             $this->contactSource,
-            $this->getDuplicateRules()
+            $this->getDuplicateRules(),
+            $this->getTimezone()
         );
         if ($duplicate) {
             throw new ContactSourceException(
@@ -234,6 +238,24 @@ class Cache extends AbstractCommonModel
     }
 
     /**
+     * Get the global timezone setting.
+     *
+     * @return mixed
+     *
+     * @throws \Exception
+     */
+    private function getTimezone()
+    {
+        if (!$this->timezone) {
+            $this->timezone = $this->getContainer()->get('mautic.helper.core_parameters')->getParameter(
+                'default_timezone'
+            );
+        }
+
+        return $this->timezone;
+    }
+
+    /**
      * Using the duplicate rules, evaluate if the current contact matches any entry in the cache.
      *
      * @param array $limitRules
@@ -244,11 +266,12 @@ class Cache extends AbstractCommonModel
      */
     public function evaluateLimits($limitRules = [], $campaignId = 0)
     {
-        $limitRules   = $this->mergeRules($limitRules, false);
-        $limits       = $this->getRepository()->findLimit(
+        $limitRules = $this->mergeRules($limitRules, false);
+        $limits     = $this->getRepository()->findLimit(
             $this->contactSource,
             $limitRules,
-            $campaignId
+            $campaignId,
+            $this->getTimezone()
         );
         if ($limits) {
             throw new ContactSourceException(

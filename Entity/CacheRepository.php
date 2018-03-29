@@ -45,6 +45,7 @@ class CacheRepository extends CommonRepository
      * @param ContactSource $contactSource
      * @param array         $rules
      * @param int           $campaignId
+     * @param string        $timezone
      *
      * @return array|null
      *
@@ -53,7 +54,8 @@ class CacheRepository extends CommonRepository
     public function findLimit(
         ContactSource $contactSource,
         $rules = [],
-        $campaignId = 0
+        $campaignId = 0,
+        $timezone = null
     ) {
         $filters = [];
         $result  = null;
@@ -91,11 +93,9 @@ class CacheRepository extends CommonRepository
             $andx['contactsource_id'] = $contactSource->getId();
 
             // Match duration (always, including campaign scope)
-            $oldest = new \DateTime();
-            $oldest->sub(new \DateInterval($duration));
             $filters[] = [
-                'andx'             => $andx,
-                'date_added'       => $oldest->format('Y-m-d H:i:s'),
+                'andx'       => $andx,
+                'date_added' => $this->oldestDateAdded($duration, $timezone),
             ];
 
             // Run the query to get the count.
@@ -111,6 +111,58 @@ class CacheRepository extends CommonRepository
         }
 
         return $result;
+    }
+
+    /**
+     * Support non-rolling durations when P is not prefixing.
+     *
+     * @param      $duration
+     * @param null $timezone
+     *
+     * @return string
+     *
+     * @throws \Exception
+     */
+    public function oldestDateAdded($duration, $timezone = null)
+    {
+        if (0 === strpos($duration, 'P')) {
+            // Standard rolling interval.
+            $oldest = new \DateTime();
+        } else {
+            // Non-rolling interval, go to previous interval segment.
+            // Will only work for simple (singular) intervals.
+            if (!$timezone) {
+                $timezone = date_default_timezone_get();
+            }
+            $timezone = new \DateTimeZone($timezone);
+            switch (strtoupper(substr($duration, -1))) {
+                case 'Y':
+                    $oldest = new \DateTime('next year jan 1 midnight', $timezone);
+                    break;
+                case 'M':
+                    $oldest = new \DateTime('first day of next month midnight', $timezone);
+                    break;
+                case 'W':
+                    $oldest = new \DateTime('sunday next week midnight', $timezone);
+                    break;
+                case 'D':
+                    $oldest = new \DateTime('tomorrow midnight', $timezone);
+                    break;
+                default:
+                    $oldest = new \DateTime();
+            }
+            // Add P so that we can now use standard interval
+            $duration = 'P'.$duration;
+        }
+        try {
+            $interval = new \DateInterval($duration);
+        } catch (\Exception $e) {
+            // Default to monthly if the interval is faulty.
+            $interval = new \DateInterval('P1M');
+        }
+        $oldest->sub($interval);
+
+        return $oldest->format('Y-m-d H:i:s');
     }
 
     /**
@@ -190,15 +242,17 @@ class CacheRepository extends CommonRepository
      * @param Contact       $contact
      * @param ContactSource $contactSource
      * @param array         $rules
+     * @param string        $timezone
      *
-     * @return bool|mixed
+     * @return mixed|null
      *
      * @throws \Exception
      */
     public function findDuplicate(
         Contact $contact,
         ContactSource $contactSource,
-        $rules = []
+        $rules = [],
+        $timezone = null
     ) {
         // Generate our filters based on the rules provided.
         $filters = [];
@@ -297,11 +351,9 @@ class CacheRepository extends CommonRepository
 
             if ($orx) {
                 // Match duration (always), once all other aspects of the query are ready.
-                $oldest = new \DateTime();
-                $oldest->sub(new \DateInterval($duration));
                 $filters[] = [
                     'orx'              => $orx,
-                    'date_added'       => $oldest->format('Y-m-d H:i:s'),
+                    'date_added'       => $this->oldestDateAdded($duration, $timezone),
                     'contactsource_id' => $contactSource->getId(),
                 ];
             }
