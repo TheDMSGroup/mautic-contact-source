@@ -462,6 +462,8 @@ class Api
 
     /**
      * Evaluate the "verbose" header if provided, to match against configuration.
+     *
+     * @throws ContactSourceException
      */
     private function parseVerbosity()
     {
