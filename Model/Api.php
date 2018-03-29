@@ -202,18 +202,6 @@ class Api
     }
 
     /**
-     * @param bool $verbose
-     *
-     * @return $this
-     */
-    public function setVerbose($verbose = false)
-    {
-        $this->verbose = $verbose;
-
-        return $this;
-    }
-
-    /**
      * Parse and validate for public access, without field and token validation.
      *
      * @return $this
@@ -459,6 +447,7 @@ class Api
      */
     private function handleInputPrivate()
     {
+        $this->parseVerbosity();
         $this->parseFieldsProvided();
         $this->parseSourceId();
         $this->parseCampaignId();
@@ -467,6 +456,55 @@ class Api
         $this->validateToken();
         $this->parseSourceCampaignSettings();
         $this->parseCampaign();
+
+        return $this;
+    }
+
+    /**
+     * Evaluate the "verbose" header if provided, to match against configuration.
+     */
+    private function parseVerbosity()
+    {
+        $verboseHeader = $this->request->headers->get('verbose');
+        if (null !== $verboseHeader) {
+            // The default key is 1, for BC.
+            $verboseKey = '1';
+            /** @var \Mautic\PluginBundle\Helper\IntegrationHelper $helper */
+            $helper = $this->dispatcher->getContainer()->get('mautic.helper.integration');
+            /** @var \Mautic\PluginBundle\Integration\AbstractIntegration $object */
+            $object = $helper->getIntegrationObject('Source');
+            if ($object) {
+                $objectSettings = $object->getIntegrationSettings();
+                if ($objectSettings) {
+                    $featureSettings = $objectSettings->getFeatureSettings();
+                    if (!empty($featureSettings['verbose'])) {
+                        $verboseKey = $featureSettings['verbose'];
+                    }
+                }
+            }
+            $verbose = $verboseHeader == $verboseKey;
+            if ($verbose) {
+                $this->setVerbose(true);
+            } else {
+                throw new ContactSourceException(
+                    'The verbose token passed was not correct. This field should only be used for debugging.',
+                    Codes::HTTP_UNAUTHORIZED,
+                    null,
+                    Stat::TYPE_INVALID,
+                    'verbose'
+                );
+            }
+        }
+    }
+
+    /**
+     * @param bool $verbose
+     *
+     * @return $this
+     */
+    public function setVerbose($verbose = false)
+    {
+        $this->verbose = $verbose;
 
         return $this;
     }

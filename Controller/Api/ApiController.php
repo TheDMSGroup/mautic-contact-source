@@ -53,7 +53,6 @@ class ApiController extends CommonApiController
                 ->setContainer($this->container)
                 ->setSourceId((int) $sourceId)
                 ->setCampaignId((int) $campaignId)
-                ->setVerbose((bool) $request->headers->get('verbose'))
                 ->validateAndImportContact();
 
             $result = $ApiModel->getResult();
