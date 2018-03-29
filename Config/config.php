@@ -129,6 +129,7 @@ return [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\Api',
                 'arguments' => [
                     'event_dispatcher',
+                    'doctrine.orm.entity_manager',
                 ],
             ],
             'mautic.contactsource.model.campaign_settings' => [

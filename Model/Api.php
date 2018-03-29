@@ -11,6 +11,7 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
+use Doctrine\ORM\EntityManager;
 use FOS\RestBundle\Util\Codes;
 use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CampaignBundle\Entity\Lead as CampaignContact;
@@ -21,6 +22,7 @@ use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\UtmTag;
 use Mautic\LeadBundle\Model\LeadModel as ContactModel;
+use Mautic\PluginBundle\Entity\IntegrationEntity;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Event\ContactLedgerContextEvent;
@@ -131,14 +133,22 @@ class Api
     /** @var array */
     protected $allowedFieldEntities;
 
+    /** @var array */
+    protected $logs = [];
+
+    /** @var EntityManager */
+    protected $em;
+
     /**
      * Api constructor.
      *
      * @param EventDispatcherInterface $dispatcher
+     * @param EntityManager            $em
      */
-    public function __construct(EventDispatcherInterface $dispatcher)
+    public function __construct(EventDispatcherInterface $dispatcher, EntityManager $em)
     {
         $this->dispatcher = $dispatcher;
+        $this->em         = $em;
     }
 
     /**
@@ -1168,7 +1178,7 @@ class Api
         if (Stat::TYPE_ACCEPT === $this->status) {
             $originalAttribution = $this->contact->getAttribution();
             // Attribution is always a negative number to represent cost.
-            $newAttribution      = $originalAttribution + $this->attribution;
+            $newAttribution = $originalAttribution + $this->attribution;
             if ($newAttribution != $originalAttribution) {
                 $this->contact->addUpdatedField(
                     'attribution',
@@ -1229,27 +1239,83 @@ class Api
 
         // Add log entry for statistics / charts.
         $sourceModel->addStat($this->contactSource, $this->status, $this->contact, $this->attribution, $campaignId);
-        $log     = [
-            'status'         => $this->status,
-            'fieldsAccepted' => $this->fieldsAccepted,
-            'fieldsProvided' => $this->fieldsProvided,
-            'realTime'       => $this->realTime,
-            'scrubbed'       => $this->scrubbed,
-            'utmSource'      => $this->utmSource,
-            'campaign'       => $this->campaign,
-            'contact'        => $this->contact,
-            'events'         => $this->events,
-        ];
-        $logYaml = Yaml::dump($log, 10, 2);
+        $this->logs = array_merge(
+            $this->logs,
+            [
+                'status'         => $this->status,
+                'fieldsAccepted' => $this->fieldsAccepted,
+                'fieldsProvided' => $this->fieldsProvided,
+                'realTime'       => $this->realTime,
+                'scrubbed'       => $this->scrubbed,
+                'utmSource'      => $this->utmSource,
+                'campaign'       => $this->campaign ? $this->campaign->convertToArray() : null,
+                'contact'        => $this->contact ? $this->contact->convertToArray() : null,
+                'events'         => $this->events,
+            ]
+        );
 
         // Add transactional event for deep dive into logs.
         $sourceModel->addEvent(
             $this->contactSource,
             $this->status,
             $this->contact,
-            $logYaml, // kinda just made up a log
+            Yaml::dump($this->logs, 10, 2),
             $message
         );
+
+        // Integration entity creation (shows up under Integrations in a Contact).
+        if ($this->contact && $this->contact->getId()) {
+            $integrationEntities = [
+                $this->saveSyncedData(
+                    'Source',
+                    'ContactSource',
+                    $this->contactSource->getId(),
+                    $this->contact
+                ),
+            ];
+            if (!empty($integrationEntities)) {
+                $this->em->getRepository('MauticPluginBundle:IntegrationEntity')->saveEntities($integrationEntities);
+                $this->em->clear('Mautic\PluginBundle\Entity\IntegrationEntity');
+            }
+        }
+    }
+
+    /**
+     * Create a new integration record (we are never updating here).
+     *
+     * @param        $integrationName
+     * @param        $integrationEntity
+     * @param        $integrationEntityId
+     * @param        $entity
+     * @param string $internalEntityType
+     * @param null   $internalData
+     *
+     * @return IntegrationEntity
+     */
+    private function saveSyncedData(
+        $integrationName,
+        $integrationEntity,
+        $integrationEntityId,
+        $entity,
+        $internalEntityType = 'lead',
+        $internalData = null
+    ) {
+        /** @var IntegrationEntity $newIntegrationEntity */
+        $newIntegrationEntity = new IntegrationEntity();
+        $newIntegrationEntity->setDateAdded(new \DateTime());
+        $newIntegrationEntity->setIntegration($integrationName);
+        $newIntegrationEntity->setIntegrationEntity($integrationEntity);
+        $newIntegrationEntity->setIntegrationEntityId($integrationEntityId);
+        $newIntegrationEntity->setInternalEntity($internalEntityType);
+        $newIntegrationEntity->setInternalEntityId($entity->getId());
+        $newIntegrationEntity->setLastSyncDate(new \DateTime());
+
+        // This is too heavy of data to log in multiple locations.
+        if ($internalData) {
+            $newIntegrationEntity->setInternal($internalData);
+        }
+
+        return $newIntegrationEntity;
     }
 
     /**
