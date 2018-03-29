@@ -11,6 +11,7 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
+use Doctrine\ORM\EntityManager;
 use FOS\RestBundle\Util\Codes;
 use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CampaignBundle\Entity\Lead as CampaignContact;
@@ -21,6 +22,7 @@ use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\UtmTag;
 use Mautic\LeadBundle\Model\LeadModel as ContactModel;
+use Mautic\PluginBundle\Entity\IntegrationEntity;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Event\ContactLedgerContextEvent;
@@ -90,7 +92,7 @@ class Api
     protected $campaign;
 
     /** @var array */
-    protected $fieldsAccepted;
+    protected $fieldsStored;
 
     /** @var array */
     protected $fieldsProvided;
@@ -131,14 +133,22 @@ class Api
     /** @var array */
     protected $allowedFieldEntities;
 
+    /** @var array */
+    protected $logs = [];
+
+    /** @var EntityManager */
+    protected $em;
+
     /**
      * Api constructor.
      *
      * @param EventDispatcherInterface $dispatcher
+     * @param EntityManager            $em
      */
-    public function __construct(EventDispatcherInterface $dispatcher)
+    public function __construct(EventDispatcherInterface $dispatcher, EntityManager $em)
     {
         $this->dispatcher = $dispatcher;
+        $this->em         = $em;
     }
 
     /**
@@ -187,18 +197,6 @@ class Api
     public function setCampaignId($campaignId = null)
     {
         $this->campaignId = $campaignId;
-
-        return $this;
-    }
-
-    /**
-     * @param bool $verbose
-     *
-     * @return $this
-     */
-    public function setVerbose($verbose = false)
-    {
-        $this->verbose = $verbose;
 
         return $this;
     }
@@ -449,6 +447,7 @@ class Api
      */
     private function handleInputPrivate()
     {
+        $this->parseVerbosity();
         $this->parseFieldsProvided();
         $this->parseSourceId();
         $this->parseCampaignId();
@@ -457,6 +456,55 @@ class Api
         $this->validateToken();
         $this->parseSourceCampaignSettings();
         $this->parseCampaign();
+
+        return $this;
+    }
+
+    /**
+     * Evaluate the "verbose" header if provided, to match against configuration.
+     */
+    private function parseVerbosity()
+    {
+        $verboseHeader = $this->request->headers->get('verbose');
+        if (null !== $verboseHeader) {
+            // The default key is 1, for BC.
+            $verboseKey = '1';
+            /** @var \Mautic\PluginBundle\Helper\IntegrationHelper $helper */
+            $helper = $this->dispatcher->getContainer()->get('mautic.helper.integration');
+            /** @var \Mautic\PluginBundle\Integration\AbstractIntegration $object */
+            $object = $helper->getIntegrationObject('Source');
+            if ($object) {
+                $objectSettings = $object->getIntegrationSettings();
+                if ($objectSettings) {
+                    $featureSettings = $objectSettings->getFeatureSettings();
+                    if (!empty($featureSettings['verbose'])) {
+                        $verboseKey = $featureSettings['verbose'];
+                    }
+                }
+            }
+            $verbose = $verboseHeader == $verboseKey;
+            if ($verbose) {
+                $this->setVerbose(true);
+            } else {
+                throw new ContactSourceException(
+                    'The verbose token passed was not correct. This field should only be used for debugging.',
+                    Codes::HTTP_UNAUTHORIZED,
+                    null,
+                    Stat::TYPE_INVALID,
+                    'verbose'
+                );
+            }
+        }
+    }
+
+    /**
+     * @param bool $verbose
+     *
+     * @return $this
+     */
+    public function setVerbose($verbose = false)
+    {
+        $this->verbose = $verbose;
 
         return $this;
     }
@@ -623,8 +671,8 @@ class Api
         }
 
         // Accepted fields straight from the contact entity.
-        $this->fieldsAccepted = $contact->getUpdatedFields();
-        if (!count($this->fieldsAccepted)) {
+        $this->fieldsStored = $contact->getUpdatedFields();
+        if (!count($this->fieldsStored)) {
             throw new ContactSourceException(
                 'There were no valid fields needed to create a contact for this campaign.',
                 Codes::HTTP_BAD_REQUEST,
@@ -633,7 +681,7 @@ class Api
             );
         }
         if (isset($this->fieldsProvided['ip'])) {
-            $this->fieldsAccepted['ip'] = $this->fieldsProvided['ip'];
+            $this->fieldsStored['ip'] = $this->fieldsProvided['ip'];
         }
 
         // Cycle through calling appropriate setters if there is utm data.
@@ -641,7 +689,7 @@ class Api
             foreach ($this->getUtmSetters() as $q => $setter) {
                 if (isset($utmTagData[$q])) {
                     $this->getUtmTag()->$setter($utmTagData[$q]);
-                    $this->fieldsAccepted[$q] = $utmTagData[$q];
+                    $this->fieldsStored[$q] = $utmTagData[$q];
                 }
             }
 
@@ -671,13 +719,8 @@ class Api
         }
         $contact->setNew();
 
-        // Exclude fields from the accepted array that we overrode.
-        if ($this->utmSource) {
-            unset($this->fieldsAccepted['utm_source']);
-        }
-
         // Sort the accepted fields for a nice output.
-        ksort($this->fieldsAccepted);
+        ksort($this->fieldsStored);
 
         $this->contact = $contact;
     }
@@ -1168,7 +1211,7 @@ class Api
         if (Stat::TYPE_ACCEPT === $this->status) {
             $originalAttribution = $this->contact->getAttribution();
             // Attribution is always a negative number to represent cost.
-            $newAttribution      = $originalAttribution + $this->attribution;
+            $newAttribution = $originalAttribution + $this->attribution;
             if ($newAttribution != $originalAttribution) {
                 $this->contact->addUpdatedField(
                     'attribution',
@@ -1229,27 +1272,83 @@ class Api
 
         // Add log entry for statistics / charts.
         $sourceModel->addStat($this->contactSource, $this->status, $this->contact, $this->attribution, $campaignId);
-        $log     = [
-            'status'         => $this->status,
-            'fieldsAccepted' => $this->fieldsAccepted,
-            'fieldsProvided' => $this->fieldsProvided,
-            'realTime'       => $this->realTime,
-            'scrubbed'       => $this->scrubbed,
-            'utmSource'      => $this->utmSource,
-            'campaign'       => $this->campaign,
-            'contact'        => $this->contact,
-            'events'         => $this->events,
-        ];
-        $logYaml = Yaml::dump($log, 10, 2);
+        $this->logs = array_merge(
+            $this->logs,
+            [
+                'status'         => $this->status,
+                'fieldsProvided' => $this->fieldsProvided,
+                'fieldsStored'   => $this->fieldsStored,
+                'realTime'       => $this->realTime,
+                'scrubbed'       => $this->scrubbed,
+                'utmSource'      => $this->utmSource,
+                'campaign'       => $this->campaign ? $this->campaign->convertToArray() : null,
+                'contact'        => $this->contact ? $this->contact->convertToArray() : null,
+                'events'         => $this->events,
+            ]
+        );
 
         // Add transactional event for deep dive into logs.
         $sourceModel->addEvent(
             $this->contactSource,
             $this->status,
             $this->contact,
-            $logYaml, // kinda just made up a log
+            Yaml::dump($this->logs, 10, 2),
             $message
         );
+
+        // Integration entity creation (shows up under Integrations in a Contact).
+        if ($this->contact && $this->contact->getId()) {
+            $integrationEntities = [
+                $this->saveSyncedData(
+                    'Source',
+                    'ContactSource',
+                    $this->contactSource->getId(),
+                    $this->contact
+                ),
+            ];
+            if (!empty($integrationEntities)) {
+                $this->em->getRepository('MauticPluginBundle:IntegrationEntity')->saveEntities($integrationEntities);
+                $this->em->clear('Mautic\PluginBundle\Entity\IntegrationEntity');
+            }
+        }
+    }
+
+    /**
+     * Create a new integration record (we are never updating here).
+     *
+     * @param        $integrationName
+     * @param        $integrationEntity
+     * @param        $integrationEntityId
+     * @param        $entity
+     * @param string $internalEntityType
+     * @param null   $internalData
+     *
+     * @return IntegrationEntity
+     */
+    private function saveSyncedData(
+        $integrationName,
+        $integrationEntity,
+        $integrationEntityId,
+        $entity,
+        $internalEntityType = 'lead',
+        $internalData = null
+    ) {
+        /** @var IntegrationEntity $newIntegrationEntity */
+        $newIntegrationEntity = new IntegrationEntity();
+        $newIntegrationEntity->setDateAdded(new \DateTime());
+        $newIntegrationEntity->setIntegration($integrationName);
+        $newIntegrationEntity->setIntegrationEntity($integrationEntity);
+        $newIntegrationEntity->setIntegrationEntityId($integrationEntityId);
+        $newIntegrationEntity->setInternalEntity($internalEntityType);
+        $newIntegrationEntity->setInternalEntityId($entity->getId());
+        $newIntegrationEntity->setLastSyncDate(new \DateTime());
+
+        // This is too heavy of data to log in multiple locations.
+        if ($internalData) {
+            $newIntegrationEntity->setInternal($internalData);
+        }
+
+        return $newIntegrationEntity;
     }
 
     /**
@@ -1261,11 +1360,18 @@ class Api
     {
         $result = [];
 
-        // Parse the response.
-        if ($this->valid && $this->attribution) {
+        // Allowed fields.
+        if ($this->verbose) {
+            $result['allowedFields'] = $this->getAllowedFields();
+        }
+
+        // Attribution (cost) applied.
+        if ($this->verbose) {
             // Attribution in this context is the revenue/cost for the third party.
             $result['attribution'] = $this->attribution;
         }
+
+        // Campaign.
         if ($this->campaign) {
             $result['campaign']         = [];
             $result['campaign']['id']   = $this->campaign->getId();
@@ -1275,54 +1381,57 @@ class Api
                 $result['campaign']['category']    = $this->campaign->getCategory();
             }
         }
-        if ($this->fieldsAccepted) {
-            $result['fields'] = $this->fieldsAccepted;
+
+        // Contact.
+        $result['contact'] = null;
+        if ($this->contact) {
+            // This is a simplified output of the "Contact"
+            // It is a flat array, containing only the fields that we accepted and used to create the contact.
+            // It does not include the same entity structure as you would find in the core API.
+            $result['contact']       = [];
+            $result['contact']['id'] = $this->contact->getId();
+            if ($this->verbose) {
+                $result['contact']['fields'] = $this->fieldsStored;
+            }
         }
+
+        // Errors.
+        $result['errors'] = null;
+        if ($this->errors) {
+            $result['errors'] = $this->errors;
+        }
+
+        // Events (for real-time campaigns).
+        if ($this->verbose) {
+            $result['events'] = $this->events;
+        }
+
+        // Source.
         if ($this->contactSource) {
             $result['source']         = [];
             $result['source']['id']   = $this->contactSource->getId();
             $result['source']['name'] = $this->contactSource->getName();
             if ($this->verbose) {
-                $result['source']['description']   = $this->contactSource->getDescriptionPublic();
                 $result['source']['category']      = $this->contactSource->getCategory();
+                $result['source']['description']   = $this->contactSource->getDescriptionPublic();
                 $result['source']['documentation'] = $this->contactSource->getDocumentation();
             }
         }
-        if ($this->verbose && $this->utmSource) {
-            $result['utmSource'] = $this->utmSource;
-        }
-        $result['success'] = $this->valid;
 
-        /*
-         * Optionally include debug data.
-         *
-         * @deprecated
-         */
+        // Status.
         if ($this->verbose) {
             $result['status'] = $this->status;
-            if ($this->events) {
-                $result['events'] = $this->events;
-            }
-        }
-        // Append errors to the response if given.
-        if ($this->errors) {
-            $result['errors'] = $this->errors;
         }
 
-        if ($this->contact && $this->valid && $this->fieldsAccepted) {
-            // This is a simplified output of the "Contact"
-            // It is a flat array, containing only the fields that we accepted and used to create the contact.
-            // It does not include the same entity structure as you would find in the core API.
-            // This is intentional, since we do not necessarily want the third party to have access to all data,
-            // that has been appended to the contact during the ingestion process.
-            $result['contact']       = $this->fieldsAccepted;
-            $result['contact']['id'] = $this->contact->getId();
-        }
-
+        // HTTP Status Code.
         $result['statusCode'] = $this->statusCode;
 
+        // Success boolean.
+        $result['success'] = $this->valid;
+
+        // UTM Source.
         if ($this->verbose) {
-            $result['allowedFields'] = $this->getAllowedFields();
+            $result['utmSource'] = $this->utmSource;
         }
 
         return $result;

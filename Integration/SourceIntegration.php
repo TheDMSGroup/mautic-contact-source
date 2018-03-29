@@ -71,6 +71,17 @@ class SourceIntegration extends AbstractIntegration
                     ],
                 ]
             );
+            $builder->add(
+                'verbose',
+                'text',
+                [
+                    'label' => $this->translator->trans('mautic.contactsource.verbose'),
+                    'data'  => !isset($data['verbose']) ? '1' : $data['verbose'],
+                    'attr'  => [
+                        'tooltip' => $this->translator->trans('mautic.contactsource.verbose.tooltip'),
+                    ],
+                ]
+            );
         }
     }
 }
