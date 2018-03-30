@@ -1211,6 +1211,7 @@ class Api
         }
 
         if (Stat::TYPE_ACCEPT === $this->status) {
+            $this->contact       = $this->getContactModel()->getEntity($this->contact->getId());
             $originalAttribution = $this->contact->getAttribution();
             // Attribution is always a negative number to represent cost.
             $newAttribution = $originalAttribution + $this->attribution;
