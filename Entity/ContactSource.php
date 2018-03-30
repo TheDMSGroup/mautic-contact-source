@@ -29,7 +29,7 @@ class ContactSource extends FormEntity
     private $id;
 
     /** @var string */
-    private $utm_source;
+    private $utmSource;
 
     /** @var string */
     private $description;
@@ -104,7 +104,7 @@ class ContactSource extends FormEntity
 
         $builder->addPublishDates();
 
-        $builder->addNullableField('utm_source', 'string');
+        $builder->addNamedField('utmSource', 'string', 'utm_source', true);
 
         $builder->addNullableField('description_public', 'string');
 
@@ -300,19 +300,19 @@ class ContactSource extends FormEntity
      */
     public function getUtmSource()
     {
-        return $this->utm_source;
+        return $this->utmSource;
     }
 
     /**
-     * @param mixed $utm_source
+     * @param mixed $utmSource
      *
      * @return ContactSource
      */
-    public function setUtmSource($utm_source)
+    public function setUtmSource($utmSource)
     {
-        $this->isChanged('utm_source', $utm_source);
+        $this->isChanged('utmSource', $utmSource);
 
-        $this->utm_source = $utm_source;
+        $this->utmSource = $utmSource;
 
         return $this;
     }
