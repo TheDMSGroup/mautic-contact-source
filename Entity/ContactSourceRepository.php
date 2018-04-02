@@ -64,7 +64,7 @@ class ContactSourceRepository extends CommonRepository
         return $this->addStandardCatchAllWhereClause(
             $q,
             $filter,
-            ['f.name', 'f.description', 'f.description_public', 'f.token', 'f.utm_source']
+            ['f.name', 'f.description', 'f.description_public', 'f.token', 'f.utmSource']
         );
     }
 
