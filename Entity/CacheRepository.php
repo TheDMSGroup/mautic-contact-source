@@ -85,7 +85,7 @@ class CacheRepository extends CommonRepository
             if ($scope & self::SCOPE_UTM_SOURCE) {
                 $utmSource = trim($value);
                 if (!empty($utmSource)) {
-                    $andx['utm_source'] = trim($value);
+                    $andx['utm_source'] = $utmSource;
                 }
             }
 
