@@ -136,6 +136,7 @@ class EventRepository extends CommonRepository
                 'results' => $results,
             ];
         }
+
         return $results;
     }
 
