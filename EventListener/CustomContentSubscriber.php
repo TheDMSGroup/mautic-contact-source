@@ -3,13 +3,13 @@
  * Created by PhpStorm.
  * User: nbush
  * Date: 3/31/18
- * Time: 8:39 PM
+ * Time: 8:39 PM.
  */
 
 namespace MauticPlugin\MauticContactSourceBundle\EventListener;
 
-use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use Mautic\CoreBundle\CoreEvents;
 use Mautic\CoreBundle\Event\CustomContentEvent;
@@ -24,6 +24,7 @@ class CustomContentSubscriber extends CommonSubscriber
 
     /**
      * CustomContentSubscriber constructor.
+     *
      * @param EntityManager $em
      */
     public function __construct(EntityManager $em)
@@ -52,7 +53,7 @@ class CustomContentSubscriber extends CommonSubscriber
                     $dateRangeForm = $vars['dateRangeForm'];
 
                     $dateFrom = new \DateTime($dateRangeForm->children['date_from']->vars['value']);
-                    $dateTo = new \DateTime($dateRangeForm->children['date_to']->vars['value']);
+                    $dateTo   = new \DateTime($dateRangeForm->children['date_to']->vars['value']);
 
                     $builder = $this->em->getConnection()->createQueryBuilder();
                     $builder
@@ -62,13 +63,15 @@ class CustomContentSubscriber extends CommonSubscriber
                             'COUNT(*) as contacts'
                         )
                         ->from('contactsource', 's')
-                        ->join('s','contactsource_stats', 'c', 's.id=c.contactsource_id')
+                        ->join('s', 'contactsource_stats', 'c', 's.id=c.contactsource_id')
                         ->where(
                             $builder->expr()->eq('?', 'c.campaign_id'),
                             $builder->expr()->lte('?', 'c.date_added'),
                             $builder->expr()->gt('?', 'c.date_added')
                         )
                         ->groupBy(['label', 's.id']);
+
+                    $results = [];
 
                     try {
                         $stmt = $this->em->getConnection()->prepare(
@@ -81,19 +84,17 @@ class CustomContentSubscriber extends CommonSubscriber
                         $stmt->execute();
                         $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
                     } catch (DBALException $e) {
-                        $results = [];
                     }
 
                     $datasets = $sources = [];
-                    foreach ($results as $result)
-                    {
-                        $sources[$result['name']] = 1;
+                    foreach ($results as $result) {
+                        $sources[$result['name']]  = 1;
                         $datasets[$result['name']] = [];
                     }
 
                     $chartData = [
                         'labels'   => [],
-                        'datasets' => []
+                        'datasets' => [],
                     ];
 
                     for (
@@ -102,22 +103,21 @@ class CustomContentSubscriber extends CommonSubscriber
                         $current->modify('+1 day')
                     ) {
                         $chartData['labels'][] = $current->format('m/d/y');
-                        foreach($sources as $source => $flag) {
+                        foreach ($sources as $source => $flag) {
                             $datasets[$source][] = '0';
                         }
                     }
 
                     $datasets = [];
-                    foreach ($results as $result)
-                    {
-                        $index = array_search($result['label'], $chartData['labels']);
+                    foreach ($results as $result) {
+                        $index                             = array_search($result['label'], $chartData['labels']);
                         $datasets[$result['name']][$index] = $result['contacts'];
                     }
 
                     foreach ($datasets as $label => $data) {
                         $temp = [
                             'label' => $label,
-                            'data' => $data
+                            'data'  => $data,
                         ];
                         //color?
                         $chartData['datasets'][] = $temp;
