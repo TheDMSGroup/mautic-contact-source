@@ -136,8 +136,8 @@ class EventRepository extends CommonRepository
                 'results' => $results,
             ];
         }
-
-        return $results;    }
+        return $results;
+    }
 
     /**
      * Get a list of entities.

@@ -488,7 +488,6 @@ class ContactSourceTimelineEvent extends Event
                 'fromDate'   => $this->dateFrom,
                 'toDate'     => $this->dateTo,
                 'chartQuery' => $this->chartQuery,
-
             ],
             $this->getEventLimit()
         );
@@ -542,7 +541,6 @@ class ContactSourceTimelineEvent extends Event
     {
         return ($this->contactSource instanceof ContactSource) ? $this->contactSource->getId() : null;
     }
-
 
     /**
      * Get the date range to get counts by.

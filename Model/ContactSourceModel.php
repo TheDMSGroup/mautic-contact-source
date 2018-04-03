@@ -457,7 +457,7 @@ class ContactSourceModel extends FormModel
         $forTimeline = true
     ) {
         $orderBy = empty($orderBy) ? ['date_added', 'DESC'] : $orderBy;
-        $event = $this->dispatcher->dispatch(
+        $event   = $this->dispatcher->dispatch(
             ContactSourceEvents::TIMELINE_ON_GENERATE,
             new ContactSourceTimelineEvent(
                 $contactSource,

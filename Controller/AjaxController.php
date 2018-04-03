@@ -16,7 +16,6 @@ use Mautic\CoreBundle\Controller\AjaxController as CommonAjaxController;
 use Mautic\CoreBundle\Controller\AjaxLookupControllerTrait;
 use Symfony\Component\HttpFoundation\Request;
 
-
 /**
  * Class AjaxController.
  */

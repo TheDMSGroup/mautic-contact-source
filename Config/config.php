@@ -30,7 +30,7 @@ return [
                 'controller'   => 'MauticContactSourceBundle:Timeline:index',
                 'requirements' => [
                     'contactSourceId' => '\d+',
-                    'objectId' => '\d+',
+                    'objectId'        => '\d+',
                 ],
             ],
         ],
