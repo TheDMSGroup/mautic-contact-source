@@ -92,6 +92,12 @@ return [
                     'doctrine.orm.entity_manager',
                 ],
             ],
+            'mautic.contactsource.customcontent.subscriber'         => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\CustomContentSubscriber',
+                'arguments' => [
+                    'doctrine.orm.entity_manager',
+                ],
+            ],
         ],
         'forms'  => [
             'mautic.contactsource.form.type.contactsourceshow_list' => [
