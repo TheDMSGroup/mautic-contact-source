@@ -177,19 +177,18 @@ class ContactSourceSubscriber extends CommonSubscriber
         $options = $event->getQueryOptions();
         foreach ($types as $eventTypeKey) {
             $eventTypeName = ucwords($eventTypeKey);
-            if (!$event->isApplicable($eventTypeKey)) {
-                continue;
-            }
             $event->addEventType($eventTypeKey, $eventTypeName);
         }
 
-        $rows = $eventRepository->getEvents($options['contactSourceId']);
+        $results = $eventRepository->getEventsForTimeline($event->getContactSource()->getId(), null, $options);
+        $rows = isset($results['results']) ? $results['results'] : $results;
+        $total = isset($results['total']) ? $results['total'] : count($rows);
         foreach ($rows as $row) {
             $eventTypeKey  = $row['type'];
             $eventTypeName = ucwords($eventTypeKey);
 
             // Add total to counter
-            $event->addToCounter($eventTypeKey, 1);
+            $event->setQueryTotal($total);
 
             if (!$event->isEngagementCount()) {
 //                if (!$this->pageModel) {

@@ -1,6 +1,6 @@
 Mautic.contactsourceTimelineOnLoad = function (container, response) {
 
-    var sortedColumn = mQuery('#contactclient-timeline a[data-sort=' + sortField + '] i');
+    var sortedColumn = mQuery('#contactsource-timeline a[data-sort=' + sortField + '] i');
     sortedColumn.addClass('fa-sort-amount-' + sortDirection);
     sortedColumn.removeClass('fa-sort');
 

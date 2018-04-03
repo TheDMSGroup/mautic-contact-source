@@ -12,6 +12,7 @@ if (isset($tmpl) && 'index' == $tmpl) {
     $view->extend('MauticContactSourceBundle:Timeline:index.html.php');
 }
 
+$order   = $events['order'];
 $baseUrl = $view['router']->path(
     'mautic_contactsource_timeline_action',
     [
@@ -25,7 +26,7 @@ $baseUrl = $view['router']->path(
     <table class="table table-hover table-bordered" id="contactsource-timeline" style="z-index: 2; position: relative;">
         <thead>
         <tr>
-            <th class="timeline-icon">
+            <th class="visible-md visible-lg timeline-icon">
                 <a class="btn btn-sm btn-nospin btn-default" data-activate-details="all" data-toggle="tooltip"
                    title="<?php echo $view['translator']->trans(
                        'mautic.contactsource.timeline.toggle_all_details'
@@ -33,55 +34,51 @@ $baseUrl = $view['router']->path(
                     <span class="fa fa-fw fa-level-down"></span>
                 </a>
             </th>
-            <?php
-            echo $view->render(
-                'MauticCoreBundle:Helper:tableheader.html.php',
-                [
-                    'orderBy'    => 'message',
-                    'text'       => 'mautic.contactsource.timeline.message',
-                    'class'      => 'timeline-name',
-                    'sessionVar' => 'contactsource.'.$contactSource->getId().'.timeline',
-                    'baseUrl'    => $baseUrl,
-                    'target'     => '#timeline-table',
-                ]
-            );
-
-            echo $view->render(
-                'MauticCoreBundle:Helper:tableheader.html.php',
-                [
-                    'orderBy'    => 'contactId',
-                    'text'       => 'mautic.contactsource.timeline.contact_id',
-                    'class'      => 'visible-md visible-lg timeline-contact-id',
-                    'sessionVar' => 'contactsource.'.$contactSource->getId().'.timeline',
-                    'baseUrl'    => $baseUrl,
-                    'target'     => '#timeline-table',
-                ]
-            );
-
-            echo $view->render(
-                'MauticCoreBundle:Helper:tableheader.html.php',
-                [
-                    'orderBy'    => 'eventType',
-                    'text'       => 'mautic.contactsource.timeline.event_type',
-                    'class'      => 'visible-md visible-lg timeline-type',
-                    'sessionVar' => 'contactsource.'.$contactSource->getId().'.timeline',
-                    'baseUrl'    => $baseUrl,
-                    'target'     => '#timeline-table',
-                ]
-            );
-
-            echo $view->render(
-                'MauticCoreBundle:Helper:tableheader.html.php',
-                [
-                    'orderBy'    => 'timestamp',
-                    'text'       => 'mautic.contactsource.timeline.event_timestamp',
-                    'class'      => 'visible-md visible-lg timeline-timestamp',
-                    'sessionVar' => 'contactsource.'.$contactSource->getId().'.timeline',
-                    'baseUrl'    => $baseUrl,
-                    'target'     => '#timeline-table',
-                ]
-            );
-            ?>
+            <th class="visible-md visible-lg timeline-message">
+                <a class="timeline-header-sort" data-toggle="tooltip" data-sort="message"
+                   title="<?php echo $view['translator']->trans(
+                       'mautic.contactsource.timeline.message'
+                   ); ?>">
+                    <?php echo $view['translator']->trans(
+                        'mautic.contactsource.timeline.message'
+                    ); ?>
+                    <i class="fa fa-sort"></i>
+                </a>
+            </th>
+            <th class="visible-md visible-lg timeline-contact-id">
+                <a class="timeline-header-sort" data-toggle="tooltip" data-sort="contact_id"
+                   title="<?php echo $view['translator']->trans(
+                       'mautic.contactsource.timeline.contact_id'
+                   ); ?>">
+                    <?php echo $view['translator']->trans(
+                        'mautic.contactsource.timeline.contact_id'
+                    ); ?>
+                    <i class="fa fa-sort"></i>
+                </a>
+            </th>
+            <th class="visible-md visible-lg timeline-event-type">
+                <a class="timeline-header-sort" data-toggle="tooltip" data-sort="type"
+                   title="<?php echo $view['translator']->trans(
+                       'mautic.contactsource.timeline.event_type'
+                   ); ?>">
+                    <?php echo $view['translator']->trans(
+                        'mautic.contactsource.timeline.event_type'
+                    ); ?>
+                    <i class="fa fa-sort"></i>
+                </a>
+            </th>
+            <th class="visible-md visible-lg timeline-timestamp">
+                <a class="timeline-header-sort" data-toggle="tooltip" data-sort="date_added"
+                   title="<?php echo $view['translator']->trans(
+                       'mautic.contactsource.timeline.event_timestamp'
+                   ); ?>">
+                    <?php echo $view['translator']->trans(
+                        'mautic.contactsource.timeline.event_timestamp'
+                    ); ?>
+                    <i class="fa fa-sort"></i>
+                </a>
+            </th>
+        </tr>
         </tr>
         <tbody>
         <?php foreach ($events['events'] as $counter => $event): ?>
@@ -148,10 +145,14 @@ $baseUrl = $view['router']->path(
         'page'       => $events['page'],
         'fixedPages' => $events['maxPages'],
         'fixedLimit' => true,
-        'baseUrl'    => $baseUrl,
-        'target'     => '#timeline-table',
+        'baseUrl'    => '/page',
+        'target'     => '',
         'totalItems' => $events['total'],
     ]
 ); ?>
-
+<script>
+    // put correct sort icons on timeline table headers
+    var sortField = '<?php echo $order[0]; ?>';
+    var sortDirection = '<?php echo strtolower($order[1]); ?>';
+</script>
 <!--/ timeline -->
