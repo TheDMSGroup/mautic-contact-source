@@ -109,6 +109,9 @@ class ContactSourceModel extends FormModel
             $options['action'] = $action;
         }
 
+        // Prevent clone action from complaining about extra fields.
+        $options['allow_extra_fields'] = true;
+
         return $formFactory->create('contactsource', $entity, $options);
     }
 
