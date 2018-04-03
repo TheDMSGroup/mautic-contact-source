@@ -102,14 +102,7 @@ trait ContactSourceAccessTrait
         // order by lastactive, filter
         $contactSources = $repo->getEntities(
             [
-                'filter'         => [
-                    'force' => [
-                        [
-                            'column' => 'l.date_identified',
-                            'expr'   => 'isNotNull',
-                        ],
-                    ],
-                ],
+                'filter'         => [],
                 'oderBy'         => 'r.last_active',
                 'orderByDir'     => 'DESC',
                 'limit'          => $limit,
@@ -125,7 +118,7 @@ trait ContactSourceAccessTrait
             if (!$this->get('mautic.security')->hasEntityAccess(
                 'contactSource:contactSources:'.$action.'own',
                 'contactSource:contactSources:'.$action.'other',
-                $contactSource->getOwner()
+                $contactSource['createdBy']
             )
             ) {
                 unset($contactSource);

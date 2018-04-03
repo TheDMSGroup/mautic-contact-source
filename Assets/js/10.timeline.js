@@ -1,5 +1,9 @@
 Mautic.contactsourceTimelineOnLoad = function (container, response) {
 
+    var sortedColumn = mQuery('#contactsource-timeline a[data-sort=' + sortField + '] i');
+    sortedColumn.addClass('fa-sort-amount-' + sortDirection);
+    sortedColumn.removeClass('fa-sort');
+
     var codeMirror = function ($el) {
         if (!$el.hasClass('codemirror-active')) {
             var $textarea = $el.find('textarea.codeMirror-yaml');
@@ -57,6 +61,30 @@ Mautic.contactsourceTimelineOnLoad = function (container, response) {
                 mQuery(this).addClass('active');
             }
         }
+    });
+
+
+    mQuery('#contactsource-timeline a.timeline-header-sort').on('click', function () {
+        var column = mQuery(this).data('sort');
+        var newDirection;
+        if(column!=sortField){
+            newDirection = 'DESC';
+        } else {
+            newDirection = sortDirection=='desc' ? 'ASC' : 'DESC';
+        }
+        mQuery('#orderBy').val(column + ':' + newDirection);
+        // trigger a form submit
+        mQuery('#timeline-filters').submit();
+
+    });
+
+    mQuery('#timeline-table:first .pagination:first a').off('click').on('click', function (e) {
+        e.preventDefault();
+        var urlbase = this.href.split('?')[0];
+        var page = urlbase.split('/')[4];
+        mQuery('#page').val(page);
+        // trigger a form submit
+        mQuery('#timeline-filters').submit();
     });
 
     if (response && typeof response.timelineCount !== 'undefined') {

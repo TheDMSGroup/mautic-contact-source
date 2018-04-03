@@ -14,6 +14,7 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller;
 use Mautic\CampaignBundle\Entity\CampaignRepository;
 use Mautic\CoreBundle\Controller\AjaxController as CommonAjaxController;
 use Mautic\CoreBundle\Controller\AjaxLookupControllerTrait;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class AjaxController.
@@ -21,6 +22,48 @@ use Mautic\CoreBundle\Controller\AjaxLookupControllerTrait;
 class AjaxController extends CommonAjaxController
 {
     use AjaxLookupControllerTrait;
+
+    /**
+     * @param Request $request
+     *
+     * @return mixed
+     */
+    public function ajaxTimelineAction(Request $request)
+    {
+        $filters     = [];
+        $eventsModel = $this->get('mautic.contactsource.model.contactsource');
+
+        foreach ($request->request->get('filters') as $key => $filter) {
+            $filter['name']           = str_replace(
+                '[]',
+                '',
+                $filter['name']
+            ); // the serializeArray() js method seems to add [] to the key ???
+            $filters[$filter['name']] = $filter['value'];
+        }
+        if (isset($filters['contactSourceId'])) {
+            if (!$contactSource = $eventsModel->getEntity($filters['contactSourceId'])) {
+                throw new \InvalidArgumentException('Contact Source argument is Invalid.');
+            }
+        } else {
+            throw new \InvalidArgumentException('Contact Source argument is Missing.');
+        }
+        $orderBy = isset($filters['orderBy']) ? explode(':', $filters['orderBy']) : null;
+        $page    = isset($filters['page']) ? $filters['page'] : 1;
+        $limit   = isset($filters['limit']) ? $filters['limit'] : 25;
+
+        $events = $eventsModel->getEngagements($contactSource, $filters, $orderBy, $page, $limit, true);
+        $view   = $this->render(
+            'MauticContactSourceBundle:Timeline:list.html.php',
+            [
+                'events'        => $events,
+                'contactSource' => $contactSource,
+                'tmpl'          => '',
+            ]
+        );
+
+        return $view;
+    }
 
     /**
      * Retrieve a list of campaigns for use in drop-downs.

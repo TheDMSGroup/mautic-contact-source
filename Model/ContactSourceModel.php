@@ -459,7 +459,8 @@ class ContactSourceModel extends FormModel
         $limit = 25,
         $forTimeline = true
     ) {
-        $event = $this->dispatcher->dispatch(
+        $orderBy = empty($orderBy) ? ['date_added', 'DESC'] : $orderBy;
+        $event   = $this->dispatcher->dispatch(
             ContactSourceEvents::TIMELINE_ON_GENERATE,
             new ContactSourceTimelineEvent(
                 $contactSource,
@@ -480,7 +481,7 @@ class ContactSourceModel extends FormModel
             'filters'  => $filters,
             'order'    => $orderBy,
             'types'    => $event->getEventTypes(),
-            'total'    => $event->getEventCounter()['total'],
+            'total'    => $event->getQueryTotal(),
             'page'     => $page,
             'limit'    => $limit,
             'maxPages' => $event->getMaxPage(),
