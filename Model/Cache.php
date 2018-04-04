@@ -278,7 +278,7 @@ class Cache extends AbstractCommonModel
                 'A cap has been exceeded.',
                 Codes::HTTP_TOO_MANY_REQUESTS,
                 null,
-                Stat::TYPE_LIMITS,
+                Stat::TYPE_LIMITED,
                 false,
                 $limits
             );

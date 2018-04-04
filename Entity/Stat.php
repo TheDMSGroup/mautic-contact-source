@@ -22,26 +22,84 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
  */
 class Stat
 {
-    // Used for querying stats
-    const TYPE_ACCEPT    = 'accepted';
+    /**
+     * Real-time:     Indicates that the contact was accepted by one or more clients.
+     * Not real-time: Indicates we accepted the contact outright.
+     *
+     * Internal status:     accepted
+     * External status:     accepted / rejected (if scrubbed)
+     *
+     * Contact saved:       Yes
+     * Added to campaign:   Yes
+     */
+    const TYPE_ACCEPTED = 'accepted';
 
+    /**
+     * Indicates that the contact has already come in via this source.
+     *
+     * Internal status:     duplicate
+     * External status:     duplicate
+     *
+     * Contact saved:       Yes
+     * Added to campaign:   No
+     */
     const TYPE_DUPLICATE = 'duplicate';
 
-    const TYPE_ERROR     = 'error';
+    /**
+     * Indicates that something went wrong on our side during processing at the contact source level.
+     *
+     * Internal status:     error
+     * External status:     error
+     *
+     * Contact saved:       Yes / No (depends on where)
+     * Added to campaign:   No
+     */
+    const TYPE_ERROR = 'error';
 
-    const TYPE_INVALID   = 'invalid';
+    /**
+     * Indicates that the parameters sent to us are invalid, such as an unpublished campaign, or invalid token.
+     *
+     * Internal status:     invalid
+     * External status:     invalid
+     *
+     * Contact saved:       No
+     * Added to campaign:   No
+     */
+    const TYPE_INVALID = 'invalid';
 
-    const TYPE_LIMITS    = 'limited';
+    /**
+     * Indicates we hit a budget/cap and could not accept this contact.
+     *
+     * Internal status:     limited
+     * External status:     limited
+     *
+     * Contact saved:       Yes
+     * Added to campaign:   No
+     */
+    const TYPE_LIMITED = 'limited';
 
-    const TYPE_QUEUED    = 'queued';
+    /**
+     * Indicates we could not find a buyer for the contact, including ourselves (not real-time).
+     *
+     * Internal status:     rejected
+     * External status:     rejected
+     *
+     * Contact saved:       Yes
+     * Added to campaign:   Yes
+     */
+    const TYPE_REJECT = 'rejected';
 
-    const TYPE_REJECT    = 'rejected';
-
-    const TYPE_SAVED     = 'saved';
-
-    const TYPE_SAVING    = 'saving';
-
-    const TYPE_SCRUB     = 'scrubbed';
+    /**
+     * Real-time:     Indicates we could not find a buyer for the contact.
+     * Not real-time: The contact was scrubbed.
+     *
+     * Internal status:     scrubbed
+     * External status:     rejected
+     *
+     * Contact saved:       Yes
+     * Added to campaign:   Yes
+     */
+    const TYPE_SCRUBBED = 'scrubbed';
 
     /** @var int $id */
     private $id;
