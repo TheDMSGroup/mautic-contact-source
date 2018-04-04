@@ -392,7 +392,7 @@ class ContactSourceModel extends FormModel
                 'date_added',
                 [
                     'contactsource_id' => $contactSource->getId(),
-                    'type'             => Stat::TYPE_ACCEPT,
+                    'type'             => Stat::TYPE_ACCEPTED,
                 ]
             );
             if (!$canViewOthers) {

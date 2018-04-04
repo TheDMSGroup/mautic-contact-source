@@ -1016,7 +1016,6 @@ class Api
     private function saveContact()
     {
         $exception    = null;
-        $this->status = Stat::TYPE_SAVING;
         $this->dispatchContextCreate();
         try {
             $this->getContactModel()->saveEntity($this->contact);
@@ -1030,7 +1029,6 @@ class Api
                 Stat::TYPE_ERROR
             );
         }
-        $this->status = Stat::TYPE_SAVED;
     }
 
     /**
@@ -1059,7 +1057,6 @@ class Api
         if ($this->contact->getId()) {
             // Add the contact directly to the campaign without duplicate checking.
             $this->addContactsToCampaign($this->campaign, [$this->contact], false, $this->realTime);
-            $this->status = Stat::TYPE_QUEUED;
         }
 
         return $this;
@@ -1115,11 +1112,11 @@ class Api
             // Establish scrub now.
             if ($this->isScrubbed()) {
                 // Asynchronous rejection (scrubbed)
-                $this->status = Stat::TYPE_SCRUB;
+                $this->status = Stat::TYPE_SCRUBBED;
                 $this->valid  = false;
             } else {
                 // Asynchronous acceptance.
-                $this->status = Stat::TYPE_ACCEPT;
+                $this->status = Stat::TYPE_ACCEPTED;
                 $this->valid  = true;
             }
         }
@@ -1177,7 +1174,7 @@ class Api
                     }
                     if (isset($event['valid']) && $event['valid']) {
                         // One valid Contact Client was found to accept the lead.
-                        $this->status = Stat::TYPE_ACCEPT;
+                        $this->status = Stat::TYPE_ACCEPTED;
                         $this->valid  = true;
                         break;
                     }
@@ -1193,7 +1190,7 @@ class Api
 
             // Apply scrub only to accepted contacts in real-time mode after evaluation.
             if ($this->valid && $this->isScrubbed()) {
-                $this->status = Stat::TYPE_SCRUB;
+                $this->status = Stat::TYPE_SCRUBBED;
                 $this->valid  = false;
             }
         }
@@ -1210,7 +1207,7 @@ class Api
             return;
         }
 
-        if (Stat::TYPE_ACCEPT === $this->status) {
+        if (Stat::TYPE_ACCEPTED === $this->status) {
             $this->contact       = $this->getContactModel()->getEntity($this->contact->getId());
             $originalAttribution = $this->contact->getAttribution();
             // Attribution is always a negative number to represent cost.
