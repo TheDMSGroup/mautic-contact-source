@@ -28,6 +28,9 @@ class Stat
      *
      * Internal status:     accepted
      * External status:     accepted / rejected (if scrubbed)
+     *
+     * Contact saved:       Yes
+     * Added to campaign:   Yes
      */
     const TYPE_ACCEPTED = 'accepted';
 
@@ -36,6 +39,9 @@ class Stat
      *
      * Internal status:     duplicate
      * External status:     duplicate
+     *
+     * Contact saved:       Yes
+     * Added to campaign:   No
      */
     const TYPE_DUPLICATE = 'duplicate';
 
@@ -44,6 +50,9 @@ class Stat
      *
      * Internal status:     error
      * External status:     error
+     *
+     * Contact saved:       Yes / No (depends on where)
+     * Added to campaign:   No
      */
     const TYPE_ERROR = 'error';
 
@@ -52,6 +61,9 @@ class Stat
      *
      * Internal status:     invalid
      * External status:     invalid
+     *
+     * Contact saved:       No
+     * Added to campaign:   No
      */
     const TYPE_INVALID = 'invalid';
 
@@ -60,6 +72,9 @@ class Stat
      *
      * Internal status:     limited
      * External status:     limited
+     *
+     * Contact saved:       Yes
+     * Added to campaign:   No
      */
     const TYPE_LIMITED = 'limited';
 
@@ -68,6 +83,9 @@ class Stat
      *
      * Internal status:     rejected
      * External status:     rejected
+     *
+     * Contact saved:       Yes
+     * Added to campaign:   Yes
      */
     const TYPE_REJECT = 'rejected';
 
@@ -77,6 +95,9 @@ class Stat
      *
      * Internal status:     scrubbed
      * External status:     rejected
+     *
+     * Contact saved:       Yes
+     * Added to campaign:   Yes
      */
     const TYPE_SCRUBBED = 'scrubbed';
 
