@@ -275,12 +275,14 @@ class Cache extends AbstractCommonModel
             $this->contactSource,
             $limitRules,
             $campaignId,
-            $this->getTimezone()
+            $this->getTimezone(),
+            true,
+            true
         );
         foreach ($limits as $limit) {
             if (isset($limit['hit']) && true === $limit['hit']) {
                 throw new ContactSourceException(
-                    'A cap has been exceeded.',
+                    'Cap exceeded'.!empty($limit['translation']) ? ': '.$limit['translation'] : '.',
                     Codes::HTTP_TOO_MANY_REQUESTS,
                     null,
                     Stat::TYPE_LIMITED,
