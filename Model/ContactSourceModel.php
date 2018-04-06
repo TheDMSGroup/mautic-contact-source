@@ -132,36 +132,6 @@ class ContactSourceModel extends FormModel
     }
 
     /**
-     * Add a stat entry.
-     *
-     * @param ContactSource|null $contactSource
-     * @param                    $type
-     * @param int                $contact
-     * @param int                $attribution
-     * @param int                $campaign
-     */
-    public function addStat(ContactSource $contactSource = null, $type, $contact = 0, $attribution = 0, $campaign = 0)
-    {
-        $stat = new Stat();
-        if ($contactSource) {
-            $stat->setContactSource($contactSource);
-        }
-        $stat->setDateAdded(new \DateTime());
-        $stat->setType($type);
-        if ($contact) {
-            $stat->setContact($contact);
-        }
-        if ($attribution) {
-            $stat->setAttribution($attribution);
-        }
-        if ($campaign) {
-            $stat->setCampaign($campaign);
-        }
-
-        $this->getStatRepository()->saveEntity($stat);
-    }
-
-    /**
      * {@inheritdoc}
      *
      * @param ContactSource $entity
@@ -182,16 +152,6 @@ class ContactSourceModel extends FormModel
     public function getRepository()
     {
         return $this->em->getRepository('MauticContactSourceBundle:ContactSource');
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return \MauticPlugin\MauticContactSourceBundle\Entity\StatRepository
-     */
-    public function getStatRepository()
-    {
-        return $this->em->getRepository('MauticContactSourceBundle:Stat');
     }
 
     /**
@@ -236,6 +196,46 @@ class ContactSourceModel extends FormModel
         } else {
             return null;
         }
+    }
+
+    /**
+     * Add a stat entry.
+     *
+     * @param ContactSource|null $contactSource
+     * @param                    $type
+     * @param int                $contact
+     * @param int                $attribution
+     * @param int                $campaign
+     */
+    public function addStat(ContactSource $contactSource = null, $type, $contact = 0, $attribution = 0, $campaign = 0)
+    {
+        $stat = new Stat();
+        if ($contactSource) {
+            $stat->setContactSource($contactSource);
+        }
+        $stat->setDateAdded(new \DateTime());
+        $stat->setType($type);
+        if ($contact) {
+            $stat->setContact($contact);
+        }
+        if ($attribution) {
+            $stat->setAttribution($attribution);
+        }
+        if ($campaign) {
+            $stat->setCampaign($campaign);
+        }
+
+        $this->getStatRepository()->saveEntity($stat);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @return \MauticPlugin\MauticContactSourceBundle\Entity\StatRepository
+     */
+    public function getStatRepository()
+    {
+        return $this->em->getRepository('MauticContactSourceBundle:Stat');
     }
 
     /**
@@ -392,7 +392,7 @@ class ContactSourceModel extends FormModel
                 'date_added',
                 [
                     'contactsource_id' => $contactSource->getId(),
-                    'type'             => Stat::TYPE_ACCEPT,
+                    'type'             => Stat::TYPE_ACCEPTED,
                 ]
             );
             if (!$canViewOthers) {
@@ -422,6 +422,11 @@ class ContactSourceModel extends FormModel
         return $chart->render();
     }
 
+    /**
+     * @param ContactSource $contactSource
+     *
+     * @return array
+     */
     private function getCampaignsBySource(ContactSource $contactSource)
     {
         $id = $contactSource->getId();
@@ -527,5 +532,48 @@ class ContactSourceModel extends FormModel
         $this->dispatcher->dispatch(ContactSourceEvents::TIMELINE_ON_GENERATE, $event);
 
         return $event->getEventCounter();
+    }
+
+    /**
+     * Evaluate all limits (budgets/caps) for a source, return them by campaign.
+     *
+     * @param ContactSource $contactSource
+     *
+     * @return array
+     * @throws \Exception
+     * @throws \MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException
+     */
+    public function evaluateAllCampaignLimits(ContactSource $contactSource)
+    {
+        $container = $this->dispatcher->getContainer();
+        /** @var CampaignSettings $campaignSettingsModel */
+        $campaignSettingsModel = $container->get('mautic.contactsource.model.campaign_settings');
+        $campaignSettingsModel->setContactSource($contactSource);
+        $campaignSettingsAll = $campaignSettingsModel->getCampaignSettings();
+
+        $campaignLimits = [];
+        if (!empty($campaignSettingsAll->campaigns)) {
+            /* @var \MauticPlugin\MauticContactSourceBundle\Model\Cache $cacheModel */
+            $cacheModel = $container->get('mautic.contactsource.model.cache');
+            $cacheModel->setContactSource($contactSource);
+
+            foreach ($campaignSettingsAll->campaigns as $campaign) {
+                // Establish parameters from campaign settings.
+                if (!empty($campaign->limits) && isset($campaign->campaignId)) {
+                    $id                = intval($campaign->campaignId);
+                    $limitRules        = new \stdClass();
+                    $limitRules->rules = $campaign->limits;
+                    $limits            = $cacheModel->evaluateLimits($limitRules, $id, false, true);
+                    if ($limits) {
+                        if (!isset($campaignLimits[$id])) {
+                            $campaignLimits[$id] = [];
+                        }
+                        $campaignLimits[$id] = array_merge($campaignLimits[$id], $limits);
+                    }
+                }
+            }
+        }
+
+        return $campaignLimits;
     }
 }

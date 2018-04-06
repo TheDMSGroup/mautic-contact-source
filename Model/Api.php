@@ -74,7 +74,7 @@ class Api
     protected $scrubRate;
 
     /** @var int */
-    protected $attribution = 0;
+    protected $cost = 0;
 
     /** @var string */
     protected $utmSource;
@@ -138,6 +138,9 @@ class Api
 
     /** @var EntityManager */
     protected $em;
+
+    /** @var int */
+    protected $attribution;
 
     /**
      * Api constructor.
@@ -299,11 +302,13 @@ class Api
             );
         }
         // Establish parameters from campaign settings.
-        $this->realTime    = (bool) isset($campaignSettings->realTime) && $campaignSettings->realTime;
-        $this->limits      = isset($campaignSettings->limits) ? $campaignSettings->limits : [];
-        $this->scrubRate   = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
-        $this->attribution = isset($campaignSettings->cost) ? (abs(floatval($campaignSettings->cost)) * -1) : 0;
-        $this->utmSource   = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
+        $this->realTime  = (bool) isset($campaignSettings->realTime) && $campaignSettings->realTime;
+        $this->limits    = isset($campaignSettings->limits) ? $campaignSettings->limits : [];
+        $this->scrubRate = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
+        $this->cost      = isset($campaignSettings->cost) ? (abs(floatval($campaignSettings->cost))) : 0;
+        $this->utmSource = !empty(
+        $this->contactSource->getUtmSource()
+        ) ? $this->contactSource->getUtmSource() : null;
         // Apply field overrides
         if ($this->utmSource) {
             $this->fieldsProvided['utm_source'] = $this->utmSource;
@@ -1015,8 +1020,7 @@ class Api
      */
     private function saveContact()
     {
-        $exception    = null;
-        $this->status = Stat::TYPE_SAVING;
+        $exception = null;
         $this->dispatchContextCreate();
         try {
             $this->getContactModel()->saveEntity($this->contact);
@@ -1030,7 +1034,6 @@ class Api
                 Stat::TYPE_ERROR
             );
         }
-        $this->status = Stat::TYPE_SAVED;
     }
 
     /**
@@ -1058,8 +1061,7 @@ class Api
     {
         if ($this->contact->getId()) {
             // Add the contact directly to the campaign without duplicate checking.
-            $this->addContactsToCampaign($this->campaign, [$this->contact], false, $this->realTime);
-            $this->status = Stat::TYPE_QUEUED;
+            $this->addContactsToCampaign($this->campaign, [$this->contact], false);
         }
 
         return $this;
@@ -1071,15 +1073,13 @@ class Api
      * @param Campaign $campaign
      * @param array    $contacts
      * @param bool     $manuallyAdded
-     * @param bool     $realTime
      *
      * @throws \Exception
      */
     public function addContactsToCampaign(
         Campaign $campaign,
         $contacts = [],
-        $manuallyAdded = false,
-        $realTime = false
+        $manuallyAdded = false
     ) {
         foreach ($contacts as $contact) {
             $campaignContact = new CampaignContact();
@@ -1115,11 +1115,11 @@ class Api
             // Establish scrub now.
             if ($this->isScrubbed()) {
                 // Asynchronous rejection (scrubbed)
-                $this->status = Stat::TYPE_SCRUB;
+                $this->status = Stat::TYPE_SCRUBBED;
                 $this->valid  = false;
             } else {
                 // Asynchronous acceptance.
-                $this->status = Stat::TYPE_ACCEPT;
+                $this->status = Stat::TYPE_ACCEPTED;
                 $this->valid  = true;
             }
         }
@@ -1177,7 +1177,7 @@ class Api
                     }
                     if (isset($event['valid']) && $event['valid']) {
                         // One valid Contact Client was found to accept the lead.
-                        $this->status = Stat::TYPE_ACCEPT;
+                        $this->status = Stat::TYPE_ACCEPTED;
                         $this->valid  = true;
                         break;
                     }
@@ -1193,7 +1193,7 @@ class Api
 
             // Apply scrub only to accepted contacts in real-time mode after evaluation.
             if ($this->valid && $this->isScrubbed()) {
-                $this->status = Stat::TYPE_SCRUB;
+                $this->status = Stat::TYPE_SCRUBBED;
                 $this->valid  = false;
             }
         }
@@ -1206,15 +1206,15 @@ class Api
      */
     private function applyAttribution()
     {
-        if (0 == $this->attribution) {
+        if (0 == $this->cost) {
             return;
         }
 
-        if (Stat::TYPE_ACCEPT === $this->status) {
+        if (Stat::TYPE_ACCEPTED === $this->status) {
             $this->contact       = $this->getContactModel()->getEntity($this->contact->getId());
             $originalAttribution = $this->contact->getAttribution();
             // Attribution is always a negative number to represent cost.
-            $newAttribution = $originalAttribution + $this->attribution;
+            $newAttribution = $originalAttribution + ($this->cost * -1);
             if ($newAttribution != $originalAttribution) {
                 $this->contact->addUpdatedField(
                     'attribution',
@@ -1223,9 +1223,7 @@ class Api
                 $this->dispatchContextCreate();
                 $this->getContactModel()->saveEntity($this->contact);
             }
-        } else {
-            // Since we did NOT accept the lead, invalidate attribution.
-            $this->attribution = 0;
+            $this->attribution = ($this->cost * -1);
         }
     }
 
@@ -1253,12 +1251,10 @@ class Api
         $sourceModel = $this->container->get('mautic.contactsource.model.contactsource');
 
         if ($this->valid) {
-            $statLevel = 'INFO';
-            $message   = 'Contact '.$this->contact->getId(
+            $message = 'Contact '.$this->contact->getId(
                 ).' was imported successfully from Campaign: '.$this->campaign->getname();
         } else {
-            $statLevel = 'ERROR';
-            $message   = isset($this->errors) ? implode(PHP_EOL, $this->errors) : '';
+            $message = isset($this->errors) ? implode(PHP_EOL, $this->errors) : '';
             if ($this->eventErrors) {
                 $message = implode(PHP_EOL.'  ', $this->eventErrors);
             }

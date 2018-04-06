@@ -32,8 +32,9 @@ class AjaxController extends CommonAjaxController
      */
     public function ajaxTimelineAction(Request $request)
     {
-        $filters     = [];
-        $eventsModel = $this->get('mautic.contactsource.model.contactsource');
+        $filters = [];
+        /** @var \MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel $contactSourceModel */
+        $contactSourceModel = $this->get('mautic.contactsource.model.contactsource');
 
         foreach ($request->request->get('filters') as $key => $filter) {
             $filter['name']           = str_replace(
@@ -44,7 +45,7 @@ class AjaxController extends CommonAjaxController
             $filters[$filter['name']] = $filter['value'];
         }
         if (isset($filters['contactSourceId'])) {
-            if (!$contactSource = $eventsModel->getEntity($filters['contactSourceId'])) {
+            if (!$contactSource = $contactSourceModel->getEntity($filters['contactSourceId'])) {
                 throw new \InvalidArgumentException('Contact Source argument is Invalid.');
             }
         } else {
@@ -54,7 +55,7 @@ class AjaxController extends CommonAjaxController
         $page    = isset($filters['page']) ? $filters['page'] : 1;
         $limit   = isset($filters['limit']) ? $filters['limit'] : 25;
 
-        $events = $eventsModel->getEngagements($contactSource, $filters, $orderBy, $page, $limit, true);
+        $events = $contactSourceModel->getEngagements($contactSource, $filters, $orderBy, $page, $limit, true);
         $view   = $this->render(
             'MauticContactSourceBundle:Timeline:list.html.php',
             [
@@ -65,6 +66,34 @@ class AjaxController extends CommonAjaxController
         );
 
         return $view;
+    }
+
+    /**
+     * Get the current Campaign Limits (for real-time updates)
+     *
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     * @throws \MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException
+     */
+    public function getCampaignLimitsAction(Request $request)
+    {
+        $contactSourceId = $request->request->get('contactSourceId');
+
+        /** @var \MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel $contactSourceModel */
+        $contactSourceModel = $this->get('mautic.contactsource.model.contactsource');
+        if (!$contactSourceId || !$contactSource = $contactSourceModel->getEntity($contactSourceId)) {
+            throw new \InvalidArgumentException('Contact Source argument is Invalid.');
+        }
+
+        $limits = $contactSourceModel->evaluateAllCampaignLimits($contactSource);
+
+        return $this->sendJsonResponse(
+            [
+                'array' => $limits,
+            ]
+        );
     }
 
     /**
