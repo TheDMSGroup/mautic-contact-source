@@ -110,6 +110,7 @@ class StatRepository extends CommonRepository
             {
                 $dataRow = [];
                 $dataRow[]= $row['source'];
+                $dataRow[]= "[Cap Name]";
                 $dataRow[] = isset($daily[$row['contactsource_id']]['daily']) ? $daily[$row['contactsource_id']]['daily'] : 0;
                 $dataRow[] = '0';
                 $dataRow[] = '0';

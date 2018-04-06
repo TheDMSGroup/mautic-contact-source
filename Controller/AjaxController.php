@@ -125,6 +125,7 @@ class AjaxController extends CommonAjaxController
         $data       = $statRepo->getCampaignBudgetsData($params);
         $headers    = [
             'mautic.contactsource.campaign.budgets.header.source',
+            'mautic.contactsource.campaign.budgets.header.cap_name',
             'mautic.contactsource.campaign.budgets.header.today',
             'mautic.contactsource.campaign.budgets.header.daily_cap',
             'mautic.contactsource.campaign.budgets.header.daily_reached',

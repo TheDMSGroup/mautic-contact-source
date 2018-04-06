@@ -14,7 +14,6 @@ Mautic.loadCampaignBudgetsTable = function () {
                         cache: true,
                         dataType: 'json',
                         success: function (response) {
-                            console.log(this);
                             mQuery('#campaign-budgets').DataTable({
                                 language: {
                                     emptyTable: "No results found for this date range and filters."
