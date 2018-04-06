@@ -146,7 +146,11 @@ class Cache extends AbstractCommonModel
      */
     public function getRepository()
     {
-        return $this->em->getRepository('MauticContactSourceBundle:Cache');
+        /** @var \MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository $repository */
+        $repository = $this->em->getRepository('MauticContactSourceBundle:Cache');
+        $repository->setContainer($this->getContainer());
+
+        return $repository;
     }
 
     /**
@@ -256,7 +260,7 @@ class Cache extends AbstractCommonModel
     }
 
     /**
-     * Using the duplicate rules, evaluate if the current contact matches any entry in the cache.
+     * Using the limit rules, evaluate if the current campaign exceeds limits.
      *
      * @param array $limitRules
      * @param int   $campaignId
@@ -267,21 +271,23 @@ class Cache extends AbstractCommonModel
     public function evaluateLimits($limitRules = [], $campaignId = 0)
     {
         $limitRules = $this->mergeRules($limitRules, false);
-        $limits     = $this->getRepository()->findLimit(
+        $limits     = $this->getRepository()->findLimits(
             $this->contactSource,
             $limitRules,
             $campaignId,
             $this->getTimezone()
         );
-        if ($limits) {
-            throw new ContactSourceException(
-                'A cap has been exceeded.',
-                Codes::HTTP_TOO_MANY_REQUESTS,
-                null,
-                Stat::TYPE_LIMITED,
-                false,
-                $limits
-            );
+        foreach ($limits as $limit) {
+            if (isset($limit['hit']) && true === $limit['hit']) {
+                throw new ContactSourceException(
+                    'A cap has been exceeded.',
+                    Codes::HTTP_TOO_MANY_REQUESTS,
+                    null,
+                    Stat::TYPE_LIMITED,
+                    false,
+                    $limit
+                );
+            }
         }
     }
 
