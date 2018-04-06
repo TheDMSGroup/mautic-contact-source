@@ -264,11 +264,14 @@ class Cache extends AbstractCommonModel
      *
      * @param array $limitRules
      * @param int   $campaignId
+     * @param bool  $break
+     * @param bool  $name
      *
+     * @return array
      * @throws ContactSourceException
      * @throws \Exception
      */
-    public function evaluateLimits($limitRules = [], $campaignId = 0)
+    public function evaluateLimits($limitRules = [], $campaignId = 0, $break = true, $name = true)
     {
         $limitRules = $this->mergeRules($limitRules, false);
         $limits     = $this->getRepository()->findLimits(
@@ -276,21 +279,24 @@ class Cache extends AbstractCommonModel
             $limitRules,
             $campaignId,
             $this->getTimezone(),
-            true,
-            true
+            $break,
+            $name
         );
-        foreach ($limits as $limit) {
-            if (isset($limit['hit']) && true === $limit['hit']) {
-                throw new ContactSourceException(
-                    'Cap exceeded'.!empty($limit['translation']) ? ': '.$limit['translation'] : '.',
-                    Codes::HTTP_TOO_MANY_REQUESTS,
-                    null,
-                    Stat::TYPE_LIMITED,
-                    false,
-                    $limit
-                );
+        if ($break) {
+            foreach ($limits as $limit) {
+                if (isset($limit['hit']) && true === $limit['hit']) {
+                    throw new ContactSourceException(
+                        'Cap exceeded'.!empty($limit['name']) ? ': '.$limit['name'] : '.',
+                        Codes::HTTP_TOO_MANY_REQUESTS,
+                        null,
+                        Stat::TYPE_LIMITED,
+                        false,
+                        $limit
+                    );
+                }
             }
         }
+        return $limits;
     }
 
     /**

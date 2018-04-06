@@ -49,8 +49,8 @@ class CacheRepository extends CommonRepository
      * @param array         $rules
      * @param int           $campaignId
      * @param null          $timezone
-     * @param bool          $first
-     * @param bool          $translate
+     * @param bool          $break
+     * @param bool          $name
      *
      * @return array
      *
@@ -61,8 +61,8 @@ class CacheRepository extends CommonRepository
         $rules = [],
         $campaignId = 0,
         $timezone = null,
-        $first = true,
-        $translate = false
+        $break = true,
+        $name = false
     ) {
         $results = [];
         foreach ($rules as $rule) {
@@ -108,15 +108,19 @@ class CacheRepository extends CommonRepository
             // Run the query to get the count.
             $count     = $this->applyFilters($filters, true);
             $hit       = $count >= $quantity;
-            $progress  = max(100, round(100 / $quantity * $count, 2));
+            $percent   = 100 / $quantity * $count;
+            $percent   = round($percent > 100 ? 100 : $percent, 2);
             $results[] = [
-                'count'       => $count,
-                'hit'         => $hit,
-                'progress'    => $progress,
-                'rule'        => $rule,
-                'translation' => $translate ? $this->translateRule($rule) : '',
+                'logCount'   => $count,
+                'hit'        => $hit,
+                'percent'    => $percent,
+                'yesPercent' => $percent,
+                'noPercent'  => 0,
+                'rule'       => $rule,
+                'name'       => $name ? $this->translateRule($rule) : '',
+                'eventType'  => 'action',
             ];
-            if ($hit && $first) {
+            if ($hit && $break) {
                 // Break at the first limit found (for fast assessment during ingestion).
                 break;
             }
