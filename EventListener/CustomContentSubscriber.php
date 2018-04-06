@@ -39,6 +39,7 @@ class CustomContentSubscriber extends CommonSubscriber
     {
         return [
             CoreEvents::VIEW_INJECT_CUSTOM_CONTENT => ['injectCustomChart', 0],
+            CoreEvents::VIEW_INJECT_CUSTOM_CONTENT => ['getContentInjection', 0]
         ];
     }
 
@@ -126,6 +127,33 @@ class CustomContentSubscriber extends CommonSubscriber
                     $event->addTemplate('MauticContactSourceBundle:Charts:campaigncontactsbysource.html.php', ['campaignSourceData' => $chartData]);
                 }
                 break;
+        }
+    }
+
+    public function getContentInjection(CustomContentEvent $event)
+    {
+        switch ($event->getViewName()) {
+            case 'MauticCampaignBundle:Campaign:details.html.php':
+                $vars = $event->getVars();
+                if ('tabs' === $event->getContext()) {
+                    $tabTemplate = 'MauticContactSourceBundle:Tabs:campaign_source_tabs.html.php';
+                    $event->addTemplate(
+                        $tabTemplate,
+                        [
+                            'tabData' => $vars,
+                        ]
+                    );
+                }
+                if ('tabs.content' === $event->getContext()) {
+                    $tabContentTemplate = 'MauticContactSourceBundle:Tabs:campaign_source_tab_content.html.php';
+                    $event->addTemplate(
+                        $tabContentTemplate,
+                        [
+                            'tabContentData' => $vars,
+                        ]
+                    );
+                }
+            break;
         }
     }
 }

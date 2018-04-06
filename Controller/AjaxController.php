@@ -14,6 +14,8 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller;
 use Mautic\CampaignBundle\Entity\CampaignRepository;
 use Mautic\CoreBundle\Controller\AjaxController as CommonAjaxController;
 use Mautic\CoreBundle\Controller\AjaxLookupControllerTrait;
+use Mautic\CoreBundle\Helper\UTF8Helper;
+use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -104,5 +106,39 @@ class AjaxController extends CommonAjaxController
                 'array' => array_values($output),
             ]
         );
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @throws \Exception
+     */
+    protected function campaignBudgetsAction(Request $request)
+    {
+        // Get the API payload to test.
+        $params['campaignId'] = $this->request->request->get('data')['campaignId'];
+        $params['dateFrom'] = new \DateTime('now');
+        $em = $this->container->get('doctrine.orm.entity_manager');
+        $statRepo = $em->getRepository(\MauticPlugin\MauticContactSourceBundle\Entity\Stat::class);
+        $data       = $statRepo->getCampaignBudgetsData($params);
+        $headers    = [
+            'mautic.contactsource.campaign.budgets.header.source',
+            'mautic.contactsource.campaign.budgets.header.today',
+            'mautic.contactsource.campaign.budgets.header.daily_cap',
+            'mautic.contactsource.campaign.budgets.header.daily_reached',
+            'mautic.contactsource.campaign.budgets.header.mtd',
+            'mautic.contactsource.campaign.budgets.header.monthly_cap',
+            'mautic.contactsource.campaign.budgets.header.monthly_reached',
+        ];
+        foreach ($headers as $header) {
+            $data['columns'][] = [
+                'title' => $this->translator->trans($header),
+            ];
+        }
+        $data = UTF8Helper::fixUTF8($data);
+
+        return $this->sendJsonResponse($data);
     }
 }
