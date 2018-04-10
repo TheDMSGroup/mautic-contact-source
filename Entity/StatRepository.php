@@ -56,11 +56,10 @@ class StatRepository extends CommonRepository
      */
     public function getCampaignBudgetsData($params = [])
     {
-        $results=[];
-        $today = $params['dateFrom']->format('Y-m-d 00:00:00');
+        $results    =[];
+        $today      = $params['dateFrom']->format('Y-m-d 00:00:00');
         $monthStart = $params['dateFrom']->format('Y-m-01 00:00:00');
-        $monthEnd = $params['dateFrom']->format('Y-m-t 23:59:59');
-
+        $monthEnd   = $params['dateFrom']->format('Y-m-t 23:59:59');
 
         // get financials from ledger based on returned Lead list
         $q = $this->_em->getConnection()->createQueryBuilder();
@@ -80,9 +79,7 @@ class StatRepository extends CommonRepository
         $q->setParameter('today', $today);
         $q->setParameter('campaign_id', $params['campaignId']);
 
-
         $q->groupBy('css.contactsource_id');
-
 
         $q->orderBy('(cs.name)', 'ASC');
 
@@ -101,22 +98,20 @@ class StatRepository extends CommonRepository
         $q->setParameter('end', $monthEnd);
         $q->setParameter('campaign_id', $params['campaignId']);
         $mtdCount = $q->execute()->fetchAll();
-        if(!empty($mtdCount))
-        {
+        if (!empty($mtdCount)) {
             $daily = $this->idToKey($todayCount);
-            $mtd = $this->idToKey($mtdCount);
+            $mtd   = $this->idToKey($mtdCount);
 
-            foreach($mtd as $row)
-            {
-                $dataRow = [];
-                $dataRow[]= $row['source'];
-                $dataRow[]= "[Cap Name]";
-                $dataRow[] = isset($daily[$row['contactsource_id']]['daily']) ? $daily[$row['contactsource_id']]['daily'] : 0;
-                $dataRow[] = '0';
-                $dataRow[] = '0';
-                $dataRow[] = $row['mtd'];
-                $dataRow[] = '0';
-                $dataRow[] = '0';
+            foreach ($mtd as $row) {
+                $dataRow           = [];
+                $dataRow[]         = $row['source'];
+                $dataRow[]         = '[Cap Name]';
+                $dataRow[]         = isset($daily[$row['contactsource_id']]['daily']) ? $daily[$row['contactsource_id']]['daily'] : 0;
+                $dataRow[]         = '0';
+                $dataRow[]         = '0';
+                $dataRow[]         = $row['mtd'];
+                $dataRow[]         = '0';
+                $dataRow[]         = '0';
                 $results['rows'][] = $dataRow;
             }
         }
@@ -127,7 +122,7 @@ class StatRepository extends CommonRepository
     public function idToKey($arr)
     {
         $result = [];
-        foreach($arr as $item){
+        foreach ($arr as $item) {
             $result[$item['contactsource_id']] = $item;
         }
 

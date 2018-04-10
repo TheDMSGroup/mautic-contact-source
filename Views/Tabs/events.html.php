@@ -46,7 +46,7 @@
             <?php foreach ($limits as $source => $sourceLimit) : ?>
             <?php foreach ($sourceLimit as $limit) : ?>
                 <li class="list-group-item bg-auto bg-light-xs">
-                    <?php $yesClass = ( 90 <= $limit['percent']) ? 'danger' : 'success'; ?>
+                    <?php $yesClass = (90 <= $limit['percent']) ? 'danger' : 'success'; ?>
                     <div class="progress-bar progress-bar-<?php echo $yesClass; ?>" style="width:<?php echo $limit['yesPercent']; ?>%; left: 0;"></div>
                     <div class="progress-bar progress-bar-danger" style="width:<?php echo $limit['noPercent']; ?>%; left: <?php echo $limit['yesPercent']; ?>%"></div>
                     <div class="box-layout">
@@ -68,25 +68,25 @@
                             <span class="label label-<?php echo $yesClass; ?>"><?php echo round($limit['percent']).'%'; ?></span>
                         </div>
                         <div class="col-md-2 va-m text-right">
-                            <?php $forecastValue = ''; $forecastClass = 'success';?>
-                            <?php if ($limit['rule']['duration'] == "P1D" && $limit['logCount'] > 0): ?>
-                                <?php $pending = floatval(($limit['logCount'] / $forecast['elapsedHoursInDaySoFar']) * $forecast['hoursLeftToday']);
-                                      $forecastValue = number_format(($pending + $limit['logCount']) / $limit['rule']['quantity'], 2, '.',',')*100;
+                            <?php $forecastValue = ''; $forecastClass = 'success'; ?>
+                            <?php if ($limit['rule']['duration'] == 'P1D' && $limit['logCount'] > 0): ?>
+                                <?php $pending       = floatval(($limit['logCount'] / $forecast['elapsedHoursInDaySoFar']) * $forecast['hoursLeftToday']);
+                                      $forecastValue = number_format(($pending + $limit['logCount']) / $limit['rule']['quantity'], 2, '.', ',') * 100;
                                       $forecastClass = $forecastValue >= 90 ? 'danger' : 'success';
-                                      $forecastValue = $forecastValue .'%';
+                                      $forecastValue = $forecastValue.'%';
                                 ?>
                                       <span class="label label-<?php echo $forecastClass; ?>"><?php echo intval($pending + $limit['logCount']); ?></span>
-                                      <span class="label label-<?php echo $forecastClass; ?>"><?php echo $forecastValue ; ?></span>
+                                      <span class="label label-<?php echo $forecastClass; ?>"><?php echo $forecastValue; ?></span>
 
                             <?php endif; ?>
-                            <?php if ($limit['rule']['duration'] == "1M" && $limit['logCount'] > 0): ?>
-                                <?php $pending = floatval(($limit['logCount'] / $forecast['currentDayOfMonth']) * $forecast['daysInMonthLeft']);
+                            <?php if ($limit['rule']['duration'] == '1M' && $limit['logCount'] > 0): ?>
+                                <?php $pending     = floatval(($limit['logCount'] / $forecast['currentDayOfMonth']) * $forecast['daysInMonthLeft']);
                                     $forecastValue = number_format(($pending + $limit['logCount']) / $limit['rule']['quantity'], 2, '.', ',') * 100;
                                     $forecastClass = $forecastValue >= 90 ? 'danger' : 'success';
-                                    $forecastValue = $forecastValue .'%';
+                                    $forecastValue = $forecastValue.'%';
                                 ?>
                                     <span class="label label-<?php echo $forecastClass; ?>"><?php echo intval($pending + $limit['logCount']); ?></span>
-                                    <span class="label label-<?php echo $forecastClass; ?>"><?php echo $forecastValue ; ?></span>
+                                    <span class="label label-<?php echo $forecastClass; ?>"><?php echo $forecastValue; ?></span>
 
                             <?php endif; ?>
 

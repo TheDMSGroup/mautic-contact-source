@@ -541,6 +541,7 @@ class ContactSourceModel extends FormModel
      * @param ContactSource $contactSource
      *
      * @return array
+     *
      * @throws \Exception
      * @throws \MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException
      */
@@ -584,23 +585,23 @@ class ContactSourceModel extends FormModel
      * @param ContactSource $contactSource
      *
      * @return array
+     *
      * @throws \Exception
      * @throws \MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException
      */
     public function evaluateAllSourceLimits($campaignId)
     {
         $campaignLimits = [];
-        $sources = $this->getRepository()->getSourcesByCampaign($campaignId);
+        $sources        = $this->getRepository()->getSourcesByCampaign($campaignId);
 
         $container = $this->dispatcher->getContainer();
         /** @var CampaignSettings $campaignSettingsModel */
         $campaignSettingsModel = $container->get('mautic.contactsource.model.campaign_settings');
 
-        foreach($sources as $source) {
+        foreach ($sources as $source) {
             $sourceEntity = $this->getEntity($source['id']);
             $campaignSettingsModel->setContactSource($sourceEntity);
             $campaignSettings = $campaignSettingsModel->getCampaignSettingsById($campaignId);
-
 
             /* @var \MauticPlugin\MauticContactSourceBundle\Model\Cache $cacheModel */
             $cacheModel = $container->get('mautic.contactsource.model.cache');

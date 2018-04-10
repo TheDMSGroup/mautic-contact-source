@@ -128,11 +128,10 @@ class ContactSourceRepository extends CommonRepository
                 $q->expr()->andX($where)
         );
 
-        $q->setParameter('regex', '"campaignId\":"' . $campaignId . '"');
+        $q->setParameter('regex', '"campaignId\":"'.$campaignId.'"');
 
         $results = $q->execute()->fetchAll();
 
         return $results;
-
     }
 }

@@ -15,7 +15,6 @@ use Mautic\CampaignBundle\Entity\CampaignRepository;
 use Mautic\CoreBundle\Controller\AjaxController as CommonAjaxController;
 use Mautic\CoreBundle\Controller\AjaxLookupControllerTrait;
 use Mautic\CoreBundle\Helper\UTF8Helper;
-use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -69,11 +68,12 @@ class AjaxController extends CommonAjaxController
     }
 
     /**
-     * Get the current Campaign Limits (for real-time updates)
+     * Get the current Campaign Limits (for real-time updates).
      *
      * @param Request $request
      *
      * @return \Symfony\Component\HttpFoundation\Response
+     *
      * @throws \Exception
      * @throws \MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException
      */
@@ -148,11 +148,11 @@ class AjaxController extends CommonAjaxController
     {
         // Get the API payload to test.
         $params['campaignId'] = $this->request->request->get('data')['campaignId'];
-        $params['dateFrom'] = new \DateTime('now');
-        $em = $this->container->get('doctrine.orm.entity_manager');
-        $statRepo = $em->getRepository(\MauticPlugin\MauticContactSourceBundle\Entity\Stat::class);
-        $data       = $statRepo->getCampaignBudgetsData($params);
-        $headers    = [
+        $params['dateFrom']   = new \DateTime('now');
+        $em                   = $this->container->get('doctrine.orm.entity_manager');
+        $statRepo             = $em->getRepository(\MauticPlugin\MauticContactSourceBundle\Entity\Stat::class);
+        $data                 = $statRepo->getCampaignBudgetsData($params);
+        $headers              = [
             'mautic.contactsource.campaign.budgets.header.source',
             'mautic.contactsource.campaign.budgets.header.cap_name',
             'mautic.contactsource.campaign.budgets.header.today',

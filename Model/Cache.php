@@ -268,6 +268,7 @@ class Cache extends AbstractCommonModel
      * @param bool  $name
      *
      * @return array
+     *
      * @throws ContactSourceException
      * @throws \Exception
      */
@@ -296,6 +297,7 @@ class Cache extends AbstractCommonModel
                 }
             }
         }
+
         return $limits;
     }
 
