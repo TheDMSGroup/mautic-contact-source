@@ -646,7 +646,7 @@ class Api
             unset($this->fieldsProvided[$key]);
             $msg = 'This field is not currently supported and was ignored.';
             if ($closest && isset($allowedKey)) {
-                $msg .= ' Did you mean \''.$closest.'\' ('.$allowedFields[$closest].')?';
+                $msg .= ' Did you mean \''.$closest.'\' '.$allowedFields[$closest].'?';
             }
             $this->errors[$key] = $msg;
         }
@@ -673,46 +673,44 @@ class Api
             $this->fieldsProvided
         );
 
-        if (!$contact) {
-            return null;
-        }
+        if ($contact) {
+            // Accepted fields straight from the contact entity.
+            $this->fieldsStored = $contact->getUpdatedFields();
+            if (!count($this->fieldsStored)) {
+                throw new ContactSourceException(
+                    'There were no valid fields needed to create a contact for this campaign.',
+                    Codes::HTTP_BAD_REQUEST,
+                    null,
+                    Stat::TYPE_INVALID
+                );
+            }
+            if (isset($this->fieldsProvided['ip'])) {
+                $this->fieldsStored['ip'] = $this->fieldsProvided['ip'];
+            }
 
-        // Accepted fields straight from the contact entity.
-        $this->fieldsStored = $contact->getUpdatedFields();
-        if (!count($this->fieldsStored)) {
-            throw new ContactSourceException(
-                'There were no valid fields needed to create a contact for this campaign.',
-                Codes::HTTP_BAD_REQUEST,
-                null,
-                Stat::TYPE_INVALID
-            );
-        }
-        if (isset($this->fieldsProvided['ip'])) {
-            $this->fieldsStored['ip'] = $this->fieldsProvided['ip'];
-        }
-
-        // Cycle through calling appropriate setters if there is utm data.
-        if (count($utmTagData)) {
-            foreach ($this->getUtmSetters() as $q => $setter) {
-                if (isset($utmTagData[$q])) {
-                    $this->getUtmTag()->$setter($utmTagData[$q]);
-                    $this->fieldsStored[$q] = $utmTagData[$q];
+            // Cycle through calling appropriate setters if there is utm data.
+            if (count($utmTagData)) {
+                foreach ($this->getUtmSetters() as $q => $setter) {
+                    if (isset($utmTagData[$q])) {
+                        $this->getUtmTag()->$setter($utmTagData[$q]);
+                        $this->fieldsStored[$q] = $utmTagData[$q];
+                    }
                 }
+
+                // Set the UTM query from the URL if provided.
+                if (isset($utmTagData['url'])) {
+                    parse_url($utmTagData['url'], PHP_URL_QUERY);
+                    parse_str(parse_url($utmTagData['url'], PHP_URL_QUERY), $query);
+                    $this->getUtmTag()->setQuery($query);
+                }
+
+                // Add date added, critical for inserts.
+                $this->getUtmTag()->setDateAdded(new \DateTime());
+
+                // Apply to the contact for save later.
+                $this->getUtmTag()->setLead($contact);
+                $contact->setUtmTags($this->getUtmTag());
             }
-
-            // Set the UTM query from the URL if provided.
-            if (isset($utmTagData['url'])) {
-                parse_url($utmTagData['url'], PHP_URL_QUERY);
-                parse_str(parse_url($utmTagData['url'], PHP_URL_QUERY), $query);
-                $this->getUtmTag()->setQuery($query);
-            }
-
-            // Add date added, critical for inserts.
-            $this->getUtmTag()->setDateAdded(new \DateTime());
-
-            // Apply to the contact for save later.
-            $this->getUtmTag()->setLead($contact);
-            $contact->setUtmTags($this->getUtmTag());
         }
 
         // Done importing fields, let's make sure the entity was made.
@@ -1246,7 +1244,7 @@ class Api
 
         if ($this->valid) {
             $message = 'Contact '.$this->contact->getId(
-                ).' was imported successfully from Campaign: '.$this->campaign->getname();
+                ).' was imported successfully into campaign '.$this->campaign->getname();
         } else {
             $message = isset($this->errors) ? implode(PHP_EOL, $this->errors) : '';
             if ($this->eventErrors) {
@@ -1254,17 +1252,8 @@ class Api
             }
         }
 
-        // Session storage for external plugins (should probably be dispatcher instead).
-        $session = $this->container->get('session');
-        // Indicates that a single (or more) valid sends have been made.
-        if ($this->valid) {
-            $session->set('contactsource_valid', true);
-        }
-        // get the campaign if exists
-        $campaignId = !empty($this->campaignId) ? $this->campaignId : 0;
-
         // Add log entry for statistics / charts.
-        $sourceModel->addStat($this->contactSource, $this->status, $this->contact, $this->attribution, $campaignId);
+        $sourceModel->addStat($this->contactSource, $this->status, $this->contact, $this->attribution, intval($this->campaignId));
         $this->logs = array_merge(
             $this->logs,
             [
