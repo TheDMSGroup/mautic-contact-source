@@ -165,11 +165,17 @@ class ContactSourceController extends FormController
                     new \DateTime($chartFilterForm->get('date_to')->getData())
                 );
             }
+            $limits = [];
+            try {
+                $limits = $model->evaluateAllCampaignLimits($item);
+            } catch (\Exception $e) {
+            }
 
             $args['viewParameters']['auditlog']        = $this->getAuditlogs($item);
             $args['viewParameters']['stats']           = $stats;
             $args['viewParameters']['events']          = $model->getEngagements($item);
             $args['viewParameters']['chartFilterForm'] = $chartFilterForm->createView();
+            $args['viewParameters']['limits']          = $limits;
         }
 
         return $args;

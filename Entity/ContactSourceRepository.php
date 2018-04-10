@@ -107,4 +107,31 @@ class ContactSourceRepository extends CommonRepository
 
         return $q->getQuery()->getArrayResult();
     }
+
+    /**
+     * @param $campaignId
+     *
+     * @return mixed
+     */
+    public function getSourcesByCampaign($campaignId)
+    {
+        // WHERE campaign_settings REGEXP '\"campaignId\":\s*\"' . campaing_id . '\",';
+        //       $where = 'l.'.$field.' REGEXP  :value';
+
+        $q = $this->_em->getConnection()->createQueryBuilder()
+            ->select('cs.*')
+            ->from(MAUTIC_TABLE_PREFIX.'contactsource', 'cs');
+
+        $where = 'REPLACE(cs.campaign_settings, " ", "") REGEXP  :regex';
+        $q->where(
+                $q->expr()->eq('cs.is_published', true),
+                $q->expr()->andX($where)
+        );
+
+        $q->setParameter('regex', '"campaignId\":"'.$campaignId.'"');
+
+        $results = $q->execute()->fetchAll();
+
+        return $results;
+    }
 }

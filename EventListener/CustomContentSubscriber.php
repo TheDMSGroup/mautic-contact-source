@@ -39,6 +39,7 @@ class CustomContentSubscriber extends CommonSubscriber
     {
         return [
             CoreEvents::VIEW_INJECT_CUSTOM_CONTENT => ['injectCustomChart', 0],
+            CoreEvents::VIEW_INJECT_CUSTOM_CONTENT => ['getContentInjection', 0],
         ];
     }
 
@@ -126,6 +127,44 @@ class CustomContentSubscriber extends CommonSubscriber
                     $event->addTemplate('MauticContactSourceBundle:Charts:campaigncontactsbysource.html.php', ['campaignSourceData' => $chartData]);
                 }
                 break;
+        }
+    }
+
+    public function getContentInjection(CustomContentEvent $event)
+    {
+        switch ($event->getViewName()) {
+            case 'MauticCampaignBundle:Campaign:details.html.php':
+                $vars = $event->getVars();
+                if ('tabs' === $event->getContext()) {
+                    $tabTemplate = 'MauticContactSourceBundle:Tabs:campaign_source_tabs.html.php';
+                    $event->addTemplate(
+                        $tabTemplate,
+                        [
+                            'tabData' => $vars,
+                        ]
+                    );
+                }
+                if ('tabs.content' === $event->getContext()) {
+                    //calculate time since values for generating forecasts
+                    $forecast                           = [];
+                    $forecast['elapsedHoursInDaySoFar'] = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
+                    $forecast['hoursLeftToday']         = intval(24 - $forecast['elapsedHoursInDaySoFar']);
+                    $forecast['currentDayOfMonth']      = intval(date('d'));
+                    $forecast['daysInMonthLeft']        =intval(date('t') - $forecast['currentDayOfMonth']);
+                    $vars                               = $event->getVars();
+                    $campaignId                         = $vars['campaign']->getId();
+                    $container                          = $this->dispatcher->getContainer();
+                    $limits                             = $container->get('mautic.contactsource.model.contactsource')->evaluateAllSourceLimits($campaignId);
+                    $tabContentTemplate                 = 'MauticContactSourceBundle:Tabs:events.html.php';
+                    $event->addTemplate(
+                        $tabContentTemplate,
+                        [
+                            'limits'   => $limits,
+                            'forecast' => $forecast,
+                        ]
+                    );
+                }
+            break;
         }
     }
 }

@@ -146,6 +146,13 @@ $token = $item->getToken();
                         <?php echo $view['translator']->trans('mautic.lead.lead.tab.auditlog'); ?>
                     </a>
                 </li> */ ?>
+                <?php if ($limits): ?>
+                    <li class="<?php if ('limits' == $firstTab): echo 'active'; endif; ?>">
+                        <a href="#limits-container" role="tab" data-toggle="tab">
+                            <?php echo $view['translator']->trans('mautic.contactsource.limits'); ?>
+                        </a>
+                    </li>
+                <?php endif; ?>
 
                 <?php echo $view['content']->getCustomContent('tabs', $mauticTemplateVars); ?>
             </ul>
@@ -165,19 +172,15 @@ $token = $item->getToken();
                     ); ?>
                 </div>
                 <!--/ #history-container -->
-
-                <!-- #auditlog-container -->
-<!--                <div class="tab-pane fade bdr-w-0" id="auditlog-container">-->
-<!--                    --><?php //echo $view->render(
-//                         'MauticLeadBundle:Auditlog:list.html.php',
-//                         [
-//                             'events' => $auditlog,
-//                             'lead'   => $item,
-//                             'tmpl'   => 'index',
-//                         ]
-//                     );?>
-<!--                </div>-->
-                <!--/ #auditlog-container -->
+                <!-- #limits-container -->
+                <?php if ($limits): ?>
+                    <div class="tab-pane fade in bdr-w-0" id="limits-container">
+                        <?php echo $view->render(
+                            'MauticCampaignBundle:Campaign:events.html.php', ['events' => $limits]
+                        ); ?>
+                    </div>
+                <?php endif; ?>
+                <!--/ #limits-container -->
 
                 <!-- custom content -->
                 <?php echo $view['content']->getCustomContent('tabs.content', $mauticTemplateVars); ?>
