@@ -549,7 +549,7 @@ class ContactSourceModel extends FormModel
     {
         $container = $this->dispatcher->getContainer();
         /** @var CampaignSettings $campaignSettingsModel */
-        $campaignModel = $container->get('mautic.campaign.model.campaign');
+        $campaignModel         = $container->get('mautic.campaign.model.campaign');
         $campaignSettingsModel = $container->get('mautic.contactsource.model.campaign_settings');
         $campaignSettingsModel->setContactSource($contactSource);
         $campaignSettingsAll = $campaignSettingsModel->getCampaignSettings();

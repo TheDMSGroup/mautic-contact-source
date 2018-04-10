@@ -184,7 +184,7 @@ $token = $item->getToken();
                         ?>
                         <?php echo $view->render(
                           //  'MauticCampaignBundle:Campaign:events.html.php', ['events' => $limits]
-                           'MauticContactSourceBundle:Tabs:events.html.php', ['limits' => $limits, 'forecast' => $forecast, 'group'    => 'campaign',]
+                           'MauticContactSourceBundle:Tabs:events.html.php', ['limits' => $limits, 'forecast' => $forecast, 'group'    => 'campaign']
                         ); ?>
                     </div>
                 <?php endif; ?>
