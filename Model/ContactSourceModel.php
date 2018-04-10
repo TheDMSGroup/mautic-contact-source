@@ -12,6 +12,7 @@
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use Doctrine\DBAL\Query\QueryBuilder;
+use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CoreBundle\Helper\Chart\ChartQuery;
 use Mautic\CoreBundle\Helper\Chart\LineChart;
 use Mautic\CoreBundle\Helper\TemplatingHelper;
@@ -569,6 +570,51 @@ class ContactSourceModel extends FormModel
                             $campaignLimits[$id] = [];
                         }
                         $campaignLimits[$id] = array_merge($campaignLimits[$id], $limits);
+                    }
+                }
+            }
+        }
+
+        return $campaignLimits;
+    }
+
+    /**
+     * Evaluate all limits (budgets/caps) for a source, return them by campaign.
+     *
+     * @param ContactSource $contactSource
+     *
+     * @return array
+     * @throws \Exception
+     * @throws \MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException
+     */
+    public function evaluateAllSourceLimits($campaignId)
+    {
+        $campaignLimits = [];
+        $sources = $this->getRepository()->getSourcesByCampaign($campaignId);
+
+        $container = $this->dispatcher->getContainer();
+        /** @var CampaignSettings $campaignSettingsModel */
+        $campaignSettingsModel = $container->get('mautic.contactsource.model.campaign_settings');
+
+        foreach($sources as $source) {
+            $sourceEntity = $this->getEntity($source['id']);
+            $campaignSettingsModel->setContactSource($sourceEntity);
+            $campaignSettings = $campaignSettingsModel->getCampaignSettingsById($campaignId);
+
+
+            /* @var \MauticPlugin\MauticContactSourceBundle\Model\Cache $cacheModel */
+            $cacheModel = $container->get('mautic.contactsource.model.cache');
+
+            foreach ($campaignSettings as $campaign) {
+                $cacheModel->setContactSource($sourceEntity);
+                // Establish parameters from campaign settings.
+                if (!empty($campaign->limits) && isset($campaign->campaignId)) {
+                    $id                = intval($campaign->campaignId);
+                    $limitRules        = new \stdClass();
+                    $limitRules->rules = $campaign->limits;
+                    $limits            = $cacheModel->evaluateLimits($limitRules, $id, false, true);
+                    if ($limits) {
+                        $campaignLimits[$source['name']] =  $limits;
                     }
                 }
             }

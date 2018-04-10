@@ -145,11 +145,22 @@ class CustomContentSubscriber extends CommonSubscriber
                     );
                 }
                 if ('tabs.content' === $event->getContext()) {
-                    $tabContentTemplate = 'MauticContactSourceBundle:Tabs:campaign_source_tab_content.html.php';
+                    //calculate time since values for generating forecasts
+                    $forecast = [];
+                    $forecast['elapsedHoursInDaySoFar'] = intval(date("H", time() - strtotime(date("Y-m-d :00:00:00", time()))));
+                    $forecast['hoursLeftToday'] = intval(24-$forecast['elapsedHoursInDaySoFar']);
+                    $forecast['currentDayOfMonth'] = intval(date('d'));
+                    $forecast['daysInMonthLeft'] =intval(date("t") - $forecast['currentDayOfMonth']);
+                    $vars = $event->getVars();
+                    $campaignId = $vars['campaign']->getId();
+                    $container = $this->dispatcher->getContainer();
+                    $limits = $container->get('mautic.contactsource.model.contactsource')->evaluateAllSourceLimits($campaignId);
+                    $tabContentTemplate = 'MauticContactSourceBundle:Tabs:events.html.php';
                     $event->addTemplate(
                         $tabContentTemplate,
                         [
-                            'tabContentData' => $vars,
+                            'limits' => $limits,
+                            'forecast' => $forecast,
                         ]
                     );
                 }
