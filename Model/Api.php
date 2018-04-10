@@ -1206,24 +1206,18 @@ class Api
      */
     private function applyAttribution()
     {
-        if (0 == $this->cost) {
-            return;
-        }
-
-        if (Stat::TYPE_ACCEPTED === $this->status) {
+        if ($this->valid && $this->cost && Stat::TYPE_ACCEPTED === $this->status) {
             $this->contact       = $this->getContactModel()->getEntity($this->contact->getId());
             $originalAttribution = $this->contact->getAttribution();
             // Attribution is always a negative number to represent cost.
-            $newAttribution = $originalAttribution + ($this->cost * -1);
-            if ($newAttribution != $originalAttribution) {
-                $this->contact->addUpdatedField(
-                    'attribution',
-                    $newAttribution
-                );
-                $this->dispatchContextCreate();
-                $this->getContactModel()->saveEntity($this->contact);
-            }
             $this->attribution = ($this->cost * -1);
+            $this->contact->addUpdatedField(
+                'attribution',
+                $originalAttribution + $this->attribution,
+                $originalAttribution
+            );
+            $this->dispatchContextCreate();
+            $this->getContactModel()->saveEntity($this->contact);
         }
     }
 
@@ -1280,8 +1274,13 @@ class Api
                 'realTime'       => $this->realTime,
                 'scrubbed'       => $this->scrubbed,
                 'utmSource'      => $this->utmSource,
-                'campaign'       => $this->campaign ? $this->campaign->convertToArray() : null,
-                'contact'        => $this->contact ? $this->contact->convertToArray() : null,
+                'campaign'       => $this->campaign ? [
+                    'id'         => $this->campaign->getId(),
+                    'name'       => $this->campaign->getName(),
+                ] : null,
+                'contact'        => $this->contact ? [
+                    'id'         => $this->contact->getId(),
+                ] : null,
                 'events'         => $this->events,
             ]
         );
