@@ -1393,6 +1393,11 @@ class Api
             $result['events'] = $this->events;
         }
 
+        // Real-Time.
+        if ($this->verbose) {
+            $result['realTime'] = $this->realTime;
+        }
+
         // Source.
         if ($this->contactSource) {
             $result['source']         = [];
