@@ -147,7 +147,7 @@ $token = $item->getToken();
                     </a>
                 </li> */ ?>
                 <?php if ($limits): ?>
-                    <li class="<?php if ('limits' == $firstTab): echo 'active'; endif; ?>">
+                    <li >
                         <a href="#limits-container" role="tab" data-toggle="tab">
                             <?php echo $view['translator']->trans('mautic.contactsource.limits'); ?>
                         </a>
@@ -175,8 +175,16 @@ $token = $item->getToken();
                 <!-- #limits-container -->
                 <?php if ($limits): ?>
                     <div class="tab-pane fade in bdr-w-0" id="limits-container">
+                        <?php
+                        $forecast                           = [];
+                        $forecast['elapsedHoursInDaySoFar'] = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
+                        $forecast['hoursLeftToday']         = intval(24 - $forecast['elapsedHoursInDaySoFar']);
+                        $forecast['currentDayOfMonth']      = intval(date('d'));
+                        $forecast['daysInMonthLeft']        =intval(date('t') - $forecast['currentDayOfMonth']);
+                        ?>
                         <?php echo $view->render(
-                            'MauticCampaignBundle:Campaign:events.html.php', ['events' => $limits]
+                          //  'MauticCampaignBundle:Campaign:events.html.php', ['events' => $limits]
+                           'MauticContactSourceBundle:Tabs:events.html.php', ['limits' => $limits, 'forecast' => $forecast, 'group'    => 'campaign']
                         ); ?>
                     </div>
                 <?php endif; ?>
