@@ -10,9 +10,9 @@
  */
 
 return [
-    'name'        => 'Mautic Contact Source',
+    'name'        => 'Contact Source',
     'description' => 'Creates API endpoints for receiving contacts from third parties.',
-    'version'     => '0.8',
+    'version'     => '1.0',
     'author'      => 'Mautic',
 
     'routes' => [
