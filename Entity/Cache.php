@@ -136,12 +136,12 @@ class Cache
             'contactsource_cache_date_added'
         );
 
-        $builder->addIndex(
-            [
-                'contactsource_id',
-            ],
-            'contactsource_cache_contactsource_id'
-        );
+        // $builder->addIndex(
+        //     [
+        //         'contactsource_id',
+        //     ],
+        //     'contactsource_cache_contactsource_id'
+        // );
 
         $builder->addIndex(
             [
@@ -182,12 +182,12 @@ class Cache
             'contactsource_cache_country'
         );
 
-        $builder->addIndex(
-            [
-                'campaign_id',
-            ],
-            'contactsource_cache_campaign_id'
-        );
+        // $builder->addIndex(
+        //     [
+        //         'campaign_id',
+        //     ],
+        //     'contactsource_cache_campaign_id'
+        // );
 
         $builder->addIndex(
             [
@@ -195,7 +195,7 @@ class Cache
                 'campaign_id',
                 'contactsource_id',
             ],
-            'contactsource_cache_limits'
+            'contactsource_cache_date_added_campaign_id_contactsource_id'
         );
 
         $builder->setCustomRepositoryClass('MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository');
