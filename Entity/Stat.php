@@ -156,6 +156,16 @@ class Stat
             ['contactsource_id', 'type', 'date_added'],
             'contactsource_type_date_added'
         );
+
+        $builder->addIndex(
+            [
+                'type',
+                'campaign_id',
+                'contactsource_id',
+                'date_added',
+            ],
+            'contactclient_ledger'
+        );
     }
 
     /**
