@@ -18,7 +18,7 @@
                 <div class="box-layout">
                     <div class="col-md-2 va-m">
                         <span class="fw-sb text-primary mb-xs">
-                            <?php echo $view['translator']->trans('mautic.campaign.source.limit.source'); ?>
+                            <?php echo $view['translator']->trans('mautic.campaign.source.limit.'.$group); ?>
                         </span>
                     </div>
                     <div class="col-md-6 va-m">

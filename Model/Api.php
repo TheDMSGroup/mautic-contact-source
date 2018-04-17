@@ -1059,7 +1059,8 @@ class Api
     {
         if ($this->contact->getId()) {
             // Add the contact directly to the campaign without duplicate checking.
-            $this->addContactsToCampaign($this->campaign, [$this->contact], false);
+            // Passing manuallyAdded as true is important, prevents cron from immediately removing the contacts.
+            $this->addContactsToCampaign($this->campaign, [$this->contact], true);
         }
 
         return $this;

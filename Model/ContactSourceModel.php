@@ -549,6 +549,7 @@ class ContactSourceModel extends FormModel
     {
         $container = $this->dispatcher->getContainer();
         /** @var CampaignSettings $campaignSettingsModel */
+        $campaignModel         = $container->get('mautic.campaign.model.campaign');
         $campaignSettingsModel = $container->get('mautic.contactsource.model.campaign_settings');
         $campaignSettingsModel->setContactSource($contactSource);
         $campaignSettingsAll = $campaignSettingsModel->getCampaignSettings();
@@ -563,14 +564,15 @@ class ContactSourceModel extends FormModel
                 // Establish parameters from campaign settings.
                 if (!empty($campaign->limits) && isset($campaign->campaignId)) {
                     $id                = intval($campaign->campaignId);
+                    $name              = $campaignModel->getEntity($id)->getName();
                     $limitRules        = new \stdClass();
                     $limitRules->rules = $campaign->limits;
                     $limits            = $cacheModel->evaluateLimits($limitRules, $id, false, true);
                     if ($limits) {
-                        if (!isset($campaignLimits[$id])) {
-                            $campaignLimits[$id] = [];
+                        if (!isset($campaignLimits[$name])) {
+                            $campaignLimits[$name] = [];
                         }
-                        $campaignLimits[$id] = array_merge($campaignLimits[$id], $limits);
+                        $campaignLimits[$name] = array_merge($campaignLimits[$name], $limits);
                     }
                 }
             }

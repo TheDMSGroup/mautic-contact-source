@@ -161,6 +161,7 @@ class CustomContentSubscriber extends CommonSubscriber
                         [
                             'limits'   => $limits,
                             'forecast' => $forecast,
+                            'group'    => 'source',
                         ]
                     );
                 }
