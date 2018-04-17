@@ -131,6 +131,13 @@ class Cache
 
         $builder->addIndex(
             [
+                'date_added',
+            ],
+            'contactsource_cache_date_added'
+        );
+
+        $builder->addIndex(
+            [
                 'contactsource_id',
             ],
             'contactsource_cache_contactsource_id'
@@ -180,6 +187,15 @@ class Cache
                 'campaign_id',
             ],
             'contactsource_cache_campaign_id'
+        );
+
+        $builder->addIndex(
+            [
+                'date_added',
+                'campaign_id',
+                'contactsource_id',
+            ],
+            'contactsource_cache_limits'
         );
 
         $builder->setCustomRepositoryClass('MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository');
