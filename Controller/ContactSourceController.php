@@ -149,20 +149,24 @@ class ContactSourceController extends FormController
             /** @var \MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel $model */
             $model = $this->getModel('contactsource');
 
+            // fix dates
+            $dateFrom = new \DateTime($chartFilterForm->get('date_from')->getData());
+            $dateTo   = new \DateTime($chartFilterForm->get('date_to')->getData());
+
             if (in_array($chartFilterForm->get('type')->getData(), ['All Events', null])) {
                 $stats = $model->getStats(
                     $item,
                     null,
-                    new \DateTime($chartFilterForm->get('date_from')->getData()),
-                    new \DateTime($chartFilterForm->get('date_to')->getData())
+                    $dateFrom,
+                    $dateTo
                 );
             } else {
                 $stats = $model->getStatsByCampaign(
                     $item,
                     null,
                     $chartFilterForm->get('type')->getData(),
-                    new \DateTime($chartFilterForm->get('date_from')->getData()),
-                    new \DateTime($chartFilterForm->get('date_to')->getData())
+                    $dateFrom,
+                    $dateTo
                 );
             }
             $limits = [];

@@ -150,7 +150,7 @@ class CustomContentSubscriber extends CommonSubscriber
                     $forecast['elapsedHoursInDaySoFar'] = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
                     $forecast['hoursLeftToday']         = intval(24 - $forecast['elapsedHoursInDaySoFar']);
                     $forecast['currentDayOfMonth']      = intval(date('d'));
-                    $forecast['daysInMonthLeft']        =intval(date('t') - $forecast['currentDayOfMonth']);
+                    $forecast['daysInMonthLeft']        = intval(date('t') - $forecast['currentDayOfMonth']);
                     $vars                               = $event->getVars();
                     $campaignId                         = $vars['campaign']->getId();
                     $container                          = $this->dispatcher->getContainer();

@@ -177,6 +177,7 @@ class CacheRepository extends CommonRepository
             $interval = new \DateInterval('P1M');
         }
         $oldest->sub($interval);
+        $oldest->setTimezone(new \DateTimeZone('UTC'));
 
         return $oldest->format('Y-m-d H:i:s');
     }
