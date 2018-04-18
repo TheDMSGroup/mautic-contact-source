@@ -252,7 +252,7 @@ class ContactSourceModel extends FormModel
                 $interval   = abs($userTZ->getOffset() / 3600);
                 $groupBy    = $q->getQueryPart('groupBy')[0];
                 $newGroupBy = str_replace(
-                    "DATE_FORMAT(t.date_added,",
+                    'DATE_FORMAT(t.date_added,',
                     "DATE_FORMAT(DATE_SUB(t.date_added, INTERVAL $interval HOUR),",
                     $groupBy
                 );
@@ -387,7 +387,7 @@ class ContactSourceModel extends FormModel
                     $interval   = abs($userTZ->getOffset() / 3600);
                     $groupBy    = $q->getQueryPart('groupBy')[0];
                     $newGroupBy = str_replace(
-                        "DATE_FORMAT(t.date_added,",
+                        'DATE_FORMAT(t.date_added,',
                         "DATE_FORMAT(DATE_SUB(t.date_added, INTERVAL $interval HOUR),",
                         $groupBy
                     );

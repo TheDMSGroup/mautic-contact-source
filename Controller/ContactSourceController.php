@@ -151,8 +151,7 @@ class ContactSourceController extends FormController
 
             // fix dates
             $dateFrom = new \DateTime($chartFilterForm->get('date_from')->getData());
-            $dateTo = new \DateTime($chartFilterForm->get('date_to')->getData());
-
+            $dateTo   = new \DateTime($chartFilterForm->get('date_to')->getData());
 
             if (in_array($chartFilterForm->get('type')->getData(), ['All Events', null])) {
                 $stats = $model->getStats(
