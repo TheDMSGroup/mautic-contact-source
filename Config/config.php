@@ -137,6 +137,7 @@ return [
                 'arguments' => [
                     'event_dispatcher',
                     'doctrine.orm.entity_manager',
+                    'mautic.helper.ip_lookup',
                 ],
             ],
             'mautic.contactsource.model.campaign_settings' => [
