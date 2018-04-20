@@ -18,6 +18,7 @@ use Mautic\CampaignBundle\Entity\Lead as CampaignContact;
 use Mautic\CampaignBundle\Model\CampaignModel;
 use Mautic\CoreBundle\Entity\IpAddress;
 use Mautic\CoreBundle\Helper\DateTimeHelper;
+use Mautic\CoreBundle\Helper\IpLookupHelper;
 use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\UtmTag;
@@ -142,16 +143,21 @@ class Api
     /** @var int */
     protected $attribution;
 
+    /** @var IpLookupHelper */
+    protected $ipLookupHelper;
+
     /**
      * Api constructor.
      *
      * @param EventDispatcherInterface $dispatcher
      * @param EntityManager            $em
+     * @param IpLookupHelper           $ipLookupHelper
      */
-    public function __construct(EventDispatcherInterface $dispatcher, EntityManager $em)
+    public function __construct(EventDispatcherInterface $dispatcher, EntityManager $em, IpLookupHelper $ipLookupHelper)
     {
-        $this->dispatcher = $dispatcher;
-        $this->em         = $em;
+        $this->dispatcher     = $dispatcher;
+        $this->em             = $em;
+        $this->ipLookupHelper = $ipLookupHelper;
     }
 
     /**
@@ -841,8 +847,13 @@ class Api
         $list = null,
         $tags = null
     ) {
-        $fields    = array_flip($fields);
-        $fieldData = [];
+        $fields               = array_flip($fields);
+        $fieldData            = [];
+        $allowedFields        = $this->getAllowedFields(true);
+        $allowedFieldsAliases = [];
+        foreach ($allowedFields as $contactField) {
+            $allowedFieldsAliases[$contactField['alias']] = true;
+        }
 
         // Fields have already been cleaned by this point, so we can remove the helper.
         foreach ($fields as $leadField => $importField) {
@@ -886,12 +897,50 @@ class Api
         // Sources will not be able to set this on creation: modifiedByUser
         unset($fieldData['modifiedByUser']);
 
+        // Import the IP address as a pivot entity.
         if (!empty($fields['ip']) && !empty($data[$fields['ip']])) {
-            $addresses = explode(',', $data[$fields['ip']]);
-            foreach ($addresses as $address) {
-                $ipAddress = new IpAddress();
-                $ipAddress->setIpAddress(trim($address));
-                $contact->addIpAddress($ipAddress);
+            $ipAddressArray = explode(',', $data[$fields['ip']]);
+            foreach ($ipAddressArray as $ipAddressString) {
+                $ipAddressString = trim($ipAddressString);
+                // Validate the IP before attempting a lookup.
+                if ($ipAddressString && $this->ipLookupHelper->ipIsValid($ipAddressString)) {
+                    /** @var IpAddress $ipAddress */
+                    $ipAddress = $this->ipLookupHelper->getIpAddress($ipAddressString);
+                    if ($ipAddress) {
+                        // If not provided, fill in location data based on the IP, without overriding any provided data.
+                        $ipDetails = $ipAddress->getIpDetails();
+                        if (is_array($ipDetails)) {
+                            foreach ($ipDetails as $ipKey => $ipValue) {
+                                if ('extra' != $ipKey
+                                    && !empty($ipValue)
+                                ) {
+                                    if (
+                                        isset($allowedFieldsAliases[$ipKey])
+                                        && empty($data[$ipKey])
+                                    ) {
+                                        $fieldData[$ipKey] = $ipValue;
+                                    } else {
+                                        // Support a 'state' field where appropriate.
+                                        if (
+                                            'region' === $ipKey
+                                            && isset($allowedFieldsAliases['state'])
+                                            && empty($data['state'])
+                                        ) {
+                                            $fieldData['state'] = $ipValue;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        $contact->addIpAddress($ipAddress);
+                    }
+                } else {
+                    // An invalid IP address is a soft error.
+                    if (!isset($this->errors['ip'])) {
+                        $this->errors['ip'] = [];
+                    }
+                    $this->errors['ip'][$ipAddressString] = 'This IP address is invalid.';
+                }
             }
         }
         unset($fieldData['ip']);
@@ -915,7 +964,8 @@ class Api
             $this->getContactModel()->modifyTags($contact, $tags, null, false);
         }
 
-        foreach ($this->getAllowedFields(true) as $contactField) {
+        // Apply custom field defaults and clean/validate inputs.
+        foreach ($allowedFields as $contactField) {
             if (isset($fieldData[$contactField['alias']])) {
                 if ('NULL' === $fieldData[$contactField['alias']]) {
                     $fieldData[$contactField['alias']] = null;
@@ -1254,7 +1304,13 @@ class Api
         }
 
         // Add log entry for statistics / charts.
-        $sourceModel->addStat($this->contactSource, $this->status, $this->contact, $this->attribution, intval($this->campaignId));
+        $sourceModel->addStat(
+            $this->contactSource,
+            $this->status,
+            $this->contact,
+            $this->attribution,
+            intval($this->campaignId)
+        );
         $this->logs = array_merge(
             $this->logs,
             [
@@ -1265,11 +1321,11 @@ class Api
                 'scrubbed'       => $this->scrubbed,
                 'utmSource'      => $this->utmSource,
                 'campaign'       => $this->campaign ? [
-                    'id'         => $this->campaign->getId(),
-                    'name'       => $this->campaign->getName(),
+                    'id'   => $this->campaign->getId(),
+                    'name' => $this->campaign->getName(),
                 ] : null,
                 'contact'        => $this->contact ? [
-                    'id'         => $this->contact->getId(),
+                    'id' => $this->contact->getId(),
                 ] : null,
                 'events'         => $this->events,
             ]
