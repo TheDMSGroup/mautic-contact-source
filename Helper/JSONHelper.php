@@ -68,7 +68,7 @@ class JSONHelper
      *
      * @throws \Exception
      */
-    private function decode($string, $fieldName, $assoc = false)
+    public function decode($string, $fieldName, $assoc = false)
     {
         $jsonError = false;
         $result    = json_decode($string, $assoc);

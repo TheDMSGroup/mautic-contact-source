@@ -6,10 +6,13 @@ Mautic.contactsourceTimelineOnLoad = function (container, response) {
 
     var codeMirror = function ($el) {
         if (!$el.hasClass('codemirror-active')) {
-            var $textarea = $el.find('textarea.codeMirror-yaml');
+            var $textarea = $el.find('textarea.codeMirror-json');
             if ($textarea.length) {
                 CodeMirror.fromTextArea($textarea[0], {
-                    mode: 'yaml',
+                    mode: {
+                        name: 'javascript',
+                        json: true
+                    },
                     theme: 'material',
                     gutters: [],
                     lineNumbers: false,
