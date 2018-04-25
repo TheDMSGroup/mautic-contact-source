@@ -17,8 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class ContactSourceApiController.
- *
- * @todo - This controller now contains too much business logic. Refactor offloading the logic to a model.
  */
 class ApiController extends CommonApiController
 {
