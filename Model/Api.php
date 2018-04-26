@@ -156,6 +156,7 @@ class Api
      * @param EventDispatcherInterface $dispatcher
      * @param EntityManager            $em
      * @param IpLookupHelper           $ipLookupHelper
+     * @param LoggerInterface          $logger
      */
     public function __construct(
         EventDispatcherInterface $dispatcher,
