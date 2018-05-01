@@ -1348,7 +1348,8 @@ class Api
             $this->contactSource,
             $this->status,
             $this->contact,
-            Yaml::dump($this->logs, 10, 2),
+            //Yaml::dump($this->logs, 10, 2),
+            $this->getLogsJSON(),
             $message
         );
 
@@ -1498,5 +1499,13 @@ class Api
         }
 
         return $result;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLogsJSON()
+    {
+        return json_encode($this->logs, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
     }
 }

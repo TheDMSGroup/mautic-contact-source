@@ -167,6 +167,9 @@ return [
             'mautic.contactsource.helper.utmsource' => [
                 'class' => 'MauticPlugin\MauticContactSourceBundle\Helper\UtmSourceHelper',
             ],
+            'mautic.contactsource.helper.json' => [
+                'class' => 'MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper',
+            ],
         ],
     ],
 

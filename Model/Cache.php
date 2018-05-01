@@ -342,4 +342,35 @@ class Cache extends AbstractCommonModel
 
         return $this;
     }
+
+    /**
+     * Reset local class variables.
+     *
+     * @param array $exclusions optional array of local variables to keep current values
+     *
+     * @return $this
+     */
+    public function reset(
+        $exclusions = [
+            'container',
+            'em',
+            'factory',
+            'security',
+            'dispatcher',
+            'router',
+            'translator',
+            'userHelper',
+            'logger',
+            'coreParamtersHelper',
+        ]
+    ) {
+        foreach (array_diff_key(
+                     get_class_vars(get_class($this)),
+                     array_flip($exclusions)
+                 ) as $name => $default) {
+            $this->$name = $default;
+        }
+
+        return $this;
+    }
 }

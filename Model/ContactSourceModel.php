@@ -592,10 +592,15 @@ class ContactSourceModel extends FormModel
                     $limitRules->rules = $campaign->limits;
                     $limits            = $cacheModel->evaluateLimits($limitRules, $id, false, true);
                     if ($limits) {
-                        if (!isset($campaignLimits[$name])) {
-                            $campaignLimits[$name] = [];
-                        }
-                        $campaignLimits[$name] = array_merge($campaignLimits[$name], $limits);
+                        $campaignLimits[] = [
+                            'campaignId' => $id,
+                            'limits'     => $limits,
+                            'name'       => $name,
+                            'link'       => $this->buildUrl(
+                                'mautic_campaign_action',
+                                ['objectAction' => 'view', 'objectId' => $id]
+                            ),
+                        ];
                     }
                 }
             }
@@ -630,9 +635,10 @@ class ContactSourceModel extends FormModel
 
             /* @var \MauticPlugin\MauticContactSourceBundle\Model\Cache $cacheModel */
             $cacheModel = $container->get('mautic.contactsource.model.cache');
+            $cacheModel->reset();
+            $cacheModel->setContactSource($sourceEntity);
 
             foreach ($campaignSettings as $campaign) {
-                $cacheModel->setContactSource($sourceEntity);
                 // Establish parameters from campaign settings.
                 if (!empty($campaign->limits) && isset($campaign->campaignId)) {
                     $id                = intval($campaign->campaignId);
@@ -640,7 +646,15 @@ class ContactSourceModel extends FormModel
                     $limitRules->rules = $campaign->limits;
                     $limits            = $cacheModel->evaluateLimits($limitRules, $id, false, true);
                     if ($limits) {
-                        $campaignLimits[$source['name']] = $limits;
+                        $campaignLimits[] = [
+                            'sourceId' => $source['id'],
+                            'limits'   => $limits,
+                            'name'     => $source['name'],
+                            'link'     => $this->buildUrl(
+                                'mautic_contactsource_action',
+                                ['objectAction' => 'view', 'objectId' => $source['id']]
+                            ),
+                        ];
                     }
                 }
             }

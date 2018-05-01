@@ -44,14 +44,18 @@
                 </div>
             </li>
             <?php foreach ($limits as $source => $sourceLimit) : ?>
-            <?php foreach ($sourceLimit as $limit) : ?>
+            <?php foreach ($sourceLimit['limits'] as $limit) : ?>
                 <li class="list-group-item bg-auto bg-light-xs">
                     <?php $yesClass = (90 <= $limit['percent']) ? 'danger' : 'success'; ?>
                     <div class="progress-bar progress-bar-<?php echo $yesClass; ?>" style="width:<?php echo $limit['yesPercent']; ?>%; left: 0;"></div>
                     <div class="progress-bar progress-bar-danger" style="width:<?php echo $limit['noPercent']; ?>%; left: <?php echo $limit['yesPercent']; ?>%"></div>
                     <div class="box-layout">
                         <div class="col-md-2 va-m">
-                            <span class="fw-sb text-primary mb-xs"><?php echo $source; ?></span>
+                            <span class="fw-sb text-primary mb-xs">
+                                <a href="<?php echo $sourceLimit['link']; ?>">
+                                    <?php echo $sourceLimit['name']; ?>
+                                </a>
+                            </span>
                         </div>
                         <div class="col-md-6 va-m">
                             <?php if (isset($limit['description'])): ?>
