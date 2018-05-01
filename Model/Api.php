@@ -28,6 +28,7 @@ use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Event\ContactLedgerContextEvent;
 use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -146,18 +147,27 @@ class Api
     /** @var IpLookupHelper */
     protected $ipLookupHelper;
 
+    /** @var LoggerInterface */
+    protected $logger;
+
     /**
      * Api constructor.
      *
      * @param EventDispatcherInterface $dispatcher
      * @param EntityManager            $em
      * @param IpLookupHelper           $ipLookupHelper
+     * @param LoggerInterface          $logger
      */
-    public function __construct(EventDispatcherInterface $dispatcher, EntityManager $em, IpLookupHelper $ipLookupHelper)
-    {
+    public function __construct(
+        EventDispatcherInterface $dispatcher,
+        EntityManager $em,
+        IpLookupHelper $ipLookupHelper,
+        LoggerInterface $logger
+    ) {
         $this->dispatcher     = $dispatcher;
         $this->em             = $em;
         $this->ipLookupHelper = $ipLookupHelper;
+        $this->logger         = $logger;
     }
 
     /**
@@ -1294,10 +1304,12 @@ class Api
         $sourceModel = $this->container->get('mautic.contactsource.model.contactsource');
 
         if ($this->valid) {
-            $message = 'Contact '.$this->contact->getId(
+            $statLevel = 'INFO';
+            $message   = 'Contact '.$this->contact->getId(
                 ).' was imported successfully into campaign '.$this->campaign->getname();
         } else {
-            $message = isset($this->errors) ? implode(PHP_EOL, $this->errors) : '';
+            $statLevel = 'ERROR';
+            $message   = isset($this->errors) ? implode(PHP_EOL, $this->errors) : '';
             if ($this->eventErrors) {
                 $message = implode(PHP_EOL.'  ', $this->eventErrors);
             }
@@ -1355,6 +1367,8 @@ class Api
                 $this->em->clear('Mautic\PluginBundle\Entity\IntegrationEntity');
             }
         }
+        // File-based logging.
+        $this->logger->log($statLevel, 'Contact Source '.$this->contactSource->getId().': '.$message);
     }
 
     /**
