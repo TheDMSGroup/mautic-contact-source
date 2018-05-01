@@ -124,7 +124,10 @@ class CustomContentSubscriber extends CommonSubscriber
                         $chartData['datasets'][] = $temp;
                     }
 
-                    $event->addTemplate('MauticContactSourceBundle:Charts:campaigncontactsbysource.html.php', ['campaignSourceData' => $chartData]);
+                    $event->addTemplate(
+                        'MauticContactSourceBundle:Charts:campaigncontactsbysource.html.php',
+                        ['campaignSourceData' => $chartData]
+                    );
                 }
                 break;
         }
@@ -145,27 +148,16 @@ class CustomContentSubscriber extends CommonSubscriber
                     );
                 }
                 if ('tabs.content' === $event->getContext()) {
-                    //calculate time since values for generating forecasts
-                    $forecast                           = [];
-                    $forecast['elapsedHoursInDaySoFar'] = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
-                    $forecast['hoursLeftToday']         = intval(24 - $forecast['elapsedHoursInDaySoFar']);
-                    $forecast['currentDayOfMonth']      = intval(date('d'));
-                    $forecast['daysInMonthLeft']        = intval(date('t') - $forecast['currentDayOfMonth']);
-                    $vars                               = $event->getVars();
-                    $campaignId                         = $vars['campaign']->getId();
-                    $container                          = $this->dispatcher->getContainer();
-                    $limits                             = $container->get('mautic.contactsource.model.contactsource')->evaluateAllSourceLimits($campaignId);
-                    $tabContentTemplate                 = 'MauticContactSourceBundle:Tabs:events.html.php';
+                    $tabContentTemplate = 'MauticContactSourceBundle:Tabs:campaign_source_tab_content.html.php';
                     $event->addTemplate(
                         $tabContentTemplate,
                         [
-                            'limits'   => $limits,
-                            'forecast' => $forecast,
-                            'group'    => 'source',
+                            'tabData'  => $vars,
+                            'campaign' => $vars['campaign'],
                         ]
                     );
                 }
-            break;
+                break;
         }
     }
 }

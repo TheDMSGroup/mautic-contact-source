@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 ?>
-<div class="tab-pane fade in bdr-w-0 page-list" id="budgets-container">
+<div class="tab-pane fade in bdr-w-0 page-list" id="budgets-tab-container">
     <?php if (!empty($limits) && is_array($limits)) : ?>
 
     <!-- start: trigger type event -->
