@@ -518,5 +518,4 @@ class CacheRepository extends CommonRepository
         $q->setParameter('oldest', $oldest);
         $q->execute();
     }
-
 }

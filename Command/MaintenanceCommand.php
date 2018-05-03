@@ -39,6 +39,7 @@ class MaintenanceCommand extends ModeratedCommand
      * @param OutputInterface $output
      *
      * @return int|null
+     *
      * @throws \Doctrine\ORM\ORMException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
