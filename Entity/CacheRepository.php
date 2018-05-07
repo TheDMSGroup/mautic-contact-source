@@ -201,7 +201,7 @@ class CacheRepository extends CommonRepository
                 $query->select('*');
                 $query->setMaxResults(1);
             }
-            $query->from(MAUTIC_TABLE_PREFIX.'contactsource_cache', $alias);
+            $query->from(MAUTIC_TABLE_PREFIX.$this->getTableName(), $alias);
 
             foreach ($filters as $k => $set) {
                 // Expect orx, anx, or neither.
@@ -499,5 +499,23 @@ class CacheRepository extends CommonRepository
         $this->container = $container;
 
         return $this;
+    }
+
+    /**
+     * Delete all Cache entities that are no longer needed for duplication/exclusivity/limit checks.
+     *
+     * @return mixed
+     */
+    public function deleteExpired()
+    {
+        // 32 days old, since the maximum limiter is 1m/30d.
+        $oldest = date('Y-m-d H:i:s', time() - (32 * 24 * 60 * 60));
+        $q      = $this->getEntityManager()->getConnection()->createQueryBuilder();
+        $q->delete(MAUTIC_TABLE_PREFIX.$this->getTableName());
+        $q->where(
+            $q->expr()->lt('date_added', ':oldest')
+        );
+        $q->setParameter('oldest', $oldest);
+        $q->execute();
     }
 }
