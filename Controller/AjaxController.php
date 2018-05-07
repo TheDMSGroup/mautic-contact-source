@@ -171,4 +171,30 @@ class AjaxController extends CommonAjaxController
 
         return $this->sendJsonResponse($data);
     }
+
+    protected function campaignBudgetsTabAction(Request $request)
+    {
+        //calculate time since values for generating forecasts
+        $forecast                           = [];
+        $forecast['elapsedHoursInDaySoFar'] = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
+        $forecast['hoursLeftToday']         = intval(24 - $forecast['elapsedHoursInDaySoFar']);
+        $forecast['currentDayOfMonth']      = intval(date('d'));
+        $forecast['daysInMonthLeft']        = intval(date('t') - $forecast['currentDayOfMonth']);
+        $campaignId                         = $request->request->get('data')['campaignId'];
+        $container                          = $this->dispatcher->getContainer();
+        $limits                             = $container->get(
+            'mautic.contactsource.model.contactsource'
+        )->evaluateAllSourceLimits($campaignId);
+
+        $view = $this->render(
+            'MauticContactSourceBundle:Tabs:events.html.php',
+            [
+                'limits'   => $limits,
+                'forecast' => $forecast,
+                'group'    => 'source',
+            ]
+        );
+
+        return $view;
+    }
 }

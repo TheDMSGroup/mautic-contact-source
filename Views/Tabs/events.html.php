@@ -1,7 +1,7 @@
 <?php
 
 /*
- * @copyright   2014 Mautic Contributors. All rights reserved
+ * @copyright   2018 Mautic Contributors. All rights reserved
  * @author      Mautic
  *
  * @link        http://mautic.org
@@ -9,7 +9,7 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 ?>
-<div class="tab-pane fade in bdr-w-0 page-list" id="budgets-container">
+<div class="tab-pane fade in bdr-w-0 page-list" id="budgets-tab-container">
     <?php if (!empty($limits) && is_array($limits)) : ?>
 
     <!-- start: trigger type event -->
@@ -43,8 +43,8 @@
                     </div>
                 </div>
             </li>
-            <?php foreach ($limits as $source => $sourceLimit) : ?>
-            <?php foreach ($sourceLimit['limits'] as $limit) : ?>
+            <?php foreach ($limits as $limitKey => $limitData) : ?>
+            <?php foreach ($limitData['limits'] as $limit) : ?>
                 <li class="list-group-item bg-auto bg-light-xs">
                     <?php $yesClass = (90 <= $limit['percent']) ? 'danger' : 'success'; ?>
                     <div class="progress-bar progress-bar-<?php echo $yesClass; ?>" style="width:<?php echo $limit['yesPercent']; ?>%; left: 0;"></div>
@@ -52,8 +52,8 @@
                     <div class="box-layout">
                         <div class="col-md-2 va-m">
                             <span class="fw-sb text-primary mb-xs">
-                                <a href="<?php echo $sourceLimit['link']; ?>">
-                                    <?php echo $sourceLimit['name']; ?>
+                                <a href="<?php echo $limitData['link']; ?>">
+                                    <?php echo $limitData['name']; ?>
                                 </a>
                             </span>
                         </div>
