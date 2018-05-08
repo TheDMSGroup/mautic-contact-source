@@ -11,7 +11,7 @@
 ?>
 <script>
     var campaignId = {campaignId: <?php echo $campaign->getId(); ?>};
-    mQuery.getScript(mauticBaseUrl + 'plugins/MauticContactSourceBundle/Assets/build/budget.js');
+    mQuery.getScript(mauticBaseUrl + 'plugins/MauticContactSourceBundle/Assets/build/budgets.js');
 </script>
 <div class="tab-pane fade in bdr-w-0 page-list" id="budgets-container">
 </div>
