@@ -679,7 +679,12 @@ class Api
         // Must have at least ONE valid contact field (some are to be ignored since we provide them or they are core).
         $ignore = ['ip', 'attribution', 'attribution_date', 'utm_source'];
         if (!count(array_diff_key($this->fieldsProvided, array_flip($ignore)))) {
-            return null;
+            throw new ContactSourceException(
+                'There were no fields provided. A contact could not be created.',
+                Codes::HTTP_BAD_REQUEST,
+                null,
+                Stat::TYPE_INVALID
+            );
         }
 
         // Dynamically generate the field map and import.
