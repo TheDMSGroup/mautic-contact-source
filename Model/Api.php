@@ -1066,8 +1066,10 @@ class Api
         if (!$this->cacheModel) {
             /* @var \MauticPlugin\MauticContactSourceBundle\Model\Cache $cacheModel */
             $this->cacheModel = $this->container->get('mautic.contactsource.model.cache');
-            $this->cacheModel->setContact($this->contact);
             $this->cacheModel->setContactSource($this->contactSource);
+        }
+        if ($this->contact) {
+            $this->cacheModel->setContact($this->contact);
         }
 
         return $this->cacheModel;
