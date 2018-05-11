@@ -32,7 +32,6 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class Api.
@@ -1355,7 +1354,6 @@ class Api
             $this->contactSource,
             $this->status,
             $this->contact,
-            //Yaml::dump($this->logs, 10, 2),
             $this->getLogsJSON(),
             $message
         );
@@ -1376,7 +1374,10 @@ class Api
             }
         }
         // File-based logging.
-        $this->logger->log($statLevel, 'Contact Source '.$this->contactSource->getId().': '.$message);
+        $this->logger->log(
+            $statLevel,
+            'Contact Source '.($this->contactSource ? $this->contactSource->getId() : 'NA').': '.$message
+        );
     }
 
     /**
