@@ -160,6 +160,7 @@ class Stat
         $builder->addIndex(
             [
                 'type',
+                'contact_id',
                 'campaign_id',
                 'contactsource_id',
                 'date_added',
