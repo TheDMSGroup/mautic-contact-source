@@ -14,10 +14,11 @@
         <i class="fa fa-spinner fa-spin fa-4x"></i>
     </div>
 </div>
-<div class="tab-pane fade in bdr-w-0 page-list" id="budgets-widget" style="overflow:auto; max-height:<?php echo $data['height'] - 39; ?>px;">
-
-</div>
+<div class="tab-pane fade in bdr-w-0 page-list" id="budgets-widget-wrqpper">
+    <table class="table table-striped table-bordered" width="100%" id="budgets-widget">
+</table>
 <script>
+    var widgetHeight = <?php echo $data['height']; ?>;
     mQuery('#budget-widget-overlay').show();
     mQuery.getScript(mauticBaseUrl + 'plugins/MauticContactSourceBundle/Assets/build/budget_widget.js');
 </script>

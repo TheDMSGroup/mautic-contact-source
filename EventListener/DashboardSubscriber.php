@@ -13,7 +13,6 @@ namespace MauticPlugin\MauticContactSourceBundle\EventListener;
 
 use Mautic\DashboardBundle\Event\WidgetDetailEvent;
 use Mautic\DashboardBundle\EventListener\DashboardSubscriber as MainDashboardSubscriber;
-use MauticPlugin\MauticContactLedgerBundle\Model\LedgerEntryModel;
 
 /**
  * Class DashboardSubscriber.
@@ -35,21 +34,6 @@ class DashboardSubscriber extends MainDashboardSubscriber
     protected $types = [
         'campaign.budgets'        => [],
     ];
-
-    /**
-     * @var LedgerEntryModel
-     */
-    protected $entryModel;
-
-    /**
-     * DashboardSubscriber constructor.
-     *
-     * @param LedgerEntryModel $entryModel
-     */
-    public function __construct(LedgerEntryModel $entryModel)
-    {
-        $this->entryModel = $entryModel;
-    }
 
     /**
      * Set a widget detail when needed.

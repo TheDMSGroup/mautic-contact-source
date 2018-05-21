@@ -201,43 +201,89 @@ class AjaxController extends CommonAjaxController
     protected function campaignBudgetsDashboardAction(Request $request)
     {
         //calculate time since values for generating forecasts
-        $limits                              = [];
-        $forecast                            = [];
-        $forecast['elapsedHoursInDaySoFar']  = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
-        $forecast['hoursLeftToday']          = intval(24 - $forecast['elapsedHoursInDaySoFar']);
-        $forecast['currentDayOfMonth']       = intval(date('d'));
-        $forecast['daysInMonthLeft']         = intval(date('t') - $forecast['currentDayOfMonth']);
-        $container                           = $this->dispatcher->getContainer();
+        $forecast                           = [];
+        $forecast['elapsedHoursInDaySoFar'] = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
+        $forecast['hoursLeftToday']         = intval(24 - $forecast['elapsedHoursInDaySoFar']);
+        $forecast['currentDayOfMonth']      = intval(date('d'));
+        $forecast['daysInMonthLeft']        = intval(date('t') - $forecast['currentDayOfMonth']);
+        $container                          = $this->dispatcher->getContainer();
+        $data                               = [];
         //get all published campaigns and get limits for each
         $campaigns = $container->get(
             'mautic.campaign.model.campaign'
         )->getPublishedCampaigns(true);
         foreach ($campaigns as $campaign) {
-            $limit = $container->get(
+            $limits = $container->get(
                 'mautic.contactsource.model.contactsource'
             )->evaluateAllSourceLimits($campaign['id']);
-            if (!empty($limit)) {
-                $limits[$campaign['id']]['name']     = $campaign['name'];
-                $limits[$campaign['id']]['limits']   = $limit;
-                $limits[$campaign['id']]['link']     = $container->get(
-                    'mautic.contactsource.model.contactsource'
-                )->buildUrl(
-                'mautic_campaign_action',
-                ['objectAction' => 'view', 'objectId' => $campaign['id']]
-                );
+            if (!empty($limits)) {
+                foreach ($limits as $campaignLimits) {
+                    foreach ($campaignLimits['limits'] as $limit) {
+                        $row           = [];
+                        $pending       = 0;
+                        $forecastValue = $leadForecast = '';
+                        if ($limit['rule']['duration'] == 'P1D' && $limit['logCount'] > 0) {
+                            $pending = floatval(
+                                ($limit['logCount'] / $forecast['elapsedHoursInDaySoFar']) * $forecast['hoursLeftToday']
+                            );
+                        }
+
+                        if ($limit['rule']['duration'] == '1M' && $limit['logCount'] > 0) {
+                            $pending = floatval(
+                                ($limit['logCount'] / $forecast['currentDayOfMonth']) * $forecast['daysInMonthLeft']
+                            );
+                        }
+                        if (!empty($pending)) {
+                            $forecastValue = number_format(
+                                    ($pending + $limit['logCount']) / $limit['rule']['quantity'],
+                                    2,
+                                    '.',
+                                    ','
+                                ) * 100;
+                            $forecastValue = $forecastValue.'%';
+                            $leadForecast  = intval($pending + $limit['logCount']);
+                        }
+
+                        $row[] = $forecastValue >= 90 ? 'fa-exclamation-triangle' : 'fa-heartbeat'; //status
+                        $row[] = $campaign['name']; //campaignName
+                        $row[] = $container->get(
+                            'mautic.contactsource.model.contactsource'
+                        )->buildUrl(
+                            'mautic_campaign_action',
+                            ['objectAction' => 'view', 'objectId' => $campaign['id']]
+                        ); // campaingLink
+                        $row[]          = $campaignLimits['name']; // source
+                        $row[]          = $campaignLimits['link']; //sourceLink
+                        $row[]          = $limit['name']; //description
+                        $row[]          = $limit['logCount']; //capCount
+                        $row[]          = $limit['percent']; // % reached
+                        $row[]          = $leadForecast; // projection
+                        $row[]          = $forecastValue; //capPercent
+                        $data['rows'][] = $row;
+                    }
+                }
             }
         }
 
-        $view = $this->render(
-            'MauticContactSourceBundle:Dashboard:events.html.php',
-            [
-                'limits'    => $limits,
-                'campaigns' => $campaigns,
-                'forecast'  => $forecast,
-                'group'     => 'source',
-            ]
-        );
+        $headers = [
+            'mautic.campaign.source.limit.status',
+            'mautic.campaign.source.limit.campaign',
+            'campaignLink',
+            'mautic.campaign.source.limit.source',
+            'sourceLink',
+            'mautic.campaign.source.limit.description',
+            'mautic.campaign.source.limit.cap_count',
+            'mautic.campaign.source.limit.cap_percent',
+            'mautic.campaign.source.limit.projection',
+            'forecastPercent',
+        ];
+        foreach ($headers as $header) {
+            $data['columns'][] = [
+                'title' => $this->translator->trans($header),
+            ];
+        }
+        $data = UTF8Helper::fixUTF8($data);
 
-        return $view;
+        return $this->sendJsonResponse($data);
     }
 }
