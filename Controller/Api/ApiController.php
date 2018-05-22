@@ -21,7 +21,6 @@ use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
  */
 class ApiController extends CommonApiController
 {
-
     public function initialize(FilterControllerEvent $event)
     {
         $this->model            = $this->getModel('contactsource');
@@ -112,14 +111,15 @@ class ApiController extends CommonApiController
     protected function prepareParametersForBinding($parameters, $entity, $action)
     {
         // there is no defaultValues for token, so grab it from the __construct supplied instance of the entity
-        if(!empty($entity->getToken())){
+        if (!empty($entity->getToken())) {
             $parameters['token'] = $entity->getToken();
-         }
+        }
 
-         // documentation can not be null because of SQL constraint. Add it here if it is.
-        if(null == $parameters['documentation'] || '' == $parameters['documentation']){
+        // documentation can not be null because of SQL constraint. Add it here if it is.
+        if (null == $parameters['documentation'] || '' == $parameters['documentation']) {
             $parameters['documentation'] = 0;
         }
+
         return $parameters;
     }
 
@@ -133,24 +133,23 @@ class ApiController extends CommonApiController
      */
     protected function preSerializeEntity(&$entity, $action = 'view')
     {
-        // deconstruct the campaign_settings blob and nerge campaign entities in.
-        $list = [];
+        // deconstruct the campaign_settings blob and merge campaign entities in.
+        $list             = [];
         $campaignSettings = json_decode($entity->getCampaignSettings(), true);
-        $campaignModel = $this->container->get('mautic.campaign.model.campaign');
-        if(!empty($campaignSettings)){
-            foreach($campaignSettings as $campaignSetting){
-                foreach($campaignSetting as $setting){
+        $campaignModel    = $this->container->get('mautic.campaign.model.campaign');
+        if (!empty($campaignSettings)) {
+            foreach ($campaignSettings as $campaignSetting) {
+                foreach ($campaignSetting as $setting) {
                     // get campaign name or other fields to merge with this data.
-                    $campaign = $campaignModel->getEntity($setting['campaignId']);
-                    $campaignName = $campaign->getName();
-                    $campaignDescription = $campaign->getDescription();
-                    $setting['campaignName'] = $campaignName;
+                    $campaign                       = $campaignModel->getEntity($setting['campaignId']);
+                    $campaignName                   = $campaign->getName();
+                    $campaignDescription            = $campaign->getDescription();
+                    $setting['campaignName']        = $campaignName;
                     $setting['campaignDescription'] = $campaignDescription;
-                    $list[$setting['campaignId']] = $setting;
+                    $list[$setting['campaignId']]   = $setting;
                 }
             }
             $entity->setCampaignList($list);
         }
-
     }
 }

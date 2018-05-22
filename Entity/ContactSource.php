@@ -142,7 +142,7 @@ class ContactSource extends FormEntity
                     'documentation',
                     'publishUp',
                     'publishDown',
-                    'campaignList'
+                    'campaignList',
                 ]
             )
             ->setGroupPrefix('contactsourceBasic')
@@ -154,7 +154,7 @@ class ContactSource extends FormEntity
                     'description',
                     'description_public',
                     'utmSource',
-                    'campaignList'
+                    'campaignList',
                 ]
             )
             ->build();
@@ -404,6 +404,7 @@ class ContactSource extends FormEntity
     public function setCampaignList($list)
     {
         $this->campaignList = $list;
+
         return $this;
     }
 }
