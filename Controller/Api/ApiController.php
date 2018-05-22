@@ -99,4 +99,27 @@ class ApiController extends CommonApiController
 
         return $this->handleView($view);
     }
+
+    /**
+     * Convert posted parameters into what the form needs in order to successfully bind.
+     *
+     * @param $parameters
+     * @param $entity
+     * @param $action
+     *
+     * @return mixed
+     */
+    protected function prepareParametersForBinding($parameters, $entity, $action)
+    {
+        // there is no defaultValues for token, so grab it from the __construct supplied instance of the entity
+        if(!empty($entity->getToken())){
+            $parameters['token'] = $entity->getToken();
+         }
+
+         // documentation can not be null because of SQL constraint. Add it here if it is.
+        if(null == $parameters['documentation'] || '' == $parameters['documentation']){
+            $parameters['documentation'] = 0;
+        }
+        return $parameters;
+    }
 }
