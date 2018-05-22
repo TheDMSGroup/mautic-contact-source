@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
 /**
- * Class ContactSourceApiController.
+ * Class ApiController.
  */
 class ApiController extends CommonApiController
 {
@@ -25,10 +25,16 @@ class ApiController extends CommonApiController
     public function initialize(FilterControllerEvent $event)
     {
         $this->model            = $this->getModel('contactsource');
-        $this->entityClass      = 'Mautic\ContactSourceBundle\Entity\ContactSource';
+        $this->entityClass      = 'MauticPlugin\MauticContactSourceBundle\Entity\ContactSource';
         $this->entityNameOne    = 'contactsource';
         $this->entityNameMulti  = 'contactsources';
-        $this->serializerGroups = ['contactsourceDetails', 'utmSourceList', 'campaign_settingsList', 'categoryList', 'publishDetails'];
+        $this->serializerGroups = [
+            'contactsourceDetails',
+            'utmSourceList',
+            'campaign_settingsList',
+            'categoryList',
+            'publishDetails',
+        ];
 
         parent::initialize($event);
     }

@@ -41,6 +41,11 @@ return [
                 'path'            => '/contactsources',
                 'controller'      => 'MauticContactSourceBundle:Api\Api',
             ],
+            // 'mautic_api_contactsource' => [
+            //     'path'       => '/contactsources/{contactSourceId}',
+            //     'controller' => 'MauticContactSourceBundle:Api\Api:getContactSource',
+            //     'method'     => 'GET',
+            // ],
            ],
         'public' => [
             'mautic_contactsource_contact'       => [
