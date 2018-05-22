@@ -58,6 +58,9 @@ class ContactSource extends FormEntity
     /** @var \DateTime */
     private $publishDown;
 
+    /** @var */
+    private $campaignList;
+
     /**
      * ContactSource constructor.
      */
@@ -139,7 +142,7 @@ class ContactSource extends FormEntity
                     'documentation',
                     'publishUp',
                     'publishDown',
-                    'campaign_settings',
+                    'campaignList'
                 ]
             )
             ->setGroupPrefix('contactsourceBasic')
@@ -151,7 +154,7 @@ class ContactSource extends FormEntity
                     'description',
                     'description_public',
                     'utmSource',
-                    'campaign_settings',
+                    'campaignList'
                 ]
             )
             ->build();
@@ -392,6 +395,15 @@ class ContactSource extends FormEntity
 
         $this->publishDown = $publishDown;
 
+        return $this;
+    }
+
+    /**
+     * @param array $list
+     */
+    public function setCampaignList($list)
+    {
+        $this->campaignList = $list;
         return $this;
     }
 }

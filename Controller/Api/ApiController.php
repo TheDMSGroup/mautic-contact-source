@@ -122,4 +122,35 @@ class ApiController extends CommonApiController
         }
         return $parameters;
     }
+
+    /**
+     * Opportunity to analyze and do whatever to an entity before going through serializer.
+     *
+     * @param        $entity
+     * @param string $action
+     *
+     * @return mixed
+     */
+    protected function preSerializeEntity(&$entity, $action = 'view')
+    {
+        // deconstruct the campaign_settings blob and nerge campaign entities in.
+        $list = [];
+        $campaignSettings = json_decode($entity->getCampaignSettings(), true);
+        $campaignModel = $this->container->get('mautic.campaign.model.campaign');
+        if(!empty($campaignSettings)){
+            foreach($campaignSettings as $campaignSetting){
+                foreach($campaignSetting as $setting){
+                    // get campaign name or other fields to merge with this data.
+                    $campaign = $campaignModel->getEntity($setting['campaignId']);
+                    $campaignName = $campaign->getName();
+                    $campaignDescription = $campaign->getDescription();
+                    $setting['campaignName'] = $campaignName;
+                    $setting['campaignDescription'] = $campaignDescription;
+                    $list[$setting['campaignId']] = $setting;
+                }
+            }
+            $entity->setCampaignList($list);
+        }
+
+    }
 }
