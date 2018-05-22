@@ -14,12 +14,25 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller\Api;
 use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
 /**
  * Class ContactSourceApiController.
  */
 class ApiController extends CommonApiController
 {
+
+    public function initialize(FilterControllerEvent $event)
+    {
+        $this->model            = $this->getModel('contactsource');
+        $this->entityClass      = 'Mautic\ContactSourceBundle\Entity\ContactSource';
+        $this->entityNameOne    = 'contactsource';
+        $this->entityNameMulti  = 'contactsources';
+        $this->serializerGroups = ['contactsourceDetails', 'utmSourceList', 'campaign_settingsList', 'categoryList', 'publishDetails'];
+
+        parent::initialize($event);
+    }
+
     /**
      * Primary API endpoint for sources to post contacts.
      *

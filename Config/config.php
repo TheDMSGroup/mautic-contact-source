@@ -34,6 +34,14 @@ return [
                 ],
             ],
         ],
+        'api' => [
+            'mautic_api_contactsourcestandard' => [
+                'standard_entity' => true,
+                'name'            => 'contactsources',
+                'path'            => '/contactsources',
+                'controller'      => 'MauticContactSourceBundle:Api\Api',
+            ],
+           ],
         'public' => [
             'mautic_contactsource_contact'       => [
                 'path'       => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',

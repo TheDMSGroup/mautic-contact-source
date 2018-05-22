@@ -122,7 +122,7 @@ class ContactSource extends FormEntity
      */
     public static function loadApiMetadata(ApiMetadataDriver $metadata)
     {
-        $metadata
+        $metadata->setGroupPrefix('contactsource')
             ->addListProperties(
                 [
                     'id',
@@ -134,11 +134,23 @@ class ContactSource extends FormEntity
                 [
                     'description',
                     'description_public',
-                    'utm_source',
+                    'utmSource',
                     'token',
                     'documentation',
                     'publishUp',
                     'publishDown',
+                    'campaign_settings',
+                ]
+            )
+            ->setGroupPrefix('contactsourceBasic')
+            ->addListProperties(
+                [
+                    'id',
+                    'name',
+                    'category',
+                    'description',
+                    'description_public',
+                    'utmSource',
                     'campaign_settings',
                 ]
             )
