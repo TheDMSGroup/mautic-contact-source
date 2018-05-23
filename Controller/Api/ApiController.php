@@ -13,9 +13,9 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller\Api;
 
 use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 
 /**
  * Class ApiController.
@@ -111,8 +111,7 @@ class ApiController extends CommonApiController
      */
     protected function prepareParametersForBinding($parameters, $entity, $action)
     {
-        if (false == isset($parameters['campaign_settings'])) // only do this for new / edit sources API calls
-        {
+        if (false == isset($parameters['campaign_settings'])) { // only do this for new / edit sources API calls
             // there is no defaultValues for token, so grab it from the __construct supplied instance of the entity
             if (!empty($entity->getToken())) {
                 $parameters['token'] = $entity->getToken();
@@ -123,7 +122,6 @@ class ApiController extends CommonApiController
                 $parameters['documentation'] = 0;
             }
         }
-
 
         return $parameters;
     }
@@ -213,9 +211,9 @@ class ApiController extends CommonApiController
         $headers = [];
         //return the newly created entities location if applicable
 
-        $route               = ($this->get('router')->getRouteCollection()->get(
+        $route               = (null !== $this->get('router')->getRouteCollection()->get(
                 'mautic_api_'.$this->entityNameMulti.'_getone'
-            ) !== null)
+            ))
             ? 'mautic_api_'.$this->entityNameMulti.'_getone' : 'mautic_api_get'.$this->entityNameOne;
         $headers['Location'] = $this->generateUrl(
             $route,
@@ -230,6 +228,5 @@ class ApiController extends CommonApiController
         $this->setSerializationContext($view);
 
         return $this->handleView($view);
-
     }
 }
