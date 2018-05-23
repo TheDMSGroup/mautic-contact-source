@@ -15,6 +15,7 @@ use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 
 /**
  * Class ApiController.
@@ -110,15 +111,19 @@ class ApiController extends CommonApiController
      */
     protected function prepareParametersForBinding($parameters, $entity, $action)
     {
-        // there is no defaultValues for token, so grab it from the __construct supplied instance of the entity
-        if (!empty($entity->getToken())) {
-            $parameters['token'] = $entity->getToken();
+        if (false == isset($parameters['campaign_settings'])) // only do this for new / edit sources API calls
+        {
+            // there is no defaultValues for token, so grab it from the __construct supplied instance of the entity
+            if (!empty($entity->getToken())) {
+                $parameters['token'] = $entity->getToken();
+            }
+
+            // documentation (boolean public page) can not be null because of SQL constraint. Add it here if it is.
+            if (null == $parameters['documentation'] || '' == $parameters['documentation']) {
+                $parameters['documentation'] = 0;
+            }
         }
 
-        // documentation can not be null because of SQL constraint. Add it here if it is.
-        if (null == $parameters['documentation'] || '' == $parameters['documentation']) {
-            $parameters['documentation'] = 0;
-        }
 
         return $parameters;
     }
@@ -162,7 +167,6 @@ class ApiController extends CommonApiController
     {
         $campaignSettingsModel = $this->container->get('mautic.contactsource.model.campaign_settings');
         $parameters            = $this->request->request->all();
-        $method                = $this->request->getMethod();
 
         if (!isset($parameters['campaignId']) || empty($parameters['campaignId'])) {
             return $this->notFound();
@@ -191,7 +195,7 @@ class ApiController extends CommonApiController
 
         $requestCampaign             = new \stdClass();
         $requestCampaign->campaignId = $parameters['campaignId'];
-        $requestCampaign->cost       = isset($parameters['cost']) ? (float) $parameters['cost'] : 0;
+        $requestCampaign->cost       = isset($parameters['cost']) ? number_format((float) $parameters['cost'], 3, '.', '') : 0;
         $requestCampaign->realTime   = isset($parameters['realTime']) && ('false' !== $parameters['realTime']) ? true : false;
         $requestCampaign->scrubRate  = isset($parameters['scrubRate']) ? (int) $parameters['scrubRate'] : 0;
         $requestCampaign->limits     = [];
@@ -202,12 +206,30 @@ class ApiController extends CommonApiController
             return $this->returnError('mautic.contactsource.api.add_campaign.bad_request', Codes::HTTP_BAD_REQUEST);
         }
         $campaignSettingsJSON = json_encode($campaignSettings);
-        $updatedParameters    = [
-            'campaign_settings' => $campaignSettingsJSON,
-        ];
+        $entity->setCampaignSettings($campaignSettingsJSON);
 
-        // convert parameters to conform to entity form so campaign_settings can be set as expected
+        $this->model->saveEntity($entity);
 
-        $this->processForm($entity, $updatedParameters, $method);
+        $headers = [];
+        //return the newly created entities location if applicable
+
+        $route               = ($this->get('router')->getRouteCollection()->get(
+                'mautic_api_'.$this->entityNameMulti.'_getone'
+            ) !== null)
+            ? 'mautic_api_'.$this->entityNameMulti.'_getone' : 'mautic_api_get'.$this->entityNameOne;
+        $headers['Location'] = $this->generateUrl(
+            $route,
+            array_merge(['id' => $entity->getId()], $this->routeParams),
+            true
+        );
+
+        $this->preSerializeEntity($entity, 'edit');
+
+        $view = $this->view([$this->entityNameOne => $entity], Codes::HTTP_OK, $headers);
+
+        $this->setSerializationContext($view);
+
+        return $this->handleView($view);
+
     }
 }
