@@ -15,8 +15,6 @@ use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
-
 
 /**
  * Class ApiController.
@@ -166,7 +164,6 @@ class ApiController extends CommonApiController
         $parameters            = $this->request->request->all();
         $method                = $this->request->getMethod();
 
-
         if (!isset($parameters['campaignId']) || empty($parameters['campaignId'])) {
             return $this->notFound();
         }
@@ -182,12 +179,10 @@ class ApiController extends CommonApiController
             return $this->accessDenied();
         }
 
-        $campaignModel = $this->container->get('mautic.campaign.model.campaign');
+        $campaignModel  = $this->container->get('mautic.campaign.model.campaign');
         $campaignEntity = $campaignModel->getEntity($parameters['campaignId']);
-        if(empty($campaignEntity))
-        {
+        if (empty($campaignEntity)) {
             return $this->returnError('mautic.contactsource.api.add_campaign.not_found', Codes::HTTP_BAD_REQUEST);
-
         }
 
         $campaignSettingsModel->setContactSource($entity);
@@ -205,16 +200,14 @@ class ApiController extends CommonApiController
             $campaignSettings->campaigns[] = $requestCampaign;
         } else {
             return $this->returnError('mautic.contactsource.api.add_campaign.bad_request', Codes::HTTP_BAD_REQUEST);
-
         }
         $campaignSettingsJSON = json_encode($campaignSettings);
         $updatedParameters    = [
-            'campaign_settings' => $campaignSettingsJSON
+            'campaign_settings' => $campaignSettingsJSON,
         ];
 
         // convert parameters to conform to entity form so campaign_settings can be set as expected
 
         $this->processForm($entity, $updatedParameters, $method);
-
     }
 }
