@@ -322,12 +322,13 @@ POST Parameters
 ```
 
 Example Request
-```PUT /api/contactsources/46/campaign/add HTTP/1.1
-   Host: pre.dmsengage.com
-   Authorization: Basic QVBJX1RFU1Q6bWF1dGlj==
-   Content-Type: application/x-www-form-urlencoded
+```
+    PUT /api/contactsources/46/campaign/add HTTP/1.1
+    Host: pre.dmsengage.com
+    Authorization: Basic QVBJX1RFU1Q6bWF1dGlj==
+    Content-Type: application/x-www-form-urlencoded
    
-   campaignId=25&cost=0.13&realTime=false&scrubRate=15
+    campaignId=25&cost=0.13&realTime=false&scrubRate=15
 ```
 Response
 ```Expected Response Code: 201```
