@@ -9,24 +9,15 @@ words...
 words ...
 
 ### Authorization
-Engage (Mautic) supports Basic Authorization and OAuth 1a and 2.
-Read more about authorization on Mautic's developer docs [here](https://developer.mautic.org/?php#authorization).
-
-### Libraries for Your Application
-
-Mautic provides a PHP library that can be installed in your applicatioon to make 
-communicating with Engage (Mautic) consistent and easy.
-
-[Read More](https://developer.mautic.org/?php#libraries)
+Engage  supports Basic Authorization  OAuth 2.
 
 
-### Endpoints
+### Endpoints and Base URL
 All responses are JSON encoded.
 
-The Base API Endpoint is 
+The Base API Endpoint for Production Sandbox is 
 ```pre.dmsengage.com/api ```
- or 
-```dev.dmsengage.com/api```
+
 
 ### Error Handling
 If an OAuth error is encountered, it’ll be a JSON encoded array similar to:
@@ -108,9 +99,9 @@ If ```PUT```, the expected response code is 200 if the campaign was edited or 20
 
 If ```PATCH```, the expected response code is 200.
 
-### List ContactSources 
+### List Sources 
 HTTP Request
-```GET /contactsources```
+```GET /sources```
 
 Query Paramters
 ```
@@ -125,49 +116,49 @@ Query Paramters
 
 Response
 ```Expected Response Code: 200```
-A JSON string of contactsources, including linked campaigns
+A JSON string of sources, including linked campaigns
 
-### Get a ContactSource By ID
+### Get a Source By ID
 HTTP Request
-```GET /contactsources/{ID}```
+```GET /sources/{ID}```
 
 Response
 ```Expected Response Code: 200```
-A JSON string of the contact source parameters, including linked campaigns
+A JSON string of the source parameters, including linked campaigns
 
-### Create A ContactSource
+### Create A Source
 HTTP Request
-```POST /contactsources/new```
+```POST /sources/new```
 
 POST Parameters
 ```
-    name            Campaign name is the only required field
-    description	    A description of the campaign.
+    name            Source name is the only required field
+    description	    A description of the Source.
     isPublished	    A value of 0 or 1
 ```
 Response
 ```Expected Response Code: 201```
 
-### Edit ContactSource
+### Edit A Source
 HTTP Request
 To edit a contactsource and return a 404 if the campaign is not found:
-```PATCH /contactsources/{ID}/edit```
+```PATCH /sources/{ID}/edit```
 To edit a campaign and create a new one if the campaign is not found:
-```PUT /contactsources/{ID}/edit```
+```PUT /sources/{ID}/edit```
 POST Paramters
 ```
-    name	        ContactSource name is the only required field
-    description	        A description of the campaign.
+    name	        Source name is the only required field
+    description	        A description of the source.
     isPublished	        A value of 0 or 1
 ```
 Response
-If ```PUT```, the expected response code is 200 if the contactsource was edited or 201 if created.
+If ```PUT```, the expected response code is 200 if the source was edited or 201 if created.
 
 If ```PATCH```, the expected response code is 200.
 
-### Add a Source to a Campaign / Campaign to a Source
+### Add a Source to a Campaign
 HTTP Request
-```POST /contactsources/{ID}/campaign/add```
+```POST /sources/{ID}/campaign/add```
 
 POST Parameters
 ```

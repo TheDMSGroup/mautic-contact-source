@@ -38,11 +38,11 @@ return [
             'mautic_api_contactsourcestandard'      => [
                 'standard_entity' => true,
                 'name'            => 'contactsources',
-                'path'            => '/contactsources',
+                'path'            => '/sources',
                 'controller'      => 'MauticContactSourceBundle:Api\Api',
             ],
             'mautic_api_contactsource_add_campaign' => [
-                'path'       => '/contactsources/{contactSourceId}/campaign/add',
+                'path'       => '/sources/{contactSourceId}/campaign/add',
                 'controller' => 'MauticContactSourceBundle:Api\Api:addCampaign',
                 'method'     => 'PUT',
             ],
