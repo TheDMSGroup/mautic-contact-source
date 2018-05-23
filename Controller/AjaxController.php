@@ -197,4 +197,48 @@ class AjaxController extends CommonAjaxController
 
         return $view;
     }
+
+    protected function campaignBudgetsDashboardAction(Request $request)
+    {
+        //calculate time since values for generating forecasts
+        $limits                              = [];
+        $forecast                           = [];
+        $forecast['elapsedHoursInDaySoFar'] = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
+        $forecast['hoursLeftToday']         = intval(24 - $forecast['elapsedHoursInDaySoFar']);
+        $forecast['currentDayOfMonth']      = intval(date('d'));
+        $forecast['daysInMonthLeft']        = intval(date('t') - $forecast['currentDayOfMonth']);
+        $container                          = $this->dispatcher->getContainer();
+        //get all published campaigns and get limits for each
+        $campaigns = $container->get(
+            'mautic.campaign.model.campaign'
+        )->getPublishedCampaigns(true);
+        foreach ($campaigns as $campaign) {
+            $limit = $container->get(
+                'mautic.contactsource.model.contactsource'
+            )->evaluateAllSourceLimits($campaign['id']);
+            if(!empty($limit))
+            {
+                $limits[$campaign['id']]['name'] = $campaign['name'];
+                $limits[$campaign['id']]['limits'] = $limit;
+                $limits[$campaign['id']]['link']     = $container->get(
+                    'mautic.contactsource.model.contactsource'
+                )->buildUrl(
+                'mautic_campaign_action',
+                ['objectAction' => 'view', 'objectId' => $campaign['id']]
+                );
+            }
+        }
+
+        $view = $this->render(
+            'MauticContactSourceBundle:Dashboard:events.html.php',
+            [
+                'limits'    => $limits,
+                'campaigns' => $campaigns,
+                'forecast'  => $forecast,
+                'group'     => 'source',
+            ]
+        );
+
+        return $view;
+    }
 }

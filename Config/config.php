@@ -115,6 +115,12 @@ return [
                     'doctrine.orm.entity_manager',
                 ],
             ],
+            'mautic.contactsource.dashboard.subscriber'       => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\DashboardSubscriber',
+                'arguments' => [
+                    'mautic.contactledger.model.ledgerentry',
+                ],
+            ],
         ],
         'forms'  => [
             'mautic.contactsource.form.type.contactsourceshow_list' => [
