@@ -82,10 +82,10 @@ HTTP Request
 
 POST Parameters
 ```
-    name	         Campaign name is the only required field
-    alias	 string
-    description	 A description of the campaign.
-    isPublished	 A value of 0 or 1
+    name            Campaign name is the only required field
+    alias           string
+    description	    A description of the campaign.
+    isPublished	    A value of 0 or 1
 ```
 Response
 ```Expected Response Code: 201```
@@ -98,10 +98,10 @@ To edit a campaign and create a new one if the campaign is not found:
 ```PUT /campaigns/ID/edit```
 POST Paramters
 ```
-    name	Campaign name is the only required field
-    alias	Name alias generated automatically if not set
-    description	A description of the campaign.
-    isPublished	A value of 0 or 1
+    name            Campaign name is the only required field
+    alias           Name alias generated automatically if not set
+    description     A description of the campaign.
+    isPublished     A value of 0 or 1
 ```
 Response
 If ```PUT```, the expected response code is 200 if the campaign was edited or 201 if created.
@@ -114,13 +114,13 @@ HTTP Request
 
 Query Paramters
 ```
-    search	String or search command to filter entities by.
-    start	Starting row for the entities returned. Defaults to 0.
-    limit	Limit number of entities to return. Defaults to the system configuration for pagination (30).
-    orderBy	Column to sort by. Can use any column listed in the response.
-    orderByDir	Sort direction: asc or desc.
-    published	Only return currently published entities.
-    minimal	Return only array of entities without additional lists in it.
+    search      String or search command to filter entities by.
+    start       Starting row for the entities returned. Defaults to 0.
+    limit       Limit number of entities to return. Defaults to the system configuration for pagination (30).
+    orderBy     Column to sort by. Can use any column listed in the response.
+    orderByDir  Sort direction: asc or desc.
+    published   Only return currently published entities.
+    minimal     Return only array of entities without additional lists in it.
 ```
 
 Response
