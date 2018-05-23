@@ -34,19 +34,19 @@ return [
                 ],
             ],
         ],
-        'api' => [
-            'mautic_api_contactsourcestandard' => [
+        'api'    => [
+            'mautic_api_contactsourcestandard'      => [
                 'standard_entity' => true,
                 'name'            => 'contactsources',
                 'path'            => '/contactsources',
                 'controller'      => 'MauticContactSourceBundle:Api\Api',
             ],
-            // 'mautic_api_contactsource' => [
-            //     'path'       => '/contactsources/{contactSourceId}',
-            //     'controller' => 'MauticContactSourceBundle:Api\Api:getContactSource',
-            //     'method'     => 'GET',
-            // ],
-           ],
+            'mautic_api_contactsource_add_campaign' => [
+                'path'       => '/contactsources/{contactSourceId}/campaign/add',
+                'controller' => 'MauticContactSourceBundle:Api\Api:addCampaign',
+                'method'     => 'PUT',
+            ],
+        ],
         'public' => [
             'mautic_contactsource_contact'       => [
                 'path'       => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',
@@ -105,7 +105,7 @@ return [
                     'doctrine.orm.entity_manager',
                 ],
             ],
-            'mautic.contactsource.customcontent.subscriber'         => [
+            'mautic.contactsource.customcontent.subscriber' => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\CustomContentSubscriber',
                 'arguments' => [
                     'doctrine.orm.entity_manager',
@@ -128,7 +128,7 @@ return [
                 'alias'     => 'contactsource',
                 'arguments' => 'mautic.security',
             ],
-            'mautic.contactsource.form.type.chartfilter' => [
+            'mautic.contactsource.form.type.chartfilter'            => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Type\ChartFilterType',
                 'arguments' => 'mautic.factory',
                 'alias'     => 'sourcechartfilter',
@@ -180,7 +180,7 @@ return [
             'mautic.contactsource.helper.utmsource' => [
                 'class' => 'MauticPlugin\MauticContactSourceBundle\Helper\UtmSourceHelper',
             ],
-            'mautic.contactsource.helper.json' => [
+            'mautic.contactsource.helper.json'      => [
                 'class' => 'MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper',
             ],
         ],

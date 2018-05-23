@@ -15,6 +15,8 @@ use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
+
 
 /**
  * Class ApiController.
@@ -151,5 +153,68 @@ class ApiController extends CommonApiController
             }
             $entity->setCampaignList($list);
         }
+    }
+
+    /**
+     * @param $id
+     *
+     * @return array|bool|\Symfony\Component\HttpFoundation\Response
+     */
+    public function addCampaignAction($contactSourceId)
+    {
+        $campaignSettingsModel = $this->container->get('mautic.contactsource.model.campaign_settings');
+        $parameters            = $this->request->request->all();
+        $method                = $this->request->getMethod();
+
+
+        if (!isset($parameters['campaignId']) || empty($parameters['campaignId'])) {
+            return $this->notFound();
+        }
+
+        $valid = $this->validateBatchPayload($parameters);
+        if ($valid instanceof Response) {
+            return $valid;
+        }
+
+        $entity = $this->model->getEntity($contactSourceId);
+
+        if (!$this->checkEntityAccess($entity, 'edit')) {
+            return $this->accessDenied();
+        }
+
+        $campaignModel = $this->container->get('mautic.campaign.model.campaign');
+        $campaignEntity = $campaignModel->getEntity($parameters['campaignId']);
+        if(empty($campaignEntity))
+        {
+            return $this->returnError('mautic.contactsource.api.add_campaign.not_found', Codes::HTTP_BAD_REQUEST);
+
+        }
+
+        $campaignSettingsModel->setContactSource($entity);
+        $campaignSettings = $campaignSettingsModel->getCampaignSettings();
+        $existingCampaign = $campaignSettingsModel->getCampaignSettingsById($parameters['campaignId']);
+
+        $requestCampaign             = new \stdClass();
+        $requestCampaign->campaignId = $parameters['campaignId'];
+        $requestCampaign->cost       = isset($parameters['cost']) ? (float) $parameters['cost'] : 0;
+        $requestCampaign->realTime   = isset($parameters['realTime']) && ('false' !== $parameters['realTime']) ? true : false;
+        $requestCampaign->scrubRate  = isset($parameters['scrubRate']) ? (int) $parameters['scrubRate'] : 0;
+        $requestCampaign->limits     = [];
+
+        if (empty($existingCampaign)) {
+            $campaignSettings->campaigns[] = $requestCampaign;
+        } else {
+            return $this->returnError('mautic.contactsource.api.add_campaign.bad_request', Codes::HTTP_BAD_REQUEST);
+
+        }
+        $campaignSettingsJSON = json_encode($campaignSettings);
+        $updatedParameters    = [
+            'campaign_settings' => $campaignSettingsJSON
+        ];
+
+        // convert parameters to conform to entity form so campaign_settings can be set as expected
+
+        $this->processForm($entity, $updatedParameters, $method);
+
     }
 }
