@@ -108,6 +108,7 @@ class ApiController extends CommonApiController
      */
     public function listCampaignSourcesAction($campaignId)
     {
+        $campaignId = intval($campaignId);
         $table_alias    = $this->model->getRepository()->getTableAlias();
         $campaignFilter = [
             'column' => $table_alias.'.campaign_settings',

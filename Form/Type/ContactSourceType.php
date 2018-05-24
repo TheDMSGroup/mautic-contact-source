@@ -83,7 +83,7 @@ class ContactSourceType extends AbstractType
         );
 
         $builder->add(
-            'description_public',
+            'descriptionPublic',
             'textarea',
             [
                 'label'      => 'mautic.contactsource.form.description_public',
