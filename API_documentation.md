@@ -120,11 +120,11 @@ A JSON string of campaigns (see example above)
 
 ### Create A Campaign
 HTTP Request
-```GET /campaigns/new_from_clone```
+```GET /campaigns/create```
 
 Example Request
 ```
-    GET /api/campaigns/new_from_clone HTTP/1.1
+    GET /api/campaigns/create HTTP/1.1
     Host: pre.dmsengage.com
     Authorization: Basic QVBJX1RFU1Q6bWF1dGlj==
 ```
