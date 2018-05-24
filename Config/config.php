@@ -51,7 +51,11 @@ return [
                 'controller' => 'MauticContactSourceBundle:Api\Api:newCampaign',
                 'method'     => 'GET',
             ],
-        ],
+            'mautic_api_contactsources_bycampaign' => [
+                'name'            => 'contactsources',
+                'path'            => '/campaigns/{campaignId}/contactsources',
+                'controller'      => 'MauticContactSourceBundle:Api\Api:listCampaignSources',
+            ],        ],
         'public' => [
             'mautic_contactsource_contact'       => [
                 'path'       => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',
