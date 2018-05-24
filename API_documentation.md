@@ -106,7 +106,7 @@ A JSON string of campaigns (see example above)
 
 ### Create A Campaign
 HTTP Request
-```POST /campaigns/new_from_clone```
+```GET /campaigns/new_from_clone```
 
 Example Request
 ```
@@ -168,7 +168,7 @@ Response
 HTTP Request
 ```GET /sources```
 
-Query Paramters
+Query Parameters
 ```
     search      String or search command to filter entities by.
     start       Starting row for the entities returned. Defaults to 0.
