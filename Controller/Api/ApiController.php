@@ -14,8 +14,9 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller\Api;
 use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
+
 
 /**
  * Class ApiController.
@@ -116,8 +117,8 @@ class ApiController extends CommonApiController
 
         $this->extraGetEntitiesArguments = [
             'filter' => [
-               'where' => [
-                   $campaignFilter,
+                'where' => [
+                    $campaignFilter,
                 ],
             ],
         ];
@@ -218,7 +219,12 @@ class ApiController extends CommonApiController
 
         $requestCampaign             = new \stdClass();
         $requestCampaign->campaignId = $parameters['campaignId'];
-        $requestCampaign->cost       = isset($parameters['cost']) ? number_format((float) $parameters['cost'], 3, '.', '') : 0;
+        $requestCampaign->cost       = isset($parameters['cost']) ? number_format(
+            (float) $parameters['cost'],
+            3,
+            '.',
+            ''
+        ) : 0;
         $requestCampaign->realTime   = isset($parameters['realTime']) && ('false' !== $parameters['realTime']) ? true : false;
         $requestCampaign->scrubRate  = isset($parameters['scrubRate']) ? (int) $parameters['scrubRate'] : 0;
         $requestCampaign->limits     = [];
@@ -262,9 +268,16 @@ class ApiController extends CommonApiController
         $this->entityClass      = 'Mautic\CampaignBundle\Entity\Campaign';
         $this->entityNameOne    = 'campaign';
         $this->entityNameMulti  = 'campaigns';
-        $this->serializerGroups = ['campaignDetails', 'campaignEventDetails', 'categoryList', 'publishDetails', 'leadListList', 'formList'];
+        $this->serializerGroups = [
+            'campaignDetails',
+            'campaignEventDetails',
+            'categoryList',
+            'publishDetails',
+            'leadListList',
+            'formList',
+        ];
 
-        $campaignModel  = $this->container->get('mautic.campaign.model.campaign');
+        $campaignModel = $this->container->get('mautic.campaign.model.campaign');
 
         // Clone the Base Campaign hardcoded as ID 16
         $original = $campaignModel->getEntity(16);
