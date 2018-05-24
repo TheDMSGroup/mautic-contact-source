@@ -106,35 +106,63 @@ A JSON string of campaigns (see example above)
 
 ### Create A Campaign
 HTTP Request
-```POST /campaigns/new```
+```POST /campaigns/new_from_clone```
 
-POST Parameters
+Example Request
 ```
-    name            Campaign name is the only required field
-    alias           string
-    description	    A description of the campaign.
-    isPublished	    A value of 0 or 1
+    GET /api/campaigns/new_from_clone HTTP/1.1
+    Host: pre.dmsengage.com
+    Authorization: Basic QVBJX1RFU1Q6bWF1dGlj==
 ```
 Response
-```Expected Response Code: 201```
+```Expected Response Code: 200```
 
-### Edit Campaign
-HTTP Request
-To edit a campaign and return a 404 if the campaign is not found:
-```PATCH /campaigns/{ID}/edit```
-To edit a campaign and create a new one if the campaign is not found:
-```PUT /campaigns/{ID}/edit```
-POST Paramters
+```{
+       "campaign": {
+           "isPublished": false,
+           "dateAdded": "2018-05-24T01:24:20+00:00",
+           "dateModified": null,
+           "createdBy": 3,
+           "createdByUser": "Matt Goodman",
+           "modifiedBy": 3,
+           "modifiedByUser": "Matt Goodman",
+           "id": 33,
+           "name": "New Campaign",
+           "category": null,
+           "description": "New Campaign",
+           "publishUp": "2017-01-01T05:00:00+00:00",
+           "publishDown": null,
+           "events": [],
+           "forms": [],
+           "lists": [],
+           "canvasSettings": {
+               "nodes": [
+                   {
+                       "id": "89",
+                       "positionX": "17",
+                       "positionY": "152"
+                   },
+                   {
+                       "id": "lists",
+                       "positionX": "144",
+                       "positionY": "34"
+                   }
+               ],
+               "connections": [
+                   {
+                       "sourceId": "lists",
+                       "targetId": "89",
+                       "anchors": {
+                           "source": "leadsource",
+                           "target": "top"
+                       }
+                   }
+               ]
+           }
+       }
+   }
 ```
-    name            Campaign name is the only required field
-    alias           Name alias generated automatically if not set
-    description     A description of the campaign.
-    isPublished     A value of 0 or 1
-```
-Response
-If ```PUT```, the expected response code is 200 if the campaign was edited or 201 if created.
 
-If ```PATCH```, the expected response code is 200.
 
 ### List Sources 
 HTTP Request

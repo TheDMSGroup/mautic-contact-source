@@ -229,4 +229,39 @@ class ApiController extends CommonApiController
 
         return $this->handleView($view);
     }
+
+    public function newCampaignAction()
+    {
+        // set paramters for campaign entity type
+        $this->model            = $this->getModel('campaign');
+        $this->entityClass      = 'Mautic\CampaignBundle\Entity\Campaign';
+        $this->entityNameOne    = 'campaign';
+        $this->entityNameMulti  = 'campaigns';
+        $this->serializerGroups = ['campaignDetails', 'campaignEventDetails', 'categoryList', 'publishDetails', 'leadListList', 'formList'];
+
+        $campaignModel  = $this->container->get('mautic.campaign.model.campaign');
+
+        // Clone the Base Campaign hardcoded as ID 16
+        $original = $campaignModel->getEntity(16);
+        $entity   = clone $original;
+
+        $campaignModel->saveEntity($entity);
+        //$this->preSerializeEntity($entity, 'edit');
+
+        $headers = [];
+        //return the newly created entities location if applicable
+
+        $route               = 'mautic_api_campaigns_getone';
+        $headers['Location'] = $this->generateUrl(
+            $route,
+            array_merge(['id' => $entity->getId()], $this->routeParams),
+            true
+        );
+
+        $view = $this->view([$this->entityNameOne => $entity], Codes::HTTP_OK, $headers);
+
+        $this->setSerializationContext($view);
+
+        return $this->handleView($view);
+    }
 }

@@ -46,6 +46,11 @@ return [
                 'controller' => 'MauticContactSourceBundle:Api\Api:addCampaign',
                 'method'     => 'PUT',
             ],
+            'mautic_api_contactsource_new_campaign' => [
+                'path'       => '/campaigns/new_from_clone',
+                'controller' => 'MauticContactSourceBundle:Api\Api:newCampaign',
+                'method'     => 'GET',
+            ],
         ],
         'public' => [
             'mautic_contactsource_contact'       => [
