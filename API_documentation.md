@@ -54,10 +54,32 @@ Query Parameters
     published	Only return currently published entities.
     minimal	Return only array of entities without additional lists in it.
 ```
+##### Search Query Help
+
+###### Search Operators:
+\+ (plus sign) - Search for the exact string (i.e. if admin, then administrator will not match)
+
+! (exclamation mark) - Not equals string
+
+" " (double quotes) - Search by phrase
+
+( ) (parentheses) - Group expressions together.
+
+OR - By default the expressions will be joined as AND statements. Use the OR operator to change that.
+
+% - Use the % as a wildcard to search for specific names or values in a phrase (i.e. to find all companies with the word ‘Technologies’ then type %technologies%)
+
+###### Search commands
++  ids:ID1,ID2 (comma separated IDs, no spaces)
++ is:active
++ is:inactive
++ is:mine
++ is:global
++ name:*
 
 Example Request
 ```
-GET /api/campaigns?limit=1&amp;minimal=true HTTP/1.1
+GET /api/campaigns?limit=1&amp;minimal=true&amp;search=%new% HTTP/1.1
 Host: pre.dmsengage.com
 Authorization: Basic QVBJX1RFU1Q6bWF1dGlj==
 ```
@@ -66,33 +88,25 @@ Response
 ```Expected Response Code: 200```
 A JSON string of campaigns
 
-```{
-       "total": 28,
-       "campaigns": {
-           "1": {
-               "isPublished": true,
-               "dateAdded": "2017-12-18T22:38:48+00:00",
-               "dateModified": "2018-05-07T19:35:46+00:00",
-               "createdBy": 3,
-               "createdByUser": "Matt Goodman",
-               "modifiedBy": 6,
-               "modifiedByUser": "Jonathan Katz",
-               "id": 1,
-               "name": "Simply Jobs",
-               "category": {
-                   "createdByUser": "Matt Goodman",
-                   "modifiedByUser": null,
-                   "id": 2,
-                   "title": "jobs",
-                   "alias": "jobs",
-                   "description": "Jobs sector",
-                   "color": "05f571",
-                   "bundle": "campaign"
-               },
-               "description": "DMS's owned and operated jobs portal (http:\/\/simplyjobs.com)"
-           }
-       }
-   }
+```
+{
+    "total": 8,
+    "campaigns": {
+        "15": {
+            "isPublished": true,
+            "dateAdded": "2018-04-18T17:26:50+00:00",
+            "dateModified": "2018-04-18T17:29:36+00:00",
+            "createdBy": 3,
+            "createdByUser": "Matt Goodman",
+            "modifiedBy": 3,
+            "modifiedByUser": "Matt Goodman",
+            "id": 15,
+            "name": "Deal News",
+            "category": null,
+            "description": "Deal News Campaign"
+        }
+    }
+}
 ```
 
 
