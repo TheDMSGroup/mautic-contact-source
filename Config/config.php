@@ -53,7 +53,7 @@ return [
             ],
             'mautic_api_contactsources_bycampaign' => [
                 'name'            => 'contactsources',
-                'path'            => '/campaigns/{campaignId}/contactsources',
+                'path'            => '/campaigns/{campaignId}/sources',
                 'controller'      => 'MauticContactSourceBundle:Api\Api:listCampaignSources',
             ],        ],
         'public' => [
