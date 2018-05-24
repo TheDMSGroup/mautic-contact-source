@@ -117,7 +117,8 @@ Example Request
 Response
 ```Expected Response Code: 200```
 
-```{
+```
+{
        "campaign": {
            "isPublished": false,
            "dateAdded": "2018-05-24T01:24:20+00:00",
@@ -190,7 +191,8 @@ Response
 ```Expected Response Code: 200```
 A JSON string of sources, including linked campaigns
 
-```{
+```
+{
        "total": 136,
        "contactsources": {
            "134": {
@@ -248,20 +250,20 @@ POST Parameters
 ```
 
 Example Request
-```POST /api/sources/new HTTP/1.1
-   Host: mautic.loc
-   Authorization: Basic QVBJX1RFU1Q6bWF1dGlj==
-   Content-Type: application/x-www-form-urlencoded
-   Cache-Control: no-cache
-   Postman-Token: 170937f4-343a-403d-aebc-bb928a2c496c
+```
+    POST /api/sources/new HTTP/1.1
+    Host: mautic.loc
+    Authorization: Basic QVBJX1RFU1Q6bWF1dGlj==
+    Content-Type: application/x-www-form-urlencoded
    
-   name=some+value
+    name=some+value
 ```
 
 Response
 ```Expected Response Code: 201```
 
-```{
+```
+    {
        "contactsource": {
            "isPublished": true,
            "dateAdded": "2018-05-23T20:47:27+00:00",
@@ -313,7 +315,8 @@ If ```PUT```, the expected response code is 200 if the source was edited or 201 
 
 If ```PATCH```, the expected response code is 200.
 
-```{
+```
+    {
        "contactsource": {
            "isPublished": false,
            "dateAdded": "2018-04-04T21:27:02+00:00",
@@ -361,7 +364,8 @@ Example Request
 Response
 ```Expected Response Code: 201```
 
-```{
+```
+    {
        "contactsource": {
            "isPublished": true,
            "dateAdded": "2018-04-04T23:38:46+00:00",
