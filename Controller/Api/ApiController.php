@@ -17,7 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
-
 /**
  * Class ApiController.
  */
@@ -108,7 +107,7 @@ class ApiController extends CommonApiController
      */
     public function listCampaignSourcesAction($campaignId)
     {
-        $campaignId = intval($campaignId);
+        $campaignId     = intval($campaignId);
         $table_alias    = $this->model->getRepository()->getTableAlias();
         $campaignFilter = [
             'column' => $table_alias.'.campaign_settings',
