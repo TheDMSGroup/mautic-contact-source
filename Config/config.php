@@ -34,24 +34,24 @@ return [
                 ],
             ],
         ],
-        'api' => [
-            'mautic_api_contactsourcestandard' => [
+        'api'    => [
+            'mautic_api_contactsourcestandard'      => [
                 'standard_entity' => true,
                 'name'            => 'contactsources',
-                'path'            => '/contactsources',
+                'path'            => '/sources',
                 'controller'      => 'MauticContactSourceBundle:Api\Api',
             ],
-            'mautic_api_getcampaignsources' => [
-                'name'            => 'contactsources',
-                'path'  => '/campaigns/{campaignId}/contactsources',
-                'controller' => 'MauticContactSourceBundle:Api\Api:listCampaignSources',
+            'mautic_api_contactsource_add_campaign' => [
+                'path'       => '/sources/{contactSourceId}/campaign/add',
+                'controller' => 'MauticContactSourceBundle:Api\Api:addCampaign',
+                'method'     => 'PUT',
             ],
-            // 'mautic_api_contactsource' => [
-            //     'path'       => '/contactsources/{contactSourceId}',
-            //     'controller' => 'MauticContactSourceBundle:Api\Api:getContactSource',
-            //     'method'     => 'GET',
-            // ],
-           ],
+            'mautic_api_contactsource_new_campaign' => [
+                'path'       => '/campaigns/create',
+                'controller' => 'MauticContactSourceBundle:Api\Api:newCampaign',
+                'method'     => 'GET',
+            ],
+        ],
         'public' => [
             'mautic_contactsource_contact'       => [
                 'path'       => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',

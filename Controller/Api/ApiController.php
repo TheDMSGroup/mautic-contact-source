@@ -14,6 +14,7 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller\Api;
 use Doctrine\ORM\Query\Expr;
 use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 
@@ -137,14 +138,16 @@ class ApiController extends CommonApiController
      */
     protected function prepareParametersForBinding($parameters, $entity, $action)
     {
-        // there is no defaultValues for token, so grab it from the __construct supplied instance of the entity
-        if (!empty($entity->getToken())) {
-            $parameters['token'] = $entity->getToken();
-        }
+        if (false == isset($parameters['campaign_settings'])) { // only do this for new / edit sources API calls
+            // there is no defaultValues for token, so grab it from the __construct supplied instance of the entity
+            if (!empty($entity->getToken())) {
+                $parameters['token'] = $entity->getToken();
+            }
 
-        // documentation can not be null because of SQL constraint. Add it here if it is.
-        if (null == $parameters['documentation'] || '' == $parameters['documentation']) {
-            $parameters['documentation'] = 0;
+            // documentation (boolean public page) can not be null because of SQL constraint. Add it here if it is.
+            if (null == $parameters['documentation'] || '' == $parameters['documentation']) {
+                $parameters['documentation'] = 0;
+            }
         }
 
         return $parameters;
@@ -178,5 +181,114 @@ class ApiController extends CommonApiController
             }
             $entity->setCampaignList($list);
         }
+    }
+
+    /**
+     * @param $id
+     *
+     * @return array|bool|\Symfony\Component\HttpFoundation\Response
+     */
+    public function addCampaignAction($contactSourceId)
+    {
+        $campaignSettingsModel = $this->container->get('mautic.contactsource.model.campaign_settings');
+        $parameters            = $this->request->request->all();
+
+        if (!isset($parameters['campaignId']) || empty($parameters['campaignId'])) {
+            return $this->notFound();
+        }
+
+        $valid = $this->validateBatchPayload($parameters);
+        if ($valid instanceof Response) {
+            return $valid;
+        }
+
+        $entity = $this->model->getEntity($contactSourceId);
+
+        if (!$this->checkEntityAccess($entity, 'edit')) {
+            return $this->accessDenied();
+        }
+
+        $campaignModel  = $this->container->get('mautic.campaign.model.campaign');
+        $campaignEntity = $campaignModel->getEntity($parameters['campaignId']);
+        if (empty($campaignEntity)) {
+            return $this->returnError('mautic.contactsource.api.add_campaign.not_found', Codes::HTTP_BAD_REQUEST);
+        }
+
+        $campaignSettingsModel->setContactSource($entity);
+        $campaignSettings = $campaignSettingsModel->getCampaignSettings();
+        $existingCampaign = $campaignSettingsModel->getCampaignSettingsById($parameters['campaignId']);
+
+        $requestCampaign             = new \stdClass();
+        $requestCampaign->campaignId = $parameters['campaignId'];
+        $requestCampaign->cost       = isset($parameters['cost']) ? number_format((float) $parameters['cost'], 3, '.', '') : 0;
+        $requestCampaign->realTime   = isset($parameters['realTime']) && ('false' !== $parameters['realTime']) ? true : false;
+        $requestCampaign->scrubRate  = isset($parameters['scrubRate']) ? (int) $parameters['scrubRate'] : 0;
+        $requestCampaign->limits     = [];
+
+        if (empty($existingCampaign)) {
+            $campaignSettings->campaigns[] = $requestCampaign;
+        } else {
+            return $this->returnError('mautic.contactsource.api.add_campaign.bad_request', Codes::HTTP_BAD_REQUEST);
+        }
+        $campaignSettingsJSON = json_encode($campaignSettings);
+        $entity->setCampaignSettings($campaignSettingsJSON);
+
+        $this->model->saveEntity($entity);
+
+        $headers = [];
+        //return the newly created entities location if applicable
+
+        $route               = (null !== $this->get('router')->getRouteCollection()->get(
+                'mautic_api_'.$this->entityNameMulti.'_getone'
+            ))
+            ? 'mautic_api_'.$this->entityNameMulti.'_getone' : 'mautic_api_get'.$this->entityNameOne;
+        $headers['Location'] = $this->generateUrl(
+            $route,
+            array_merge(['id' => $entity->getId()], $this->routeParams),
+            true
+        );
+
+        $this->preSerializeEntity($entity, 'edit');
+
+        $view = $this->view([$this->entityNameOne => $entity], Codes::HTTP_OK, $headers);
+
+        $this->setSerializationContext($view);
+
+        return $this->handleView($view);
+    }
+
+    public function newCampaignAction()
+    {
+        // set paramters for campaign entity type
+        $this->model            = $this->getModel('campaign');
+        $this->entityClass      = 'Mautic\CampaignBundle\Entity\Campaign';
+        $this->entityNameOne    = 'campaign';
+        $this->entityNameMulti  = 'campaigns';
+        $this->serializerGroups = ['campaignDetails', 'campaignEventDetails', 'categoryList', 'publishDetails', 'leadListList', 'formList'];
+
+        $campaignModel  = $this->container->get('mautic.campaign.model.campaign');
+
+        // Clone the Base Campaign hardcoded as ID 16
+        $original = $campaignModel->getEntity(16);
+        $entity   = clone $original;
+
+        $campaignModel->saveEntity($entity);
+        //$this->preSerializeEntity($entity, 'edit');
+
+        $headers = [];
+        //return the newly created entities location if applicable
+
+        $route               = 'mautic_api_campaigns_getone';
+        $headers['Location'] = $this->generateUrl(
+            $route,
+            array_merge(['id' => $entity->getId()], $this->routeParams),
+            true
+        );
+
+        $view = $this->view([$this->entityNameOne => $entity], Codes::HTTP_OK, $headers);
+
+        $this->setSerializationContext($view);
+
+        return $this->handleView($view);
     }
 }
