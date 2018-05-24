@@ -11,6 +11,7 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Controller\Api;
 
+use Doctrine\ORM\Query\Expr;
 use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
 use Symfony\Component\HttpFoundation\Request;
@@ -97,6 +98,32 @@ class ApiController extends CommonApiController
         $view->setFormat('json');
 
         return $this->handleView($view);
+    }
+
+    /**
+     * @param $campaignId
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function listCampaignSourcesAction($campaignId)
+    {
+        $table_alias = $this->model->getRepository()->getTableAlias();
+        $campaignFilter = [
+            'column' => $table_alias.'.campaign_settings',
+            'expr' => 'like', //like
+            'value' => '%"campaignId": "'.$campaignId.'"%'
+        ];
+
+
+        $this->extraGetEntitiesArguments = [
+            'filter' => [
+               'where' => [
+                   $campaignFilter
+                ],
+            ],
+        ];
+
+        return $this->getEntitiesAction();
     }
 
     /**
