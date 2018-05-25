@@ -72,7 +72,7 @@ echo $view['form']->start($form);
                             </div>
                             <div class="row description-public hide">
                                 <div class="col-md-12">
-                                    <?php echo $view['form']->row($form['description_public']); ?>
+                                    <?php echo $view['form']->row($form['descriptionPublic']); ?>
                                 </div>
                             </div>
                         </div>

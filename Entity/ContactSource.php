@@ -35,7 +35,7 @@ class ContactSource extends FormEntity
     private $description;
 
     /** @var string */
-    private $description_public;
+    private $descriptionPublic;
 
     /** @var string */
     private $name;
@@ -57,6 +57,9 @@ class ContactSource extends FormEntity
 
     /** @var \DateTime */
     private $publishDown;
+
+    /** @var */
+    private $campaignList;
 
     /**
      * ContactSource constructor.
@@ -106,7 +109,7 @@ class ContactSource extends FormEntity
 
         $builder->addNamedField('utmSource', 'string', 'utm_source', true);
 
-        $builder->addNullableField('description_public', 'string');
+        $builder->addNullableField('descriptionPublic', 'string', 'description_public');
 
         $builder->addField('token', 'string');
 
@@ -122,7 +125,7 @@ class ContactSource extends FormEntity
      */
     public static function loadApiMetadata(ApiMetadataDriver $metadata)
     {
-        $metadata
+        $metadata->setGroupPrefix('contactsource')
             ->addListProperties(
                 [
                     'id',
@@ -133,13 +136,25 @@ class ContactSource extends FormEntity
             ->addProperties(
                 [
                     'description',
-                    'description_public',
-                    'utm_source',
+                    'descriptionPublic',
+                    'utmSource',
                     'token',
                     'documentation',
                     'publishUp',
                     'publishDown',
-                    'campaign_settings',
+                    'campaignList',
+                ]
+            )
+            ->setGroupPrefix('contactsourceBasic')
+            ->addListProperties(
+                [
+                    'id',
+                    'name',
+                    'category',
+                    'description',
+                    'descriptionPublic',
+                    'utmSource',
+                    'campaignList',
                 ]
             )
             ->build();
@@ -256,19 +271,19 @@ class ContactSource extends FormEntity
      */
     public function getDescriptionPublic()
     {
-        return $this->description_public;
+        return $this->descriptionPublic;
     }
 
     /**
-     * @param string $description_public
+     * @param string $descriptionPublic
      *
      * @return ContactSource
      */
-    public function setDescriptionPublic($description_public)
+    public function setDescriptionPublic($descriptionPublic)
     {
-        $this->isChanged('descriptionPublic', $description_public);
+        $this->isChanged('descriptionPublic', $descriptionPublic);
 
-        $this->description_public = $description_public;
+        $this->descriptionPublic = $descriptionPublic;
 
         return $this;
     }
@@ -379,6 +394,16 @@ class ContactSource extends FormEntity
         $this->isChanged('publishDown', $publishDown);
 
         $this->publishDown = $publishDown;
+
+        return $this;
+    }
+
+    /**
+     * @param array $list
+     */
+    public function setCampaignList($list)
+    {
+        $this->campaignList = $list;
 
         return $this;
     }
