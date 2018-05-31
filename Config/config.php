@@ -117,9 +117,6 @@ return [
             ],
             'mautic.contactsource.dashboard.subscriber'       => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\DashboardSubscriber',
-                'arguments' => [
-                    'mautic.contactledger.model.ledgerentry',
-                ],
             ],
         ],
         'forms'  => [
