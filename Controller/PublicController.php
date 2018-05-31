@@ -11,38 +11,21 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
-use FOS\RestBundle\Util\Codes;
 use Mautic\CoreBundle\Controller\CommonController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class PublicController extends CommonController
 {
-    // @todo - Add documentation autogenerator.
-    public function getDocumentationAction($sourceId = null, $campaignId = null)
-    {
-        // @todo - Check Source existence and published status.
-
-        // @todo - Check if documentation is turned on, if not 403.
-
-        // @todo - Get list of assigned and published Campaigns.
-
-        // @todo - Get list of Source+Campaign required fields.
-
-        // @todo - Get list of Source+Campaign limits.
-
-        // @todo - Get sync status (async/sync).
-
-        // @todo - Generate document.
-
-        return $this->render(
-            'MauticContactSourceBundle:Documentation:details.html.php',
-            [
-                'documentation' => 'documentation to go here',
-            ]
-        );
-    }
-
+    /**
+     * @param Request $request
+     * @param null    $sourceId
+     * @param         $main
+     * @param null    $campaignId
+     * @param         $object
+     * @param         $action
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function handlerAction(
         Request $request,
         $sourceId = null,
@@ -62,12 +45,25 @@ class PublicController extends CommonController
 
         $result = $ApiModel->getResult(true);
 
-        $response = new Response('', $result['statusCode'] ? $result['statusCode'] : Codes::HTTP_OK);
+        $parameters = [];
+        if (!isset($result['campaign']['name'])) {
+            // No valid campaign specified, should show the listing of all campaigns.
+            $view                = 'MauticContactSourceBundle:Documentation:details.html.php';
+            $parameters['title'] = $this->translator->trans('mautic.contactsource.api.docs.source_title');
+        } elseif (isset($result['source']['name'])) {
+            // Valid campaign is specified, should include hash or direct link to that campaign.
+            $view                 = 'MauticContactSourceBundle:Documentation:details.html.php';
+            $parameters['title']  = $this->translator->trans(
+                'mautic.contactsource.api.docs.campaign_title',
+                ['%source%' => $result['source']['name']]
+            );
+            $parameters['fields'] = $ApiModel->getAllowedFields(false);
+        } else {
+            // Completely invalid source.
+            // @todo - We should respond with a 404 most likely.
+            $this->notFound('mautic.contactsource.api.docs.not_found');
+        }
 
-        return $this->render(
-            'MauticContactSourceBundle:Documentation:details.html.php',
-            $result,
-            $response
-        );
+        return $this->render($view, $parameters);
     }
 }

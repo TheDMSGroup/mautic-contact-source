@@ -20,56 +20,31 @@
     <script src="<?php echo $view['assets']->getUrl(
         'plugins/MauticContactSourceBundle/Assets/slate/javascripts/all.js'
     ) ?>"></script>
-    <?php // echo $view['assets']->outputSystemStylesheets(); ?>
-    <?php // echo $view->render('MauticCoreBundle:Default:script.html.php'); ?>
+    <?php // echo $view['assets']->outputSystemStylesheets(); ?> <?php // echo $view->render('MauticCoreBundle:Default:script.html.php'); ?>
 </head>
 <body class="index" data-languages="[&quot;shell&quot;,&quot;ruby&quot;,&quot;python&quot;,&quot;javascript&quot;]">
-<a href="#" id="nav-button">
-    <span>
-    NAV
-    <img src="<?php echo $view['assets']->getUrl('plugins/MauticContactSourceBundle/Assets/slate/images/navbar.png') ?>"
-         alt="Navbar"/>
-    </span>
-</a>
-<div class="toc-wrapper">
-    <img src="<?php echo $view['assets']->getUrl('media/images/mautic_logo_db200.png') ?>"
-         class="logo" alt="Logo"/>
-    <div class="lang-selector">
-        <a href="#" data-language-name="shell">shell</a>
-        <a href="#" data-language-name="ruby">ruby</a>
-        <a href="#" data-language-name="python">python</a>
-        <a href="#" data-language-name="javascript">javascript</a>
-    </div>
-    <div class="search">
-        <input type="text" class="search" id="input-search" placeholder="Search">
-    </div>
+<a href="#" id="nav-button"> <span> NAV <img src="<?php echo $view['assets']->getUrl(
+            'plugins/MauticContactSourceBundle/Assets/slate/images/navbar.png'
+        ) ?>" alt="Navbar"/> </span></a>
+<div class="toc-wrapper"><img src="<?php echo $view['assets']->getUrl(
+        'media/images/mautic_logo_db200.png'
+    ) ?>" class="logo" alt="Logo"/>
+    <div class="lang-selector"><a href="#" data-language-name="shell">shell</a>
+        <a href="#" data-language-name="ruby">ruby</a> <a href="#" data-language-name="python">python</a>
+        <a href="#" data-language-name="javascript">javascript</a></div>
+    <div class="search"><input type="text" class="search" id="input-search" placeholder="Search"></div>
     <ul class="search-results"></ul>
     <div id="toc" class="toc-list-h1">
-        <li>
-            <a href="#introduction" class="toc-h1 toc-link" data-title="Introduction">Introduction</a>
-        </li>
-        <li>
-            <a href="#authentication" class="toc-h1 toc-link" data-title="Authentication">Authentication</a>
-        </li>
-        <li>
-            <a href="#kittens" class="toc-h1 toc-link" data-title="Kittens">Kittens</a>
+        <li><a href="#introduction" class="toc-h1 toc-link" data-title="Introduction">Introduction</a></li>
+        <li><a href="#authentication" class="toc-h1 toc-link" data-title="Authentication">Authentication</a></li>
+        <li><a href="#contacts" class="toc-h1 toc-link" data-title="Contacts">Contacts</a>
             <ul class="toc-list-h2">
                 <li>
-                    <a href="#get-all-kittens" class="toc-h2 toc-link" data-title="Get All Kittens">Get All Kittens</a>
-                </li>
-                <li>
-                    <a href="#get-a-specific-kitten" class="toc-h2 toc-link"
-                       data-title="Get a Specific Kitten">Get a Specific Kitten</a>
-                </li>
-                <li>
-                    <a href="#delete-a-specific-kitten" class="toc-h2 toc-link"
-                       data-title="Delete a Specific Kitten">Delete a Specific Kitten</a>
+                    <a href="#create-contact" class="toc-h2 toc-link" data-title="Create Contact">Create Contact</a>
                 </li>
             </ul>
         </li>
-        <li>
-            <a href="#errors" class="toc-h1 toc-link" data-title="Errors">Errors</a>
-        </li>
+        <li><a href="#errors" class="toc-h1 toc-link" data-title="Errors">Errors</a></li>
     </div>
     <ul class="toc-footer">
         <li><a href='#'>Sign Up for a Developer Key</a></li>
@@ -78,130 +53,35 @@
 </div>
 <div class="page-wrapper">
     <div class="dark-box"></div>
-    <div class="content">
-        <h1 id='introduction'>Introduction</h1>
-        <?php if (!empty($introduction)): ?>
-            <h4 class="mt-15"><?php echo $introduction; ?></h4>
-        <?php endif; ?>
-        <h2><?php echo $message; ?></h2>
-        <?php if (!empty($submessage)): ?>
-            <h4 class="mt-15"><?php echo $submessage; ?></h4>
-        <?php endif; ?>
-
-        <h1 id='authentication'>Authentication</h1>
-        <blockquote>
-            <p>To authorize, use this code:</p>
+    <div class="content"><h1 id='introduction'>Introduction</h1> <?php if (!empty($introduction)): ?>
+            <h4 class="mt-15"><?php echo $introduction; ?></h4> <?php endif; ?>
+        <h2><?php echo $message; ?></h2> <?php if (!empty($submessage)): ?>
+            <h4 class="mt-15"><?php echo $submessage; ?></h4> <?php endif; ?><h1 id='authentication'>Authentication</h1>
+        <blockquote><p>To authorize, use this code:</p></blockquote>
+        <pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'contact'</span><span class="n">api</span> <span class="o">=</span> <span class="no">Contact</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'000000000000000000000000000000'</span><span class="p">)</span></code></pre>
+        <pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">contact</span><span class="n">api</span> <span class="o">=</span> <span class="n">contact</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'000000000000000000000000000000'</span><span class="p">)</span></code></pre>
+        <pre class="highlight shell tab-shell"><code><span class="c"># With shell, you can just pass the correct header with each request</span>curl <span class="s2">"api_endpoint_here"</span> -H <span class="s2">"Authorization: 000000000000000000000000000000"</span></code></pre>
+        <pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">contact</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'contact'</span><span class="p">);</span><span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">contact</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="s1">'000000000000000000000000000000'</span><span class="p">);</span></code></pre>
+        <blockquote><p>Make sure to replace <code>000000000000000000000000000000</code> with your API key.</p>
         </blockquote>
-        <pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span
-                        class="no">APIClient</span><span
-                        class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span
-                        class="s1">'meowmeowmeow'</span><span class="p">)</span>
-</code></pre>
-        <pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span
-                        class="n">authorize</span><span class="p">(</span><span
-                        class="s">'meowmeowmeow'</span><span class="p">)</span>
-</code></pre>
-        <pre class="highlight shell tab-shell"><code><span
-                        class="c"># With shell, you can just pass the correct header with each request</span>
-curl <span class="s2">"api_endpoint_here"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre>
-        <pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span
-                        class="nx">kittn</span> <span class="o">=</span> <span
-                        class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span
-                        class="p">);</span>
-
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span
-                        class="p">.</span><span
-                        class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span
-                        class="p">);</span>
-</code></pre>
-        <blockquote>
-            <p>Make sure to replace <code>meowmeowmeow</code> with your API key.</p>
-        </blockquote>
-        <p>Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our <a
-                    href="http://example.com/developers">developer portal</a>.</p>
-        <p>Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:</p>
-        <p><code>Authorization: meowmeowmeow</code></p>
-        <aside class="notice">
-            You must replace <code>meowmeowmeow</code> with your personal API key.
+        <p>Contact uses API keys to allow access to the API. You can register a new Contact API key at our
+            <a href="http://example.com/developers">developer portal</a>.</p>
+        <p>Contact expects for the API key to be included in all API requests to the server in a header that looks like the following:</p>
+        <p><code>Authorization: 000000000000000000000000000000</code></p>
+        <aside class="notice"> You must replace
+            <code>000000000000000000000000000000</code> with the API token we have provided for you.
         </aside>
-        <h1 id='kittens'>Kittens</h1>
-        <h2 id='get-all-kittens'>Get All Kittens</h2>
-        <pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span
-                        class="no">APIClient</span><span
-                        class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span
-                        class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span
-                        class="nf">get</span>
-</code></pre>
-        <pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span
-                        class="n">authorize</span><span class="p">(</span><span
-                        class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span
-                        class="n">get</span><span class="p">()</span>
-</code></pre>
-        <pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://example.com/api/kittens"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre>
-        <pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span
-                        class="nx">kittn</span> <span class="o">=</span> <span
-                        class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span
-                        class="p">);</span>
-
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span
-                        class="p">.</span><span
-                        class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span
-                        class="p">);</span>
-<span class="kd">let</span> <span class="nx">kittens</span> <span class="o">=</span> <span class="nx">api</span><span
-                        class="p">.</span><span
-                        class="nx">kittens</span><span class="p">.</span><span class="nx">get</span><span
-                        class="p">();</span>
-</code></pre>
-        <blockquote>
-            <p>The above command returns JSON structured like this:</p>
-        </blockquote>
-        <pre class="highlight json tab-json"><code><span class="p">[</span><span class="w">
-  </span><span class="p">{</span><span class="w">
-    </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span
-                        class="p">,</span><span class="w">
-    </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">"Fluffums"</span><span class="p">,</span><span
-                        class="w">
-    </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">"calico"</span><span class="p">,</span><span
-                        class="w">
-    </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span
-                        class="p">,</span><span class="w">
-    </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span
-                        class="mi">7</span><span class="w">
-  </span><span class="p">},</span><span class="w">
-  </span><span class="p">{</span><span class="w">
-    </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span
-                        class="p">,</span><span class="w">
-    </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">"Max"</span><span class="p">,</span><span class="w">
-    </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">"unknown"</span><span class="p">,</span><span
-                        class="w">
-    </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span
-                        class="p">,</span><span class="w">
-    </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span
-                        class="mi">10</span><span class="w">
-  </span><span class="p">}</span><span class="w">
-</span><span class="p">]</span><span class="w">
-</span></code></pre>
-        <p>This endpoint retrieves all kittens.</p>
+        <h1 id='contacts'>Contacts</h1>
+        <h2 id='create-contact'>Create Contact</h2>
+        <pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'contact'</span><span class="n">api</span> <span class="o">=</span> <span class="no">Contact</span><span class="o">::</span><span class="no">APIClient</span><span class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span class="s1">'000000000000000000000000000000'</span><span class="p">)</span><span class="n">api</span><span class="p">.</span><span class="nf">contacts</span><span class="p">.</span><span class="nf">get</span></code></pre>
+        <pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">contact</span><span class="n">api</span> <span class="o">=</span> <span class="n">contact</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="s">'000000000000000000000000000000'</span><span class="p">)</span><span class="n">api</span><span class="o">.</span><span class="n">contacts</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></code></pre>
+        <pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://example.com/api/contacts"</span> -H <span class="s2">"Authorization: 000000000000000000000000000000"</span></code></pre>
+        <pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span class="nx">contact</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'contact'</span><span class="p">);</span><span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">contact</span><span class="p">.</span><span class="nx">authorize</span><span class="p">(</span><span class="s1">'000000000000000000000000000000'</span><span class="p">);</span><span class="kd">let</span> <span class="nx">contacts</span> <span class="o">=</span> <span class="nx">api</span><span class="p">.</span><span class="nx">contacts</span><span class="p">.</span><span class="nx">get</span><span class="p">();</span></code></pre>
+        <blockquote><p>The above command returns JSON structured like this:</p></blockquote>
+        <pre class="highlight json tab-json"><code><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Fluffums"</span><span class="p">,</span><span class="w"> </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"calico"</span><span class="p">,</span><span class="w"> </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Max"</span><span class="p">,</span><span class="w"> </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unknown"</span><span class="p">,</span><span class="w"> </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">}</span><span class="w"></span><span class="p">]</span><span class="w"></span></code></pre>
+        <p>This endpoint retrieves all contacts.</p>
         <h3 id='http-request'>HTTP Request</h3>
-        <p><code>GET http://example.com/api/kittens</code></p>
+        <p><code>GET http://example.com/api/contacts</code></p>
         <h3 id='query-parameters'>Query Parameters</h3>
         <table>
             <thead>
@@ -220,159 +100,14 @@ curl <span class="s2">"api_endpoint_here"</span>
             <tr>
                 <td>available</td>
                 <td>true</td>
-                <td>If set to false, the result will include kittens that have already been adopted.</td>
+                <td>If set to false, the result will include contacts that have already been adopted.</td>
             </tr>
             </tbody>
         </table>
-        <aside class="success">
-            Remember — a happy kitten is an authenticated kitten!
-        </aside>
-        <h2 id='get-a-specific-kitten'>Get a Specific Kitten</h2>
-        <pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span
-                        class="no">APIClient</span><span
-                        class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span
-                        class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span
-                        class="nf">get</span><span
-                        class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre>
-        <pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span
-                        class="n">authorize</span><span class="p">(</span><span
-                        class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span
-                        class="n">get</span><span class="p">(</span><span
-                        class="mi">2</span><span class="p">)</span>
-</code></pre>
-        <pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://example.com/api/kittens/2"</span>
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre>
-        <pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span
-                        class="nx">kittn</span> <span class="o">=</span> <span
-                        class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span
-                        class="p">);</span>
-
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span
-                        class="p">.</span><span
-                        class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span
-                        class="p">);</span>
-<span class="kd">let</span> <span class="nx">max</span> <span class="o">=</span> <span class="nx">api</span><span
-                        class="p">.</span><span
-                        class="nx">kittens</span><span class="p">.</span><span class="nx">get</span><span
-                        class="p">(</span><span class="mi">2</span><span
-                        class="p">);</span>
-</code></pre>
-        <blockquote>
-            <p>The above command returns JSON structured like this:</p>
-        </blockquote>
-        <pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-  </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span
-                        class="p">,</span><span class="w">
-  </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">"Max"</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">"unknown"</span><span class="p">,</span><span
-                        class="w">
-  </span><span class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span
-                        class="mi">5</span><span class="p">,</span><span class="w">
-  </span><span class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span
-                        class="mi">10</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
-        <p>This endpoint retrieves a specific kitten.</p>
-        <aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use
-            <code>&lt;code&gt;</code> blocks to denote code.
-        </aside>
-        <h3 id='http-request-2'>HTTP Request</h3>
-        <p><code>GET http://example.com/kittens/&lt;ID&gt;</code></p>
-        <h3 id='url-parameters'>URL Parameters</h3>
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>ID</td>
-                <td>The ID of the kitten to retrieve</td>
-            </tr>
-            </tbody>
-        </table>
-        <h2 id='delete-a-specific-kitten'>Delete a Specific Kitten</h2>
-        <pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span class="s1">'kittn'</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="no">Kittn</span><span class="o">::</span><span
-                        class="no">APIClient</span><span
-                        class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span
-                        class="s1">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="p">.</span><span class="nf">kittens</span><span class="p">.</span><span
-                        class="nf">delete</span><span
-                        class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre>
-        <pre class="highlight python tab-python"><code><span class="kn">import</span> <span class="nn">kittn</span>
-
-<span class="n">api</span> <span class="o">=</span> <span class="n">kittn</span><span class="o">.</span><span
-                        class="n">authorize</span><span class="p">(</span><span
-                        class="s">'meowmeowmeow'</span><span class="p">)</span>
-<span class="n">api</span><span class="o">.</span><span class="n">kittens</span><span class="o">.</span><span
-                        class="n">delete</span><span
-                        class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</code></pre>
-        <pre class="highlight shell tab-shell"><code>curl <span class="s2">"http://example.com/api/kittens/2"</span>
-  -X DELETE
-  -H <span class="s2">"Authorization: meowmeowmeow"</span>
-</code></pre>
-        <pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span
-                        class="nx">kittn</span> <span class="o">=</span> <span
-                        class="nx">require</span><span class="p">(</span><span class="s1">'kittn'</span><span
-                        class="p">);</span>
-
-<span class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span class="nx">kittn</span><span
-                        class="p">.</span><span
-                        class="nx">authorize</span><span class="p">(</span><span class="s1">'meowmeowmeow'</span><span
-                        class="p">);</span>
-<span class="kd">let</span> <span class="nx">max</span> <span class="o">=</span> <span class="nx">api</span><span
-                        class="p">.</span><span
-                        class="nx">kittens</span><span class="p">.</span><span class="k">delete</span><span
-                        class="p">(</span><span class="mi">2</span><span
-                        class="p">);</span>
-</code></pre>
-        <blockquote>
-            <p>The above command returns JSON structured like this:</p>
-        </blockquote>
-        <pre class="highlight json tab-json"><code><span class="p">{</span><span class="w">
-  </span><span class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span
-                        class="p">,</span><span class="w">
-  </span><span class="s2">"deleted"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">":("</span><span class="w">
-</span><span class="p">}</span><span class="w">
-</span></code></pre>
-        <p>This endpoint deletes a specific kitten.</p>
-        <h3 id='http-request-3'>HTTP Request</h3>
-        <p><code>DELETE http://example.com/kittens/&lt;ID&gt;</code></p>
-        <h3 id='url-parameters-2'>URL Parameters</h3>
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Description</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>ID</td>
-                <td>The ID of the kitten to delete</td>
-            </tr>
-            </tbody>
-        </table>
+        <aside class="success"> Remember — a happy contact is an authenticated contact!</aside>
         <h1 id='errors'>Errors</h1>
         <aside class="notice">This error section is stored in a separate file in `includes/_errors.md`. Slate allows you to optionally separate out your docs into many files...just save them to the `includes` folder and add them to the top of your `index.md`'s frontmatter. Files are included in the order listed.</aside>
-        <p>The Kittn API uses the following error codes:</p>
+        <p>The Contact API uses the following error codes:</p>
         <table>
             <thead>
             <tr>
@@ -391,15 +126,15 @@ curl <span class="s2">"api_endpoint_here"</span>
             </tr>
             <tr>
                 <td>403</td>
-                <td>Forbidden -- The kitten requested is hidden for administrators only.</td>
+                <td>Forbidden -- The contact requested is hidden for administrators only.</td>
             </tr>
             <tr>
                 <td>404</td>
-                <td>Not Found -- The specified kitten could not be found.</td>
+                <td>Not Found -- The specified contact could not be found.</td>
             </tr>
             <tr>
                 <td>405</td>
-                <td>Method Not Allowed -- You tried to access a kitten with an invalid method.</td>
+                <td>Method Not Allowed -- You tried to access a contact with an invalid method.</td>
             </tr>
             <tr>
                 <td>406</td>
@@ -407,7 +142,7 @@ curl <span class="s2">"api_endpoint_here"</span>
             </tr>
             <tr>
                 <td>410</td>
-                <td>Gone -- The kitten requested has been removed from our servers.</td>
+                <td>Gone -- The contact requested has been removed from our servers.</td>
             </tr>
             <tr>
                 <td>418</td>
@@ -415,7 +150,7 @@ curl <span class="s2">"api_endpoint_here"</span>
             </tr>
             <tr>
                 <td>429</td>
-                <td>Too Many Requests -- You&#39;re requesting too many kittens! Slow down!</td>
+                <td>Too Many Requests -- You&#39;re requesting too many contacts! Slow down!</td>
             </tr>
             <tr>
                 <td>500</td>
@@ -429,12 +164,9 @@ curl <span class="s2">"api_endpoint_here"</span>
         </table>
     </div>
     <div class="dark-box">
-        <div class="lang-selector">
-            <a href="#" data-language-name="shell">shell</a>
-            <a href="#" data-language-name="ruby">ruby</a>
-            <a href="#" data-language-name="python">python</a>
-            <a href="#" data-language-name="javascript">javascript</a>
-        </div>
+        <div class="lang-selector"><a href="#" data-language-name="shell">shell</a>
+            <a href="#" data-language-name="ruby">ruby</a> <a href="#" data-language-name="python">python</a>
+            <a href="#" data-language-name="javascript">javascript</a></div>
     </div>
 </div>
 </body>

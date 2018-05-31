@@ -256,5 +256,6 @@
 .toc-wrapper > img {
     margin: 10px auto;
     padding-bottom: 10px;
-    max-height: 20%;
+    max-height: 52px;
+    max-width: 90%;
 }
