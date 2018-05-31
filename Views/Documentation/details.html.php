@@ -32,8 +32,7 @@
     </span>
 </a>
 <div class="toc-wrapper">
-    <!--@todo Support custom global logo.-->
-    <img src="<?php echo $view['assets']->getUrl('plugins/MauticContactSourceBundle/Assets/slate/images/logo.png') ?>"
+    <img src="<?php echo $view['assets']->getUrl('media/images/mautic_logo_db200.png') ?>"
          class="logo" alt="Logo"/>
     <div class="lang-selector">
         <a href="#" data-language-name="shell">shell</a>

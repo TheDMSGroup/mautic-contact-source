@@ -252,3 +252,9 @@
 .highlight .o {
     color: #f92672;
 }
+
+.toc-wrapper > img {
+    margin: 10px auto;
+    padding-bottom: 10px;
+    max-height: 20%;
+}
