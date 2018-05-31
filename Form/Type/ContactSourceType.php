@@ -89,7 +89,7 @@ class ContactSourceType extends AbstractType
                 'label'      => 'mautic.contactsource.form.description_public',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => [
-                    'class'   => 'form-control editor',
+                    'class'   => 'form-control editor editor-advanced',
                     'tooltip' => 'mautic.contactsource.form.description_public.tooltip',
                 ],
                 'required'   => false,

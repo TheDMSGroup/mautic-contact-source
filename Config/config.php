@@ -63,9 +63,6 @@ return [
                     'campaignId' => '',
                     'sourceId'   => '',
                 ],
-                'arguments'  => [
-                    'translator',
-                ],
             ],
             'mautic_contactsource_documentation' => [
                 'path'       => '/source/{sourceId}/{main}/{campaignId}/{object}/{action}',

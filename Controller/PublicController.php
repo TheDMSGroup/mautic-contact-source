@@ -49,13 +49,21 @@ class PublicController extends CommonController
         if (!isset($result['campaign']['name'])) {
             // No valid campaign specified, should show the listing of all campaigns.
             $view                = 'MauticContactSourceBundle:Documentation:details.html.php';
-            $parameters['title'] = $this->translator->trans('mautic.contactsource.api.docs.source_title');
+            $parameters['title'] = $this->translator->trans(
+                'mautic.contactsource.api.docs.source_title',
+                [
+                    '%campaign%' => $result['campaign']['name'],
+                ]
+            );
         } elseif (isset($result['source']['name'])) {
             // Valid campaign is specified, should include hash or direct link to that campaign.
             $view                 = 'MauticContactSourceBundle:Documentation:details.html.php';
             $parameters['title']  = $this->translator->trans(
                 'mautic.contactsource.api.docs.campaign_title',
-                ['%source%' => $result['source']['name']]
+                [
+                    '%source%'   => $result['source']['name'],
+                    '%campaign%' => $result['campaign']['name'],
+                ]
             );
             $parameters['fields'] = $ApiModel->getAllowedFields(false);
         } else {

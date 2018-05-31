@@ -47,8 +47,7 @@
         <li><a href="#errors" class="toc-h1 toc-link" data-title="Errors">Errors</a></li>
     </div>
     <ul class="toc-footer">
-        <li><a href='#'>Sign Up for a Developer Key</a></li>
-        <li><a href='https://github.com/lord/slate'>Documentation Powered by Slate</a></li>
+        <li><a href='#'>Contact us for assistance</a></li>
     </ul>
 </div>
 <div class="page-wrapper">

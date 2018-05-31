@@ -183,9 +183,9 @@ class ApiController extends CommonApiController
     }
 
     /**
-     * @param $id
+     * @param $contactSourceId
      *
-     * @return array|bool|\Symfony\Component\HttpFoundation\Response
+     * @return array|Response
      */
     public function addCampaignAction($contactSourceId)
     {
@@ -210,7 +210,7 @@ class ApiController extends CommonApiController
         $campaignModel  = $this->container->get('mautic.campaign.model.campaign');
         $campaignEntity = $campaignModel->getEntity($parameters['campaignId']);
         if (empty($campaignEntity)) {
-            return $this->returnError('mautic.contactsource.api.add_campaign.not_found', Codes::HTTP_BAD_REQUEST);
+            return $this->returnError('mautic.contactsource.api.error.error.add_campaign.not_found', Codes::HTTP_BAD_REQUEST);
         }
 
         $campaignSettingsModel->setContactSource($entity);
