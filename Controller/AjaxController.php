@@ -175,13 +175,18 @@ class AjaxController extends CommonAjaxController
     protected function campaignBudgetsTabAction(Request $request)
     {
         //calculate time since values for generating forecasts
-        $forecast                           = [];
-        $forecast['elapsedHoursInDaySoFar'] = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
-        $forecast['hoursLeftToday']         = intval(24 - $forecast['elapsedHoursInDaySoFar']);
-        $forecast['currentDayOfMonth']      = intval(date('d'));
-        $forecast['daysInMonthLeft']        = intval(date('t') - $forecast['currentDayOfMonth']);
-        $campaignId                         = $request->request->get('data')['campaignId'];
         $container                          = $this->dispatcher->getContainer();
+        $timezone                           = $container->get('mautic.helper.core_parameters')->getParameter(
+            'default_timezone'
+        );
+        $now                                = new \DateTime('now', new \DateTimezone($timezone));
+        $midnight                           = new \DateTime('midnight', new \DateTimezone($timezone));
+        $dateDiff                           = $now->diff($midnight);
+        $forecast                           = [];
+        $forecast['elapsedHoursInDaySoFar'] = $dateDiff->h;
+        $forecast['hoursLeftToday']         = 24 - $forecast['elapsedHoursInDaySoFar'];
+        $forecast['currentDayOfMonth']      = intval($now->format('d'));
+        $forecast['daysInMonthLeft']        = intval($now->format('t')) - $forecast['currentDayOfMonth'];
         $limits                             = $container->get(
             'mautic.contactsource.model.contactsource'
         )->evaluateAllSourceLimits($campaignId);
@@ -201,13 +206,21 @@ class AjaxController extends CommonAjaxController
     protected function campaignBudgetsDashboardAction(Request $request)
     {
         //calculate time since values for generating forecasts
-        $forecast                           = [];
-        $forecast['elapsedHoursInDaySoFar'] = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
-        $forecast['hoursLeftToday']         = intval(24 - $forecast['elapsedHoursInDaySoFar']);
-        $forecast['currentDayOfMonth']      = intval(date('d'));
-        $forecast['daysInMonthLeft']        = intval(date('t') - $forecast['currentDayOfMonth']);
+
         $container                          = $this->dispatcher->getContainer();
-        $data                               = [];
+        $timezone                           = $container->get('mautic.helper.core_parameters')->getParameter(
+            'default_timezone'
+        );
+        $now                                = new \DateTime('now', new \DateTimezone($timezone));
+        $midnight                           = new \DateTime('midnight', new \DateTimezone($timezone));
+        $dateDiff                           = $now->diff($midnight);
+        $forecast                           = [];
+        $forecast['elapsedHoursInDaySoFar'] = $dateDiff->h;
+        $forecast['hoursLeftToday']         = 24 - $forecast['elapsedHoursInDaySoFar'];
+        $forecast['currentDayOfMonth']      = intval($now->format('d'));
+        $forecast['daysInMonthLeft']        = intval($now->format('t')) - $forecast['currentDayOfMonth'];
+
+        $data = [];
         //get all published campaigns and get limits for each
         $campaigns = $container->get(
             'mautic.campaign.model.campaign'
@@ -244,9 +257,9 @@ class AjaxController extends CommonAjaxController
                             $leadForecast  = intval($pending + $limit['logCount']);
                         }
 
-                        $row[] = $forecastValue >= 90 ? 'fa-exclamation-triangle' : 'fa-heartbeat'; //status
-                        $row[] = $campaign['name']; //campaignName
-                        $row[] = $container->get(
+                        $row[]          = $forecastValue >= 90 ? 'fa-exclamation-triangle' : 'fa-heartbeat'; //status
+                        $row[]          = $campaign['name']; //campaignName
+                        $row[]          = $container->get(
                             'mautic.contactsource.model.contactsource'
                         )->buildUrl(
                             'mautic_campaign_action',
