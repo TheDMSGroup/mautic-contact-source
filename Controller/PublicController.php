@@ -40,22 +40,34 @@ class PublicController extends CommonController
             ->setContainer($this->container)
             ->setSourceId((int) $sourceId)
             ->setCampaignId((int) $campaignId)
-            ->setVerbose((bool) $request->headers->get('debug'))
+            ->setVerbose(true)
             ->handleInputPublic();
 
-        $result = $ApiModel->getResult(true);
-
+        $result     = $ApiModel->getResult();
         $parameters = [];
+
+        // get list of campaigns
+        $contactSourceModel         = $this->container->get('mautic.contactsource.model.contactsource');
+        $campaigns                  = $contactSourceModel->getCampaignList($ApiModel->getContactSource());
+        $parameters['campaignList'] = $campaigns;
+        $parameters['campaign']     = null;
+
+        // get global Source integration settings
+        $global = [];
+
+        $parameters['global'] = $global;
+        $parameters['source'] = $result['source'];
+
         if (!isset($result['campaign']['name'])) {
             // No valid campaign specified, should show the listing of all campaigns.
             $view                = 'MauticContactSourceBundle:Documentation:details.html.php';
             $parameters['title'] = $this->translator->trans(
                 'mautic.contactsource.api.docs.source_title',
                 [
-                    '%campaign%' => $result['campaign']['name'],
+                    '%source%' => $result['source']['name'],
                 ]
             );
-        } elseif (isset($result['source']['name'])) {
+        } elseif (isset($result['campaign']['name'])) {
             // Valid campaign is specified, should include hash or direct link to that campaign.
             $view                 = 'MauticContactSourceBundle:Documentation:details.html.php';
             $parameters['title']  = $this->translator->trans(
@@ -65,7 +77,8 @@ class PublicController extends CommonController
                     '%campaign%' => $result['campaign']['name'],
                 ]
             );
-            $parameters['fields'] = $ApiModel->getAllowedFields(false);
+            $parameters['campaignFields'] = $ApiModel->getAllowedFields(false);
+            $parameters['campaign']       = $result['campaign'];
         } else {
             // Completely invalid source.
             // @todo - We should respond with a 404 most likely.

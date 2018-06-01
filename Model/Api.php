@@ -1016,6 +1016,14 @@ class Api
     }
 
     /**
+     * @return ContactSource
+     */
+    public function getContactSource()
+    {
+        return $this->contactSource;
+    }
+
+    /**
      * Return our extended contact model.
      *
      * @return ContactModel|object
