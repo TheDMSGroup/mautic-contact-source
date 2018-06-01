@@ -175,13 +175,18 @@ class AjaxController extends CommonAjaxController
     protected function campaignBudgetsTabAction(Request $request)
     {
         //calculate time since values for generating forecasts
-        $forecast                           = [];
-        $forecast['elapsedHoursInDaySoFar'] = intval(date('H', time() - strtotime(date('Y-m-d :00:00:00', time()))));
-        $forecast['hoursLeftToday']         = intval(24 - $forecast['elapsedHoursInDaySoFar']);
-        $forecast['currentDayOfMonth']      = intval(date('d'));
-        $forecast['daysInMonthLeft']        = intval(date('t') - $forecast['currentDayOfMonth']);
-        $campaignId                         = $request->request->get('data')['campaignId'];
         $container                          = $this->dispatcher->getContainer();
+        $timezone                           = $container->get('mautic.helper.core_parameters')->getParameter(
+            'default_timezone'
+        );
+        $now                                = new \DateTime('now', new \DateTimezone($timezone));
+        $midnight                           = new \DateTime('midnight', new \DateTimezone($timezone));
+        $dateDiff                           = $now->diff($midnight);
+        $forecast                           = [];
+        $forecast['elapsedHoursInDaySoFar'] = $dateDiff->h;
+        $forecast['hoursLeftToday']         = 24 - $forecast['elapsedHoursInDaySoFar'];
+        $forecast['currentDayOfMonth']      = intval($now->format('d'));
+        $forecast['daysInMonthLeft']        = intval($now->format('t')) - $forecast['currentDayOfMonth'];
         $limits                             = $container->get(
             'mautic.contactsource.model.contactsource'
         )->evaluateAllSourceLimits($campaignId);
@@ -196,5 +201,102 @@ class AjaxController extends CommonAjaxController
         );
 
         return $view;
+    }
+
+    protected function campaignBudgetsDashboardAction(Request $request)
+    {
+        //calculate time since values for generating forecasts
+
+        $container                          = $this->dispatcher->getContainer();
+        $timezone                           = $container->get('mautic.helper.core_parameters')->getParameter(
+            'default_timezone'
+        );
+        $now                                = new \DateTime('now', new \DateTimezone($timezone));
+        $midnight                           = new \DateTime('midnight', new \DateTimezone($timezone));
+        $dateDiff                           = $now->diff($midnight);
+        $forecast                           = [];
+        $forecast['elapsedHoursInDaySoFar'] = $dateDiff->h;
+        $forecast['hoursLeftToday']         = 24 - $forecast['elapsedHoursInDaySoFar'];
+        $forecast['currentDayOfMonth']      = intval($now->format('d'));
+        $forecast['daysInMonthLeft']        = intval($now->format('t')) - $forecast['currentDayOfMonth'];
+
+        $data = [];
+        //get all published campaigns and get limits for each
+        $campaigns = $container->get(
+            'mautic.campaign.model.campaign'
+        )->getPublishedCampaigns(true);
+        foreach ($campaigns as $campaign) {
+            $limits = $container->get(
+                'mautic.contactsource.model.contactsource'
+            )->evaluateAllSourceLimits($campaign['id']);
+            if (!empty($limits)) {
+                foreach ($limits as $campaignLimits) {
+                    foreach ($campaignLimits['limits'] as $limit) {
+                        $row           = [];
+                        $pending       = 0;
+                        $forecastValue = $leadForecast = '';
+                        if ($limit['rule']['duration'] == 'P1D' && $limit['logCount'] > 0) {
+                            $pending = floatval(
+                                ($limit['logCount'] / $forecast['elapsedHoursInDaySoFar']) * $forecast['hoursLeftToday']
+                            );
+                        }
+
+                        if ($limit['rule']['duration'] == '1M' && $limit['logCount'] > 0) {
+                            $pending = floatval(
+                                ($limit['logCount'] / $forecast['currentDayOfMonth']) * $forecast['daysInMonthLeft']
+                            );
+                        }
+                        if (!empty($pending)) {
+                            $forecastValue = number_format(
+                                    ($pending + $limit['logCount']) / $limit['rule']['quantity'],
+                                    2,
+                                    '.',
+                                    ','
+                                ) * 100;
+                            $forecastValue = $forecastValue.'%';
+                            $leadForecast  = intval($pending + $limit['logCount']);
+                        }
+
+                        $row[]          = $forecastValue >= 90 ? 'fa-exclamation-triangle' : 'fa-heartbeat'; //status
+                        $row[]          = $campaign['name']; //campaignName
+                        $row[]          = $container->get(
+                            'mautic.contactsource.model.contactsource'
+                        )->buildUrl(
+                            'mautic_campaign_action',
+                            ['objectAction' => 'view', 'objectId' => $campaign['id']]
+                        ); // campaingLink
+                        $row[]          = $campaignLimits['name']; // source
+                        $row[]          = $campaignLimits['link']; //sourceLink
+                        $row[]          = $limit['name']; //description
+                        $row[]          = $limit['logCount']; //capCount
+                        $row[]          = $limit['percent']; // % reached
+                        $row[]          = $leadForecast; // projection
+                        $row[]          = $forecastValue; //capPercent
+                        $data['rows'][] = $row;
+                    }
+                }
+            }
+        }
+
+        $headers = [
+            'mautic.campaign.source.limit.status',
+            'mautic.campaign.source.limit.campaign',
+            'campaignLink',
+            'mautic.campaign.source.limit.source',
+            'sourceLink',
+            'mautic.campaign.source.limit.description',
+            'mautic.campaign.source.limit.cap_count',
+            'mautic.campaign.source.limit.cap_percent',
+            'mautic.campaign.source.limit.projection',
+            'forecastPercent',
+        ];
+        foreach ($headers as $header) {
+            $data['columns'][] = [
+                'title' => $this->translator->trans($header),
+            ];
+        }
+        $data = UTF8Helper::fixUTF8($data);
+
+        return $this->sendJsonResponse($data);
     }
 }
