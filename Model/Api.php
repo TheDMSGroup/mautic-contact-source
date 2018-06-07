@@ -849,35 +849,41 @@ class Api
      * @param null $owner
      * @param null $list
      * @param null $tags
+     * @param bool $persist
      *
-     * @return bool|Contact
-     *
-     * @throws \Exception
+     * @return Contact
+     * @throws ContactSourceException
      */
     public function importContact(
         $fields,
         $data,
         $owner = null,
         $list = null,
-        $tags = null
+        $tags = null,
+        $persist = true
     ) {
-        $fields               = array_flip($fields);
-        $fieldData            = [];
+        $fields    = array_flip($fields);
+        $fieldData = [];
+
+        // Alteration to core start.
+        // Get an array of allowed field aliases.
         $allowedFields        = $this->getAllowedFields(true);
         $allowedFieldsAliases = [];
         foreach ($allowedFields as $contactField) {
             $allowedFieldsAliases[$contactField['alias']] = true;
         }
+        // Alteration to core stop.
 
-        // Fields have already been cleaned by this point, so we can remove the helper.
+        // Alteration to core: Skip company import section.
+
         foreach ($fields as $leadField => $importField) {
             if (array_key_exists($importField, $data) && !is_null($data[$importField]) && '' != $data[$importField]) {
+                // Alteration to core: Fields have already been cleaned by this point, so we can remove the helper.
                 $fieldData[$leadField] = $data[$importField];
             }
         }
 
-        // Sources will not be able to set this on creation: Companies and their linkages.
-
+        // Alteration to core: Skip duplicate contact check and merge with checkForDuplicateContact.
         // These contacts are always going to be new.
         $contact = new Contact();
 
@@ -911,7 +917,7 @@ class Api
         // Sources will not be able to set this on creation: modifiedByUser
         unset($fieldData['modifiedByUser']);
 
-        // Import the IP address as a pivot entity.
+        // Alteration to core: Validate IP addresses on import and support multiple for geolocation.
         if (!empty($fields['ip']) && !empty($data[$fields['ip']])) {
             $ipAddressArray = explode(',', $data[$fields['ip']]);
             foreach ($ipAddressArray as $ipAddressString) {
@@ -959,15 +965,15 @@ class Api
         }
         unset($fieldData['ip']);
 
-        // Sources will not be able to set this on creation: points
+        // Alteration to core: Sources will not be able to set this on creation: points
 
-        // Sources will not be able to set this on creation: stage
+        // Alteration to core: Sources will not be able to set this on creation: stage
         unset($fieldData['stage']);
 
-        // Sources will not be able to set this on creation: doNotEmail
+        // Alteration to core: Sources will not be able to set this on creation: doNotEmail
         unset($fieldData['doNotEmail']);
 
-        // Sources will not be able to set this on creation: ownerusername
+        // Alteration to core: Sources will not be able to set this on creation: ownerusername
         unset($fieldData['ownerusername']);
 
         if (null !== $owner) {
@@ -978,7 +984,9 @@ class Api
             $this->getContactModel()->modifyTags($contact, $tags, null, false);
         }
 
+        // Alteration to core: Use AllowedFields array instead of allowing all...
         // Apply custom field defaults and clean/validate inputs.
+        // Return exception to API if validation fails.
         foreach ($allowedFields as $contactField) {
             if (isset($fieldData[$contactField['alias']])) {
                 if ('NULL' === $fieldData[$contactField['alias']]) {
@@ -1011,6 +1019,8 @@ class Api
             $contact->addUpdatedField($field, $value);
         }
         $contact->imported = true;
+
+        // Alteration to core: Skip imported/merged event triggers, manipulator, and the persist/save.
 
         return $contact;
     }
@@ -1214,40 +1224,38 @@ class Api
     private function processRealTime()
     {
         if ($this->realTime) {
-            // Synchronous acceptance or denial.
-            // Step through the campaign model events to define status.
-            $totalEventCount = 0;
-            /** @var CampaignEventModel $campaignEventModel */
-            $campaignEventModel = $this->container->get('mautic.contactsource.model.campaign_event');
-            $campaignResult     = $campaignEventModel->triggerContactStartingEvents(
-                $this->campaign,
-                $totalEventCount,
-                [$this->contact]
-            );
 
+            /** @var CampaignExecutioner $executioner */
+            $executioner = $this->container->get('mautic.contactsource.model.campaign_executioner');
+            $result      = $executioner->execute($this->campaign, [$this->contact->getId()]);
+
+            // @todo - Needs to feed back from the clients (by events) the following:
+            // $session->set('contactclient_events', []);
+            // $session->set('contactclient_valid', null);
             // Sync (real-time): Evaluate the result of the campaign workflow and return status.
-            if (
-                $campaignResult
-                && !empty($campaignResult['contactClientEvents'])
-                && !empty($campaignResult['contactClientEvents'][$this->contact->getId()])
-            ) {
-                $this->events = $campaignResult['contactClientEvents'][$this->contact->getId()];
-                foreach ($campaignResult['contactClientEvents'][$this->contact->getId()] as $eventId => $event) {
-                    if (!empty($event['error'])) {
-                        $eventName = !empty($event['name']) ? $event['name'] : '';
-                        if (!is_array($event['error'])) {
-                            $event['error'] = [$event['error']];
-                        }
-                        $this->eventErrors[$eventId] = $eventName.' ('.$eventId.'): '.implode(', ', $event['error']);
-                    }
-                    if (isset($event['valid']) && $event['valid']) {
-                        // One valid Contact Client was found to accept the lead.
-                        $this->status = Stat::TYPE_ACCEPTED;
-                        $this->valid  = true;
-                        break;
-                    }
-                }
-            }
+            // if (
+            //     $campaignResult
+            //     && !empty($campaignResult['contactClientEvents'])
+            //     && !empty($campaignResult['contactClientEvents'][$this->contact->getId()])
+            // ) {
+            //     $this->events = $campaignResult['contactClientEvents'][$this->contact->getId()];
+            //     foreach ($campaignResult['contactClientEvents'][$this->contact->getId()] as $eventId => $event) {
+            //         if (!empty($event['error'])) {
+            //             $eventName = !empty($event['name']) ? $event['name'] : '';
+            //             if (!is_array($event['error'])) {
+            //                 $event['error'] = [$event['error']];
+            //             }
+            //             $this->eventErrors[$eventId] = $eventName.' ('.$eventId.'): '.implode(', ', $event['error']);
+            //         }
+            //         if (isset($event['valid']) && $event['valid']) {
+            //             // One valid Contact Client was found to accept the lead.
+            //             $this->status = Stat::TYPE_ACCEPTED;
+            //             $this->valid  = true;
+            //             break;
+            //         }
+            //     }
+            // }
+
             // There was no accepted client hit, consider this a rejection.
             // @todo - This is highly dependent on the contact client plugin, thus should be made configurable, or we can make the realTime mode only available to those with both plugins.
             if (!$this->valid) {
@@ -1381,6 +1389,14 @@ class Api
     }
 
     /**
+     * @return string
+     */
+    public function getLogsJSON()
+    {
+        return json_encode($this->logs, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+    }
+
+    /**
      * Create a new integration record (we are never updating here).
      *
      * @param        $integrationName
@@ -1507,13 +1523,5 @@ class Api
         }
 
         return $result;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogsJSON()
-    {
-        return json_encode($this->logs, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
     }
 }
