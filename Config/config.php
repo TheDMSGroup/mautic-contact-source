@@ -171,8 +171,6 @@ return [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\CampaignExecutioner',
                 'arguments' => [
                     'mautic.campaign.executioner.kickoff',
-                    'mautic.campaign.executioner.scheduled',
-                    'mautic.campaign.executioner.inactive',
                 ],
             ],
             'mautic.contactsource.model.cache'             => [

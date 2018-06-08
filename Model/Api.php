@@ -852,6 +852,7 @@ class Api
      * @param bool $persist
      *
      * @return Contact
+     *
      * @throws ContactSourceException
      */
     public function importContact(
@@ -1224,38 +1225,37 @@ class Api
     private function processRealTime()
     {
         if ($this->realTime) {
-
             /** @var CampaignExecutioner $executioner */
             $executioner = $this->container->get('mautic.contactsource.model.campaign_executioner');
-            $result      = $executioner->execute($this->campaign, [$this->contact->getId()]);
+            $executioner->execute($this->campaign, [$this->contact->getId()]);
 
-            // @todo - Needs to feed back from the clients (by events) the following:
+            // Retrieve events fired by MauticContactClientBundle (if any)
             $session = $this->container->get('session');
-            $events = $session->get('mautic.contactClient.events', []);
-            $valid = $session->get('mautic.contactClient.valid', null);
-            // Sync (real-time): Evaluate the result of the campaign workflow and return status.
-            // if (
-            //     $campaignResult
-            //     && !empty($campaignResult['contactClientEvents'])
-            //     && !empty($campaignResult['contactClientEvents'][$this->contact->getId()])
-            // ) {
-            //     $this->events = $campaignResult['contactClientEvents'][$this->contact->getId()];
-            //     foreach ($campaignResult['contactClientEvents'][$this->contact->getId()] as $eventId => $event) {
-            //         if (!empty($event['error'])) {
-            //             $eventName = !empty($event['name']) ? $event['name'] : '';
-            //             if (!is_array($event['error'])) {
-            //                 $event['error'] = [$event['error']];
-            //             }
-            //             $this->eventErrors[$eventId] = $eventName.' ('.$eventId.'): '.implode(', ', $event['error']);
-            //         }
-            //         if (isset($event['valid']) && $event['valid']) {
-            //             // One valid Contact Client was found to accept the lead.
-            //             $this->status = Stat::TYPE_ACCEPTED;
-            //             $this->valid  = true;
-            //             break;
-            //         }
-            //     }
-            // }
+            $events  = $session->get('mautic.contactClient.events', []);
+
+            $contactId = $this->contact->getId();
+            if (
+                !empty($events)
+                && !empty($events[$contactId])
+            ) {
+                $this->events      = $events[$contactId];
+                $this->eventErrors = [];
+                foreach ($this->events as $eventId => $event) {
+                    if (!empty($event['error'])) {
+                        $eventName = !empty($event['name']) ? $event['name'] : '';
+                        if (!is_array($event['error'])) {
+                            $event['error'] = [$event['error']];
+                        }
+                        $this->eventErrors[$eventId] = $eventName.' ('.$eventId.'): '.implode(', ', $event['error']);
+                    }
+                    if (isset($event['valid']) && $event['valid']) {
+                        // One valid Contact Client was found to accept the lead.
+                        $this->status = Stat::TYPE_ACCEPTED;
+                        $this->valid  = true;
+                        break;
+                    }
+                }
+            }
 
             // There was no accepted client hit, consider this a rejection.
             // @todo - This is highly dependent on the contact client plugin, thus should be made configurable, or we can make the realTime mode only available to those with both plugins.
