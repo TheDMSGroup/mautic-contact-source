@@ -17,7 +17,7 @@ use Mautic\CampaignBundle\Executioner\InactiveExecutioner;
 use Mautic\CampaignBundle\Executioner\KickoffExecutioner;
 use Mautic\CampaignBundle\Executioner\Result\Counter;
 use Mautic\CampaignBundle\Executioner\ScheduledExecutioner;
-use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Console\Output\NullOutput;
 
 /**
  * Class CampaignExecutioner
@@ -54,10 +54,11 @@ class CampaignExecutioner
     /**
      * Kicks off real-time campaign events for a single contact.
      *
-     * Returns an array with aggregated output, and counters.
+     * Returns an array with counts.
      *
      * @param Campaign $campaign
      * @param array    $contactIdList
+     * @param int      $batchLimit
      *
      * @return array
      * @throws \Doctrine\ORM\Query\QueryException
@@ -66,22 +67,22 @@ class CampaignExecutioner
      * @throws \Mautic\CampaignBundle\Executioner\Exception\CannotProcessEventException
      * @throws \Mautic\CampaignBundle\Executioner\Scheduler\Exception\NotSchedulableException
      */
-    public function execute(Campaign $campaign, array $contactIdList)
+    public function execute(Campaign $campaign, array $contactIdList, $batchLimit = 50)
     {
-        $output  = new BufferedOutput();
-        $limiter = new ContactLimiter(null, null, null, null, $contactIdList);
+        $limiter = new ContactLimiter($batchLimit, null, null, null, $contactIdList);
 
         /** @var Counter $kickoff */
-        $kickoff = $this->kickoffExecutioner->execute($campaign, $limiter, $output);
+        $kickoff = $this->kickoffExecutioner->execute($campaign, $limiter);
 
         /** @var Counter $schedule */
-        $schedule = $this->scheduledExecutioner->execute($campaign, $limiter, $output);
+        $limiter->resetBatchMinContactId();
+        $schedule = $this->scheduledExecutioner->execute($campaign, $limiter);
 
         /** @var Counter $inactive */
-        $inactive = $this->inactiveExecutioner->execute($campaign, $limiter, $output);
+        $limiter->resetBatchMinContactId();
+        $inactive = $this->inactiveExecutioner->execute($campaign, $limiter);
 
         return [
-            'output'   => $output,
             'kickoff'  => $kickoff,
             'schedule' => $schedule,
             'inactive' => $inactive,

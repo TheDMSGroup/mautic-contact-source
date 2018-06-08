@@ -1230,8 +1230,9 @@ class Api
             $result      = $executioner->execute($this->campaign, [$this->contact->getId()]);
 
             // @todo - Needs to feed back from the clients (by events) the following:
-            // $session->set('contactclient_events', []);
-            // $session->set('contactclient_valid', null);
+            $session = $this->container->get('session');
+            $events = $session->get('mautic.contactClient.events', []);
+            $valid = $session->get('mautic.contactClient.valid', null);
             // Sync (real-time): Evaluate the result of the campaign workflow and return status.
             // if (
             //     $campaignResult
