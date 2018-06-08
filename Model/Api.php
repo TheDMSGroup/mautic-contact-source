@@ -1243,10 +1243,10 @@ class Api
                 foreach ($this->events as $eventId => $event) {
                     if (!empty($event['error'])) {
                         $eventName = !empty($event['name']) ? $event['name'] : '';
-                        if (!is_array($event['error'])) {
-                            $event['error'] = [$event['error']];
+                        if (!is_array($event['errors'])) {
+                            $event['errors'] = [$event['errors']];
                         }
-                        $this->eventErrors[$eventId] = $eventName.' ('.$eventId.'): '.implode(', ', $event['error']);
+                        $this->eventErrors[$eventId] = $eventName.' ('.$eventId.'): '.implode(', ', $event['errors']);
                     }
                     if (isset($event['valid']) && $event['valid']) {
                         // One valid Contact Client was found to accept the lead.
