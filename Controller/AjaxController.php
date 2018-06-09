@@ -175,6 +175,7 @@ class AjaxController extends CommonAjaxController
     protected function campaignBudgetsTabAction(Request $request)
     {
         //calculate time since values for generating forecasts
+        $campaignId                         = $request->request->get('data')['campaignId'];
         $container                          = $this->dispatcher->getContainer();
         $timezone                           = $container->get('mautic.helper.core_parameters')->getParameter(
             'default_timezone'

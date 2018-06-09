@@ -46,8 +46,7 @@ $page             = isset($events['page']) && !empty($events['page']) ? $events[
              * </span>
              * </a>
              * </div>*/ ?>
-            <div class="input-group-btn" style="width:auto;font-size:1em;padding-left:4px;"
-            ">
+            <div class="input-group-btn" style="width:auto;font-size:1em;padding-left:4px;">
                 <input id="include-logs" type="checkbox"
                        title="Apply search term to verbose logs - may cause unexpected results." name="logs"
                        class="bdr-w-0">
@@ -94,8 +93,8 @@ $page             = isset($events['page']) && !empty($events['page']) ? $events[
                 url: mauticAjaxUrl,
                 data: {
                     action: 'plugin:mauticContactSource:ajaxTimeline',
-                    filters: form.serializeArray(),
-                },
+                    filters: form.serializeArray()
+                }
             }).done(function (data) {
                 mQuery('div#timeline-table').html(data);
                 if (mQuery('#contactsource-timeline').length) {

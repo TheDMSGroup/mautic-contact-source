@@ -79,7 +79,7 @@ $baseUrl = $view['router']->path(
                 </a>
             </th>
         </tr>
-        </tr>
+        </thead>
         <tbody>
         <?php foreach ($events['events'] as $counter => $event): ?>
             <?php
