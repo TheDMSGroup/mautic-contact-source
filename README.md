@@ -10,10 +10,14 @@ to discern real-time acceptance criteria with external clients.
 
 ## Installation & Usage
 
-Currently being tested with Mautic `2.12.x`.
-If you have success/issues with other versions please report.
+Choose a release that matches your version of Mautic.
 
-1. Install by running `composer require thedmsgroup/mautic-contact-source-bundle`
+| Mautic version | Installation                                                        |
+| -------------- | ------------------------------------------------------------------- |
+| 2.12.x         | `composer require thedmsgroup/mautic-contact-source-bundle "^2.12"` |
+| 2.14.x         | `composer require thedmsgroup/mautic-contact-source-bundle "^2.14"` |
+
+1. Install by running the command above or by downloading the appropriate version and unpacking the contents into a folder named `/plugins/MauticContactSourceBundle`
 2. Go to `/s/plugins/reload`
 3. After a refresh you will find "Sources" in the main menu, you can dive in and create your first one.
 
@@ -34,10 +38,16 @@ By default your third parties can POST contacts to urls matching this pattern:
 - [x] Campaign Finance: Track the cost/revenue of contacts upon ingestion per campaign.
 - [x] Campaign Scrub: Support an optional scrub-rate per campaign which affects the cost/revenue.
 - [x] Caps: Rules to limit the quantity of successful contacts can be received.
+- [x] Logging: Log statistics on contact ingestion, provide charts when viewing a source in the UI.
 
 ## Todo
-- [ ] Logging: Log statistics on contact ingestion, provide charts when viewing a source in the UI.
 - [ ] Campaign Required Fields: The fields being used within a campaign should percolate upward to the Source, updating required fields.
 - [ ] Self-Documentation: Each source (API) created should auto-generate a public documentation page for a third party. 
 - [ ] Notifications: Third parties should be notified when their API changes (such as an added campaign or required field change).
-- [ ] Batch Support: Multiple contacts being imported at once for performance.
+- [ ] Batch Support: Import multiple contacts at once for improved performance.
+
+# Review and refactor for 2.14.x
+
+Overrides to refactor:
+- processRealTime - Refactor to use executioner instead of modified event model.
+-- Also use event dispatching from client plugin instead of session storage.

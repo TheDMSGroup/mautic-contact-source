@@ -167,16 +167,10 @@ return [
                     'mautic.contactsource.model.contactsource',
                 ],
             ],
-            'mautic.contactsource.model.campaign_event'    => [
-                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\CampaignEventModel',
+            'mautic.contactsource.model.campaign_executioner'    => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\CampaignExecutioner',
                 'arguments' => [
-                    'mautic.helper.ip_lookup',
-                    'mautic.helper.core_parameters',
-                    'mautic.lead.model.lead',
-                    'mautic.campaign.model.campaign',
-                    'mautic.user.model.user',
-                    'mautic.core.model.notification',
-                    'mautic.factory',
+                    'mautic.campaign.executioner.kickoff',
                 ],
             ],
             'mautic.contactsource.model.cache'             => [
