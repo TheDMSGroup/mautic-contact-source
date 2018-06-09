@@ -46,17 +46,30 @@ class PublicController extends CommonController
         $result     = $ApiModel->getResult();
         $parameters = [];
 
-        // get list of campaigns
+        // Get list of campaigns.
         $contactSourceModel         = $this->container->get('mautic.contactsource.model.contactsource');
         $campaigns                  = $contactSourceModel->getCampaignList($ApiModel->getContactSource());
         $parameters['campaignList'] = $campaigns;
         $parameters['campaign']     = null;
 
-        // get global Source integration settings
-        $global = [];
-
-        $parameters['global'] = $global;
-        $parameters['source'] = $result['source'];
+        // Get global Source integration settings.
+        $parameters['global'] = [];
+        /** @var \Mautic\PluginBundle\Helper\IntegrationHelper $helper */
+        $helper = $this->get('mautic.helper.integration');
+        /** @var \Mautic\PluginBundle\Integration\AbstractIntegration $object */
+        $object = $helper->getIntegrationObject('Source');
+        if ($object) {
+            $objectSettings = $object->getIntegrationSettings();
+            if ($objectSettings) {
+                $featureSettings      = $objectSettings->getFeatureSettings();
+                $parameters['global'] = $featureSettings;
+            }
+        }
+        if (empty($parameters['global']['domain'])) {
+            $parameters['global']['domain'] = $this->get('mautic.helper.core_parameters')->getParameter('site_url');
+        }
+        $parameters['global']['domain'] = rtrim('/', $parameters['global']['domain']);
+        $parameters['source']           = $result['source'];
 
         if (!isset($result['campaign']['name'])) {
             // No valid campaign specified, should show the listing of all campaigns.
@@ -69,8 +82,8 @@ class PublicController extends CommonController
             );
         } elseif (isset($result['campaign']['name'])) {
             // Valid campaign is specified, should include hash or direct link to that campaign.
-            $view                 = 'MauticContactSourceBundle:Documentation:details.html.php';
-            $parameters['title']  = $this->translator->trans(
+            $view                         = 'MauticContactSourceBundle:Documentation:details.html.php';
+            $parameters['title']          = $this->translator->trans(
                 'mautic.contactsource.api.docs.campaign_title',
                 [
                     '%source%'   => $result['source']['name'],
@@ -81,7 +94,6 @@ class PublicController extends CommonController
             $parameters['campaign']       = $result['campaign'];
         } else {
             // Completely invalid source.
-            // @todo - We should respond with a 404 most likely.
             $this->notFound('mautic.contactsource.api.docs.not_found');
         }
 

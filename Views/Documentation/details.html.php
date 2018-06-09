@@ -22,7 +22,7 @@
     ); ?>"></script>
     <?php // echo $view['assets']->outputSystemStylesheets();?> <?php // echo $view->render('MauticCoreBundle:Default:script.html.php');?>
 </head>
-<body class="index" data-languages="[&quot;shell&quot;,&quot;ruby&quot;,&quot;python&quot;,&quot;javascript&quot;]">
+<body class="index" data-languages="[&quot;shell&quot;,&quot;ruby&quot;,&quot;php&quot;,&quot;javascript&quot;]">
 
 <!-- SIDEBAR ------------------------------>
 <a href="#" id="nav-button"> <span> NAV <img src="<?php echo $view['assets']->getUrl(
@@ -32,7 +32,7 @@
         'media/images/mautic_logo_db200.png'
     ); ?>" class="logo" alt="Logo"/>
     <div class="lang-selector"><a href="#" data-language-name="shell">shell</a>
-        <a href="#" data-language-name="ruby">ruby</a> <a href="#" data-language-name="python">python</a>
+        <a href="#" data-language-name="ruby">ruby</a> <a href="#" data-language-name="php">php</a>
         <a href="#" data-language-name="javascript">javascript</a></div>
     <div class="search"><input type="text" class="search" id="input-search" placeholder="Search"></div>
     <ul class="search-results"></ul>
@@ -69,10 +69,13 @@
     <div class="content">
         <h1><?php echo $title; ?></h1>
         <!-- # Introduction ------------------------------>
-        <h1 id='introduction'>Introduction</h1> <?php if (!empty($global['introduction'])): ?>
-            <h4 class="mt-15"><?php echo $global['introduction']; ?></h4> <?php endif; ?>
-        <h2><?php echo $source['name']; ?></h2> <?php if (!empty($source['description'])): ?>
-            <h4 class="mt-15"><?php echo $source['description']; ?></h4> <?php endif; ?>
+        <?php if (!empty($global['introduction'])): ?>
+            <?php echo $global['introduction']; ?>
+        <?php endif; ?>
+        <?php /* <h2><?php echo $source['name']; ?></h2> */ ?>
+            <?php if (!empty($source['description'])): ?>
+            <h4 class="mt-15"><?php echo $source['description']; ?></h4>
+        <?php endif; ?>
 
         <!-- # Authentication ------------------------------>
         <h1 id='authentication'>Authentication</h1>
@@ -84,7 +87,7 @@
                         class="no">Contact</span><span class="o">::</span><span class="no">APIClient</span><span
                         class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span
                         class="s1">'000000000000000000000000000000'</span><span class="p">)</span></code></pre>
-        <pre class="highlight python tab-python"><code><span class="kn">import</span> <span
+        <pre class="highlight php tab-php"><code><span class="kn">import</span> <span
                         class="nn">contact</span><span class="n">api</span> <span class="o">=</span> <span
                         class="n">contact</span><span class="o">.</span><span class="n">authorize</span><span
                         class="p">(</span><span class="s">'000000000000000000000000000000'</span><span
@@ -105,7 +108,7 @@
 
         <!-- Light Block ---------------------------------->
         <p>Contact uses API keys to allow access to the API. You can register a new Contact API key at our
-            <a href="http://example.com/developers">developer portal</a>.</p>
+            <a href="<?php echo $global['domain']; ?>/developers">developer portal</a>.</p>
         <p>Contact expects for the API key to be included in all API requests to the server in a header that looks like the following:</p>
         <p><code>Authorization: 000000000000000000000000000000</code></p>
         <aside class="notice"> You must replace
@@ -116,7 +119,7 @@
         <h1 id='campaigns'>Campaigns</h1>
         <ul>
             <?php foreach ($campaignList as $campaignItem): ?>
-                <li><a href = "/source/<?php echo $source['id']; ?>/campaign/<?php echo $campaignItem['campaign_id']; ?>"><?php echo $campaignItem['name']; ?></a></li>
+                <li><a href="<?php echo $global['domain']; ?>/source/<?php echo $source['id']; ?>/campaign/<?php echo $campaignItem['campaign_id']; ?>"><?php echo $campaignItem['name']; ?></a></li>
             <?php endforeach; ?>
         </ul>
 
@@ -159,33 +162,9 @@
         <!-- # Create Contact ------------------------------>
         <h2 id='create-contact'>Create Contact</h2>
         <!-- Dark Block ------------------------------------->
-        <pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span
-                        class="s1">'contact'</span><span class="n">api</span> <span class="o">=</span> <span
-                        class="no">Contact</span><span class="o">::</span><span class="no">APIClient</span><span
-                        class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span
-                        class="s1">'000000000000000000000000000000'</span><span class="p">)</span><span
-                        class="n">api</span><span class="p">.</span><span class="nf">contacts</span><span
-                        class="p">.</span><span class="nf">get</span></code></pre>
-        <pre class="highlight python tab-python"><code><span class="kn">import</span> <span
-                        class="nn">contact</span><span class="n">api</span> <span class="o">=</span> <span
-                        class="n">contact</span><span class="o">.</span><span class="n">authorize</span><span
-                        class="p">(</span><span class="s">'000000000000000000000000000000'</span><span
-                        class="p">)</span><span class="n">api</span><span class="o">.</span><span
-                        class="n">contacts</span><span class="o">.</span><span class="n">get</span><span
-                        class="p">()</span></code></pre>
         <pre class="highlight shell tab-shell"><code>curl <span
-                        class="s2">"http://example.com/api/contacts"</span> -H <span
+                        class="s2">"<?php echo $global['domain']; ?>/api/contacts"</span> -H <span
                         class="s2">"Authorization: 000000000000000000000000000000"</span></code></pre>
-        <pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span
-                        class="nx">contact</span> <span class="o">=</span> <span class="nx">require</span><span
-                        class="p">(</span><span class="s1">'contact'</span><span class="p">);</span><span
-                        class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span
-                        class="nx">contact</span><span class="p">.</span><span class="nx">authorize</span><span
-                        class="p">(</span><span class="s1">'000000000000000000000000000000'</span><span
-                        class="p">);</span><span class="kd">let</span> <span class="nx">contacts</span> <span
-                        class="o">=</span> <span class="nx">api</span><span class="p">.</span><span
-                        class="nx">contacts</span><span class="p">.</span><span class="nx">get</span><span
-                        class="p">();</span></code></pre>
         <blockquote><p>The above command returns JSON structured like this:</p></blockquote>
         <pre class="highlight json tab-json"><code><span class="p">[</span><span class="w"> </span><span
                         class="p">{</span><span class="w"> </span><span class="s2">"id"</span><span
@@ -214,7 +193,7 @@
         <!-- Light Block ------------------------------------->
         <p>This endpoint retrieves all contacts.</p>
         <h3 id='http-request'>HTTP Request</h3>
-        <p><code>GET http://example.com/api/contacts</code></p>
+        <p><code>GET <?php echo $global['domain']; ?>/api/contacts</code></p>
         <h3 id='query-parameters'>Query Parameters</h3>
         <table>
             <thead>
@@ -241,7 +220,7 @@
 
         <!-- # Errors ------------------------------>
         <h1 id='errors'>Errors</h1>
-        <aside class="notice">This error section is stored in a separate file in `includes/_errors.md`. Slate allows you to optionally separate out your docs into many files...just save them to the `includes` folder and add them to the top of your `index.md`'s frontmatter. Files are included in the order listed.</aside>
+        <aside class="notice"></aside>
         <p>The Contact API uses the following error codes:</p>
         <table>
             <thead>
@@ -253,7 +232,7 @@
             <tbody>
             <tr>
                 <td>400</td>
-                <td>Bad Request -- Your request sucks.</td>
+                <td>Bad Request.</td>
             </tr>
             <tr>
                 <td>401</td>
@@ -280,10 +259,6 @@
                 <td>Gone -- The contact requested has been removed from our servers.</td>
             </tr>
             <tr>
-                <td>418</td>
-                <td>I&#39;m a teapot.</td>
-            </tr>
-            <tr>
                 <td>429</td>
                 <td>Too Many Requests -- You&#39;re requesting too many contacts! Slow down!</td>
             </tr>
@@ -300,7 +275,7 @@
     </div>
     <div class="dark-box">
         <div class="lang-selector"><a href="#" data-language-name="shell">shell</a>
-            <a href="#" data-language-name="ruby">ruby</a> <a href="#" data-language-name="python">python</a>
+            <a href="#" data-language-name="ruby">ruby</a> <a href="#" data-language-name="php">php</a>
             <a href="#" data-language-name="javascript">javascript</a></div>
     </div>
 </div>
