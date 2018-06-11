@@ -185,7 +185,12 @@ return [
                 ],
             ],
             'mautic.contactsource.model.cache'             => [
-                'class' => 'MauticPlugin\MauticContactSourceBundle\Model\Cache',
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\Cache',
+                'arguments' => [
+                    'translator',
+                    'mautic.contactsource.helper.utmsource',
+                    'mautic.helper.core_parameters',
+                ],
             ],
         ],
         'other'  => [

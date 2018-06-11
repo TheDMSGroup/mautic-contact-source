@@ -12,14 +12,17 @@
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use FOS\RestBundle\Util\Codes;
+use Mautic\CoreBundle\Helper\CoreParametersHelper;
 use Mautic\CoreBundle\Helper\PhoneNumberHelper;
 use Mautic\CoreBundle\Model\AbstractCommonModel;
+use Mautic\CoreBundle\Translation\Translator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use MauticPlugin\MauticContactSourceBundle\Entity\Cache as CacheEntity;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
 use MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper;
+use MauticPlugin\MauticContactSourceBundle\Helper\UtmSourceHelper;
 
 /**
  * Class Cache.
@@ -35,11 +38,31 @@ class Cache extends AbstractCommonModel
     /** @var PhoneNumberHelper */
     protected $phoneHelper;
 
-    /** @var \Symfony\Component\DependencyInjection\Container */
-    protected $container;
-
     /** @var string */
     protected $timezone;
+
+    /** @var UtmSourceHelper */
+    protected $utmSourceHelper;
+
+    /** @var Translator */
+    protected $translator;
+
+    /**
+     * Cache constructor.
+     *
+     * @param Translator           $translator
+     * @param UtmSourceHelper      $utmSourceHelper
+     * @param CoreParametersHelper $coreParametersHelper
+     */
+    public function __construct(
+        Translator $translator,
+        UtmSourceHelper $utmSourceHelper,
+        CoreParametersHelper $coreParametersHelper
+    ) {
+        $this->translator           = $translator;
+        $this->utmSourceHelper      = $utmSourceHelper;
+        $this->coreParametersHelper = $coreParametersHelper;
+    }
 
     /**
      * Create all necessary cache entities for the given Contact and Contact Source.
@@ -95,8 +118,7 @@ class Cache extends AbstractCommonModel
             $entity->setMobile($mobile);
         }
         // get the original / first utm source code for contact
-        $utmHelper = $this->getContainer()->get('mautic.contactsource.helper.utmsource');
-        $utmSource = $utmHelper->getFirstUtmSource($this->contact);
+        $utmSource = $this->utmSourceHelper->getFirstUtmSource($this->contact);
         if (!empty($utmSource)) {
             $entity->setUtmSource(trim($utmSource));
         }
@@ -130,25 +152,14 @@ class Cache extends AbstractCommonModel
     }
 
     /**
-     * @return \Symfony\Component\DependencyInjection\Container
-     */
-    private function getContainer()
-    {
-        if (!$this->container) {
-            $this->container = $this->dispatcher->getContainer();
-        }
-
-        return $this->container;
-    }
-
-    /**
      * @return \MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository
      */
     public function getRepository()
     {
         /** @var \MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository $repository */
         $repository = $this->em->getRepository('MauticContactSourceBundle:Cache');
-        $repository->setContainer($this->getContainer());
+        $repository->setTranslator($this->translator);
+        $repository->setUtmSourceHelper($this->utmSourceHelper);
 
         return $repository;
     }
@@ -251,7 +262,7 @@ class Cache extends AbstractCommonModel
     private function getTimezone()
     {
         if (!$this->timezone) {
-            $this->timezone = $this->getContainer()->get('mautic.helper.core_parameters')->getParameter(
+            $this->timezone = $this->coreParametersHelper->getParameter(
                 'default_timezone'
             );
         }
@@ -352,13 +363,13 @@ class Cache extends AbstractCommonModel
      */
     public function reset(
         $exclusions = [
-            'container',
+            'translator',
+            'utmSourceHelper',
             'em',
             'factory',
             'security',
             'dispatcher',
             'router',
-            'translator',
             'userHelper',
             'logger',
             'coreParamtersHelper',

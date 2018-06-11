@@ -1048,7 +1048,18 @@ class Api
         $limitRules        = new \stdClass();
         $limitRules->rules = $this->limits;
 
-        $this->cacheModel->evaluateLimits($limitRules, $this->campaignId);
+        $this->getCacheModel()->evaluateLimits($limitRules, $this->campaignId);
+    }
+
+    /**
+     * @return Cache
+     * @throws \Exception
+     */
+    private function getCacheModel()
+    {
+        $this->cacheModel->setContactSource($this->contactSource);
+
+        return $this->cacheModel;
     }
 
     /**
@@ -1261,7 +1272,7 @@ class Api
     private function createCache()
     {
         if ($this->contact->getId()) {
-            $this->cacheModel->setContact($this->contact)
+            $this->getCacheModel()->setContact($this->contact)
                 ->setContactSource($this->contactSource)
                 ->create($this->campaignId);
         }
