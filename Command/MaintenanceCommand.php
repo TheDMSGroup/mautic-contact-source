@@ -17,9 +17,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * CLI Command : Performs maintenance tasks required by the client plugin.
+ * CLI Command : Performs maintenance tasks required by the source plugin.
  *
- * php app/console mautic:contactclient:maintenance
+ * php app/console mautic:contactsource:maintenance
  */
 class MaintenanceCommand extends ModeratedCommand
 {
@@ -28,8 +28,8 @@ class MaintenanceCommand extends ModeratedCommand
      */
     protected function configure()
     {
-        $this->setName('mautic:contactclient:maintenance')
-            ->setDescription('Performs maintenance tasks required by the client plugin.');
+        $this->setName('mautic:contactsource:maintenance')
+            ->setDescription('Performs maintenance tasks required by the source plugin.');
 
         parent::configure();
     }
@@ -51,7 +51,7 @@ class MaintenanceCommand extends ModeratedCommand
         }
 
         /** @var Cache $cacheModel */
-        $cacheModel = $container->get('mautic.contactclient.model.cache');
+        $cacheModel = $container->get('mautic.contactsource.model.cache');
         $output->writeln(
             '<info>'.$translator->trans(
                 'mautic.contactsource.maintenance.running'
