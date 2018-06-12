@@ -13,11 +13,25 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
 use FOS\RestBundle\Util\Codes;
 use Mautic\CoreBundle\Controller\CommonController;
+use MauticPlugin\MauticContactSourceBundle\Model\Api;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class PublicController extends CommonController
 {
+    /** @var Api */
+    protected $apiModel;
+
+    /**
+     * PublicController constructor.
+     *
+     * @param Api $api
+     */
+    public function __construct(Api $api)
+    {
+        $this->apiModel = $api;
+    }
+
     // @todo - Add documentation autogenerator.
     public function getDocumentationAction($sourceId = null, $campaignId = null)
     {
@@ -52,9 +66,8 @@ class PublicController extends CommonController
         $action
     ) {
         /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
-        $ApiModel = $this->get('mautic.contactsource.model.api')
+        $ApiModel = $this->apiModel
             ->setRequest($request)
-            ->setContainer($this->container)
             ->setSourceId((int) $sourceId)
             ->setCampaignId((int) $campaignId)
             ->setVerbose((bool) $request->headers->get('debug'))

@@ -67,7 +67,6 @@ class ApiController extends CommonApiController
             $ApiModel = $this->get('mautic.contactsource.model.api');
             $ApiModel
                 ->setRequest($request)
-                ->setContainer($this->container)
                 ->setSourceId((int) $sourceId)
                 ->setCampaignId((int) $campaignId)
                 ->validateAndImportContact();

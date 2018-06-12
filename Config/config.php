@@ -65,6 +65,7 @@ return [
                 ],
                 'arguments'  => [
                     'translator',
+                    'mautic.contactsource.model.api',
                 ],
             ],
             'mautic_contactsource_documentation' => [
@@ -159,6 +160,16 @@ return [
                     'doctrine.orm.entity_manager',
                     'mautic.helper.ip_lookup',
                     'monolog.logger.mautic',
+                    'mautic.helper.integration',
+                    'mautic.contactsource.model.contactsource',
+                    'mautic.contactsource.model.campaign_settings',
+                    'mautic.campaign.model.campaign',
+                    'mautic.contactsource.model.campaign_executioner',
+                    'mautic.lead.model.field',
+                    'mautic.lead.model.lead',
+                    'mautic.validator.email',
+                    'mautic.contactsource.model.cache',
+                    'session',
                 ],
             ],
             'mautic.contactsource.model.campaign_settings' => [
@@ -174,7 +185,12 @@ return [
                 ],
             ],
             'mautic.contactsource.model.cache'             => [
-                'class' => 'MauticPlugin\MauticContactSourceBundle\Model\Cache',
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Model\Cache',
+                'arguments' => [
+                    'translator',
+                    'mautic.contactsource.helper.utmsource',
+                    'mautic.helper.core_parameters',
+                ],
             ],
         ],
         'other'  => [
