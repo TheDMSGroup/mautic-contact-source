@@ -1076,7 +1076,7 @@ class Api
         }
         if ($exception || !$this->contact->getId()) {
             throw new ContactSourceException(
-                'Could not confirm the contact was saved.',
+                'Could not confirm the contact was saved. '.($exception ? $exception->getMessage() : ''),
                 Codes::HTTP_INTERNAL_SERVER_ERROR,
                 $exception,
                 Stat::TYPE_ERROR
