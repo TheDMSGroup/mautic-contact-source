@@ -1053,6 +1053,7 @@ class Api
 
     /**
      * @return Cache
+     *
      * @throws \Exception
      */
     private function getCacheModel()
