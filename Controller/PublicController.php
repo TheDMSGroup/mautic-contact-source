@@ -17,19 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 class PublicController extends CommonController
 {
-    /** @var Api */
-    protected $apiModel;
-
-    /**
-     * PublicController constructor.
-     *
-     * @param Api $api
-     */
-    public function __construct(Api $api)
-    {
-        $this->apiModel = $api;
-    }
-
     // @todo - Add documentation autogenerator.
     public function getDocumentationAction($sourceId = null, $campaignId = null)
     {
@@ -74,7 +61,8 @@ class PublicController extends CommonController
         $action
     ) {
         /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
-        $ApiModel = $this->apiModel
+        $ApiModel = $this->get('mautic.contactsource.model.api');
+        $ApiModel
             ->setRequest($request)
             ->setSourceId((int) $sourceId)
             ->setCampaignId((int) $campaignId)
