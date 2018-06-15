@@ -160,7 +160,7 @@
         <pre class="highlight shell tab-shell"><p>Example Shell script "create contacts" call</p>
             <code>
   curl --request POST <span class="se">\</span>
-  --url http://mautic.loc/source/3/campaign/1 <span class="se">\</span>
+  --url https://pre.dmsengage.com/source/3/campaign/1 <span class="se">\</span>
   --header <span class="s1">'Cache-Control: no-cache'</span> <span class="se">\</span>
   --header <span class="s1">'Content-Type: application/x-www-form-urlencoded'</span> <span class="se">\</span>
   --header <span class="s1">'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'</span> <span class="se">\</span>
@@ -176,7 +176,7 @@
             <code>
       <span class="cp">&lt;?php</span>
   <span class="nv">$request</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">HttpRequest</span><span class="p">();</span>
-  <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setUrl</span><span class="p">(</span><span class="s1">'http://mautic.loc/source/3/campaign/1'</span><span class="p">);</span>
+  <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setUrl</span><span class="p">(</span><span class="s1">'https://pre.dmsengage.com/source/3/campaign/1'</span><span class="p">);</span>
   <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setMethod</span><span class="p">(</span><span class="nx">HTTP_METH_POST</span><span class="p">);</span>
 
   <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setHeaders</span><span class="p">(</span><span class="k">array</span><span class="p">(</span>
