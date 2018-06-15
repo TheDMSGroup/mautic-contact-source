@@ -107,7 +107,7 @@
 
             <?php if (empty($campaignList)): ?>
                 <p>There are no campaigns configured for this Source. You can push contacts into campaigns by
-                    editing the <a href="/s/contactsource/edit/<?php echo $source['id'] ;?>">Source Configuration</a> to add campaigns.</p>
+                    editing the <a href="/s/contactsource/edit/<?php echo $source['id']; ?>">Source Configuration</a> to add campaigns.</p>
             <aside class="notice"> Managing the Source Configuration requires portal login credentials.</aside>
             <?php endif; ?>
         <ul>
