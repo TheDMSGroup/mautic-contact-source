@@ -1545,4 +1545,16 @@ class Api
 
         return $result;
     }
+
+    /**
+     * Retrieve a list of campaign fields.
+     *
+     * @param bool $asEntities
+     *
+     * @return array|null
+     */
+    public function getCampaignFields($asEntities = false)
+    {
+        return null;
+    }
 }

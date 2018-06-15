@@ -22,19 +22,23 @@
     ); ?>"></script>
     <?php // echo $view['assets']->outputSystemStylesheets();?> <?php // echo $view->render('MauticCoreBundle:Default:script.html.php');?>
 </head>
-<body class="index" data-languages="[&quot;shell&quot;,&quot;ruby&quot;,&quot;php&quot;,&quot;javascript&quot;]">
+<body class="index" data-languages="[&quot;shell&quot;,&quot;php&quot;,&quot;javascript&quot;]">
 
 <!-- SIDEBAR ------------------------------>
 <a href="#" id="nav-button"> <span> NAV <img src="<?php echo $view['assets']->getUrl(
             'plugins/MauticContactSourceBundle/Assets/slate/images/navbar.png'
         ); ?>" alt="Navbar"/> </span></a>
-<div class="toc-wrapper"><img src="<?php echo $view['assets']->getUrl(
+<div class="toc-wrapper">
+    <img src="<?php echo $view['assets']->getUrl(
         'media/images/mautic_logo_db200.png'
     ); ?>" class="logo" alt="Logo"/>
-    <div class="lang-selector"><a href="#" data-language-name="shell">shell</a>
-        <a href="#" data-language-name="ruby">ruby</a> <a href="#" data-language-name="php">php</a>
-        <a href="#" data-language-name="javascript">javascript</a></div>
-    <div class="search"><input type="text" class="search" id="input-search" placeholder="Search"></div>
+    <div class="lang-selector">
+        <a href="#" data-language-name="shell">shell</a>
+        <a href="#" data-language-name="php">php</a>
+        <a href="#" data-language-name="javascript">javascript</a>
+    </div>
+    <div class="search">
+        <input type="text" class="search" id="input-search" placeholder="Search"></div>
     <ul class="search-results"></ul>
     <div id="toc" class="toc-list-h1">
         <?php // todo: use translation for these values?>
@@ -67,56 +71,45 @@
 <div class="page-wrapper">
     <div class="dark-box"></div>
     <div class="content">
-        <h1><?php echo $title; ?></h1>
+        <h1 id='introduction'><?php echo $title; ?></h1>
         <!-- # Introduction ------------------------------>
         <?php if (!empty($global['introduction'])): ?>
-            <?php echo $global['introduction']; ?>
+            <p><?php echo $global['introduction']; ?></p>
         <?php endif; ?>
         <?php /* <h2><?php echo $source['name']; ?></h2> */ ?>
             <?php if (!empty($source['description'])): ?>
-            <h4 class="mt-15"><?php echo $source['description']; ?></h4>
+            <p><?php echo $source['description']; ?></p>
         <?php endif; ?>
 
         <!-- # Authentication ------------------------------>
         <h1 id='authentication'>Authentication</h1>
-
         <!-- Dark Block ------------------------------------->
-        <blockquote><p>To authorize, use this code:</p></blockquote>
-        <pre class="highlight ruby tab-ruby"><code><span class="nb">require</span> <span
-                        class="s1">'contact'</span><span class="n">api</span> <span class="o">=</span> <span
-                        class="no">Contact</span><span class="o">::</span><span class="no">APIClient</span><span
-                        class="p">.</span><span class="nf">authorize!</span><span class="p">(</span><span
-                        class="s1">'000000000000000000000000000000'</span><span class="p">)</span></code></pre>
-        <pre class="highlight php tab-php"><code><span class="kn">import</span> <span
-                        class="nn">contact</span><span class="n">api</span> <span class="o">=</span> <span
-                        class="n">contact</span><span class="o">.</span><span class="n">authorize</span><span
-                        class="p">(</span><span class="s">'000000000000000000000000000000'</span><span
-                        class="p">)</span></code></pre>
-        <pre class="highlight shell tab-shell"><code><span
-                        class="c"># With shell, you can just pass the correct header with each request</span>curl <span
-                        class="s2">"api_endpoint_here"</span> -H <span
-                        class="s2">"Authorization: 000000000000000000000000000000"</span></code></pre>
-        <pre class="highlight javascript tab-javascript"><code><span class="kr">const</span> <span
-                        class="nx">contact</span> <span class="o">=</span> <span class="nx">require</span><span
-                        class="p">(</span><span class="s1">'contact'</span><span class="p">);</span><span
-                        class="kd">let</span> <span class="nx">api</span> <span class="o">=</span> <span
-                        class="nx">contact</span><span class="p">.</span><span class="nx">authorize</span><span
-                        class="p">(</span><span class="s1">'000000000000000000000000000000'</span><span
-                        class="p">);</span></code></pre>
-        <blockquote><p>Make sure to replace <code>000000000000000000000000000000</code> with your API key.</p>
-        </blockquote>
-
         <!-- Light Block ---------------------------------->
-        <p>Contact uses API keys to allow access to the API. You can register a new Contact API key at our
-            <a href="<?php echo $global['domain']; ?>/developers">developer portal</a>.</p>
-        <p>Contact expects for the API key to be included in all API requests to the server in a header that looks like the following:</p>
-        <p><code>Authorization: 000000000000000000000000000000</code></p>
+        <p>Pushing Contacts to Engage requires the use of personalized API token. This token was created when the Data Source
+        was added to the Engage portal.</p>
+        <p>To learn how to manage your source configuration via a Private API, please visit our
+            <a target="_new" href="https://github.com/TheDMSGroup/engage-documentation/blob/master/API_Documentation.md">developer documentation portal</a>.</p>
+        <p>Contact API calls expect the API token to be included in all API requests to the server, like the following:</p>
+        <ul>
+            <li>As a Header (Recommended) - <code>token: 000000000000000000000000000000</code></li>
+            <li>As form-data (Alternate) - <code>Content-Disposition: form-data; name="token"
+
+                    000000000000000000000000000000</code></li>
+        </ul>
+
         <aside class="notice"> You must replace
             <code>000000000000000000000000000000</code> with the API token we have provided for you.
         </aside>
+        <aside class="warning"> If you dont know your Token, please contact your sales or operations representative.</aside>
 
         <!-- # Campaigns ------------------------------>
         <h1 id='campaigns'>Campaigns</h1>
+
+            <?php if (empty($campaignList)): ?>
+                <p>There are no campaigns configured for this Source. You can push contacts into campaigns by
+                    editing the <a href="/s/contactsource/edit/<?php echo $source['id'] ;?>">Source Configuration</a> to add campaigns.</p>
+            <aside class="notice"> Managing the Source Configuration requires portal login credentials.</aside>
+            <?php endif; ?>
         <ul>
             <?php foreach ($campaignList as $campaignItem): ?>
                 <li><a href="<?php echo $global['domain']; ?>/source/<?php echo $source['id']; ?>/campaign/<?php echo $campaignItem['campaign_id']; ?>"><?php echo $campaignItem['name']; ?></a></li>
@@ -130,6 +123,7 @@
         <!-- Light Block ------------------------------------->
             <p><?php echo $campaign['description']; ?></p>
             <h3 id='http-request'>Field List</h3>
+            <p>Required Field settings for <?php echo $campaign['description']; ?></p>
             <table>
                 <thead>
                     <tr>
@@ -139,13 +133,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($campaignFields as $fieldName=>$fieldDescription): ?>
+                <?php foreach ($campaignFields as $campaignFieldName=>$campaignFieldDescription): ?>
                     <tr>
                         <td>
-                            <?php echo $fieldName; ?>
+                            <?php echo $campaignFieldName; ?>
                         </td>
                         <td>
-                            <?php echo $fieldDescription; ?>
+                            <?php echo $campaignFieldDescription; ?>
                         </td>
                         <td>
                             &nbsp;
@@ -162,65 +156,127 @@
         <!-- # Create Contact ------------------------------>
         <h2 id='create-contact'>Create Contact</h2>
         <!-- Dark Block ------------------------------------->
-        <pre class="highlight shell tab-shell"><code>curl <span
-                        class="s2">"<?php echo $global['domain']; ?>/api/contacts"</span> -H <span
-                        class="s2">"Authorization: 000000000000000000000000000000"</span></code></pre>
-        <blockquote><p>The above command returns JSON structured like this:</p></blockquote>
-        <pre class="highlight json tab-json"><code><span class="p">[</span><span class="w"> </span><span
-                        class="p">{</span><span class="w"> </span><span class="s2">"id"</span><span
-                        class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span
-                        class="w"> </span><span class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">"Fluffums"</span><span class="p">,</span><span class="w"> </span><span
-                        class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">"calico"</span><span class="p">,</span><span class="w"> </span><span
-                        class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span
-                        class="mi">6</span><span class="p">,</span><span class="w"> </span><span
-                        class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span
-                        class="mi">7</span><span class="w"> </span><span class="p">},</span><span
-                        class="w"> </span><span class="p">{</span><span class="w"> </span><span
-                        class="s2">"id"</span><span class="p">:</span><span class="w"> </span><span
-                        class="mi">2</span><span class="p">,</span><span class="w"> </span><span
-                        class="s2">"name"</span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">"Max"</span><span class="p">,</span><span class="w"> </span><span
-                        class="s2">"breed"</span><span class="p">:</span><span class="w"> </span><span
-                        class="s2">"unknown"</span><span class="p">,</span><span class="w"> </span><span
-                        class="s2">"fluffiness"</span><span class="p">:</span><span class="w"> </span><span
-                        class="mi">5</span><span class="p">,</span><span class="w"> </span><span
-                        class="s2">"cuteness"</span><span class="p">:</span><span class="w"> </span><span
-                        class="mi">10</span><span class="w"> </span><span class="p">}</span><span class="w"></span><span
-                        class="p">]</span><span class="w"></span></code></pre>
 
-        <!-- Light Block ------------------------------------->
-        <p>This endpoint retrieves all contacts.</p>
+        <pre class="highlight shell tab-shell"><p>Example Shell script "create contacts" call</p>
+            <code>
+    curl --request POST \
+      --url https://pre.dmsengage.com/source/3/campaign/1 \
+      --header 'Cache-Control: no-cache' \
+      --header 'Content-Type: application/x-www-form-urlencoded' \
+      --header 'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW' \
+      --header 'token: b4d7637c60963938c854d5d0a5b471b17dd64135' \
+      --header 'verbose: 1' \
+      --form firstname=Greg \
+      --form lastname=Scott \
+      --form email=gregscott@email.com \
+
+            </code>
+        </pre>
+        <pre class="highlight php tab-php"><p>Example PHP "create contacts" call</p>
+            <code>
+      $request = new HttpRequest();
+      $request-&gt;setUrl('https://pre.dmsengage.com/source/3/campaign/1');
+      $request-&gt;setMethod(HTTP_METH_POST);
+
+      $request-&gt;setHeaders(array(
+        'Cache-Control' =&gt; 'no-cache',
+        'Content-Type' =&gt; 'application/x-www-form-urlencoded',
+        'token' =&gt; 'b4d7637c60963938c854d5d0a5b471b17dd64135',
+        'verbose' =&gt; '1',
+        'content-type' =&gt; 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'
+      ));
+
+      $request-&gt;setBody('------WebKitFormBoundary7MA4YWxkTrZu0gW
+      Content-Disposition: form-data; name="firstname"
+
+      Greg
+      ------WebKitFormBoundary7MA4YWxkTrZu0gW
+      Content-Disposition: form-data; name="lastname"
+
+      Scott
+      ------WebKitFormBoundary7MA4YWxkTrZu0gW
+      Content-Disposition: form-data; name="email"
+
+      gregscott@email.com
+
+      ------WebKitFormBoundary7MA4YWxkTrZu0gW--');
+
+      try {
+        $response = $request-&gt;send();
+
+        echo $response-&gt;getBody();
+      } catch (HttpException $ex) {
+        echo $ex;
+      }
+            </code>
+        </pre>
+        <pre class="highlight javascript tab-javascript"><p>Example Javascript "create contacts" call</p>
+            <code>
+        <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">FormData</span><span class="p">();</span>
+        <span class="nx">data</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"firstname"</span><span class="p">,</span> <span class="s2">"Greg"</span><span class="p">);</span>
+        <span class="nx">data</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"lastname"</span><span class="p">,</span> <span class="s2">"Scott"</span><span class="p">);</span>
+        <span class="nx">data</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="s2">"email"</span><span class="p">,</span> <span class="s2">"gregscott@email.com"</span><span class="p">);</span>
+
+        <span class="kd">var</span> <span class="nx">xhr</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">XMLHttpRequest</span><span class="p">();</span>
+        <span class="nx">xhr</span><span class="p">.</span><span class="nx">withCredentials</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+
+        <span class="nx">xhr</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s2">"readystatechange"</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+          <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">readyState</span> <span class="o">===</span> <span class="mi">4</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">responseText</span><span class="p">);</span>
+          <span class="p">}</span>
+        <span class="p">});</span>
+
+        <span class="nx">xhr</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s2">"POST"</span><span class="p">,</span> <span class="s2">"https://pre.dmsengage.com/source/3/campaign/1"</span><span class="p">);</span>
+        <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"verbose"</span><span class="p">,</span> <span class="s2">"1"</span><span class="p">);</span>
+        <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"token"</span><span class="p">,</span> <span class="s2">"000000000000000000000000000000"</span><span class="p">);</span>
+        <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"Content-Type"</span><span class="p">,</span> <span class="s2">"application/x-www-form-urlencoded"</span><span class="p">);</span>
+        <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"Cache-Control"</span><span class="p">,</span> <span class="s2">"no-cache"</span><span class="p">);</span>
+
+        <span class="nx">xhr</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+    </code>
+        </pre>
+
+
+                <!-- Light Block ------------------------------------->
+        <p>This endpoint submits a contact for processing.</p>
         <h3 id='http-request'>HTTP Request</h3>
-        <p><code>GET <?php echo $global['domain']; ?>/api/contacts</code></p>
-        <h3 id='query-parameters'>Query Parameters</h3>
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Default</th>
-                <th>Description</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>include_cats</td>
-                <td>false</td>
-                <td>If set to true, the result will also include cats.</td>
-            </tr>
-            <tr>
-                <td>available</td>
-                <td>true</td>
-                <td>If set to false, the result will include contacts that have already been adopted.</td>
-            </tr>
-            </tbody>
-        </table>
+        <p><code>POST <?php echo $global['domain']; ?>/source/{sourceId}/campaign/{campaignId}</code></p>
+        <p><code>PUT <?php echo $global['domain']; ?>/source/{sourceId}/campaign/{campaignId}</code></p>
+        <h3 id='query-parameters'>Form Data Options</h3>
+        <p>The full list of available fields to send as form-data:</p>
+            <table id="FieldList" style="height:400px; overflow:hidden;">
+                <thead>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Field Description</th>
+                    <th>Required?</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($FieldList as $fieldName=>$fieldDescription): ?>
+                    <tr>
+                        <td>
+                            <?php echo $fieldName; ?>
+                        </td>
+                        <td>
+                            <?php echo $fieldDescription; ?>
+                        </td>
+                        <td>
+                            &nbsp;
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        <p>
+            <span style="margin:auto; width:75%; text-align:center; display:block;">
+                <a id="toggleFieldList" onClick="toggleFieldListEvent(this)" style="cursor: pointer;"><< show more >></a>
+            </span>
+        </p>
         <aside class="success"> Remember — a happy contact is an authenticated contact!</aside>
 
         <!-- # Errors ------------------------------>
         <h1 id='errors'>Errors</h1>
-        <aside class="notice"></aside>
         <p>The Contact API uses the following error codes:</p>
         <table>
             <thead>
@@ -274,10 +330,27 @@
         </table>
     </div>
     <div class="dark-box">
-        <div class="lang-selector"><a href="#" data-language-name="shell">shell</a>
-            <a href="#" data-language-name="ruby">ruby</a> <a href="#" data-language-name="php">php</a>
-            <a href="#" data-language-name="javascript">javascript</a></div>
+        <div class="lang-selector">
+            <a href="#" data-language-name="shell">shell</a>
+            <a href="#" data-language-name="php">php</a>
+            <a href="#" data-language-name="javascript">javascript</a>
+        </div>
     </div>
 </div>
+<script>
+    function toggleFieldListEvent(elem){
+        var table = document.getElementById('FieldList');
+        var anchor = document.getElementById('toggleFieldList');
+        if (table.classList.contains('expanded')){
+            table.classList.remove('expanded');
+            table.style.height = "400px";
+            anchor.innerText = "<< show more >>";
+        } else {
+            table.classList.add("expanded");
+            table.style.height = "auto";
+            anchor.innerText = "<< show less >>";
+        }
+    };
+</script>
 </body>
 </html>

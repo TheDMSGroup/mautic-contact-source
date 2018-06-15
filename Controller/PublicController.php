@@ -96,6 +96,7 @@ class PublicController extends CommonController
         }
         $parameters['global']['domain'] = rtrim('/', $parameters['global']['domain']);
         $parameters['source']           = $result['source'];
+        $parameters['FieldList'] = $ApiModel->getAllowedFields(false);
 
         if (!isset($result['campaign']['name'])) {
             // No valid campaign specified, should show the listing of all campaigns.
@@ -116,7 +117,7 @@ class PublicController extends CommonController
                     '%campaign%' => $result['campaign']['name'],
                 ]
             );
-            $parameters['campaignFields'] = $ApiModel->getAllowedFields(false);
+            $parameters['campaignFields'] = $ApiModel->getCampaignFields(false);
             $parameters['campaign']       = $result['campaign'];
         } else {
             // Completely invalid source.
