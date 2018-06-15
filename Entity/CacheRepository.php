@@ -14,6 +14,7 @@ namespace MauticPlugin\MauticContactSourceBundle\Entity;
 use Mautic\CoreBundle\Entity\CommonRepository;
 use Mautic\CoreBundle\Helper\PhoneNumberHelper;
 use Mautic\LeadBundle\Entity\Lead as Contact;
+use MauticPlugin\MauticContactSourceBundle\Helper\UtmSourceHelper;
 
 /**
  * Class CacheRepository.
@@ -39,8 +40,8 @@ class CacheRepository extends CommonRepository
     /** @var PhoneNumberHelper */
     protected $phoneHelper;
 
-    /** @var \Symfony\Component\DependencyInjection\Container */
-    protected $container;
+    /** @var UtmSourceHelper */
+    protected $utmSourceHelper;
 
     /**
      * Evaluate limits (aka caps/budgets) for this Source.
@@ -261,11 +262,6 @@ class CacheRepository extends CommonRepository
      */
     public function translateRule($rule, $mode = 'limit')
     {
-        if (!$this->container) {
-            return null;
-        }
-        $translator = $this->container->get('translator');
-
         $quantity = isset($rule['quantity']) ? $rule['quantity'] : 0;
         $value    = isset($rule['value']) ? $rule['value'] : null;
 
@@ -281,7 +277,7 @@ class CacheRepository extends CommonRepository
             $scopeStrings = [];
             foreach ($scopes as $scopeBitwise) {
                 if ($scope & $scopeBitwise) {
-                    $scopeStrings[$scopeBitwise] = $translator->trans(
+                    $scopeStrings[$scopeBitwise] = $this->translator->trans(
                         'mautic.contactsource.rule.scope.'.$scopeBitwise
                     );
                 }
@@ -303,14 +299,14 @@ class CacheRepository extends CommonRepository
             $matchingStrings = [];
             foreach ($matches as $matchingBitwise) {
                 if ($matching & $matchingBitwise) {
-                    $matchingStrings[$matchingBitwise] = $translator->trans(
+                    $matchingStrings[$matchingBitwise] = $this->translator->trans(
                         'mautic.contactsource.rule.matching.'.self::SCOPE_CAMPAIGN
                     );
                 }
             }
             $matchingString = implode(' & ', $matchingStrings);
             if ($value) {
-                $matchingString .= $translator->trans(
+                $matchingString .= $this->translator->trans(
                     'mautic.contactsource.rule.value'
                 );
             }
@@ -320,20 +316,28 @@ class CacheRepository extends CommonRepository
         $duration       = isset($rule['duration']) ? $rule['duration'] : null;
         $durationString = '';
         if ($duration) {
-            $durationString = $translator->trans('mautic.contactsource.rule.duration.'.$duration);
+            $durationString = $this->translator->trans('mautic.contactsource.rule.duration.'.$duration);
             if ($durationString == 'mautic.contactsource.rule.duration.'.$duration) {
                 $durationString = $duration;
             }
         }
 
         // Combine the string and token values.
-        $result = $translator->trans('mautic.contactsource.rule.'.$mode);
+        $result = $this->translator->trans('mautic.contactsource.rule.'.$mode);
 
         return str_replace(
             ['{{scope}}', '{{matching}}', '{{value}}', '{{quantity}}', '{{duration}}'],
             [$scopeString, $matchingString, $value, $quantity, $durationString],
             $result
         );
+    }
+
+    /**
+     * @param UtmSourceHelper $utmSourceHelper
+     */
+    public function setUtmSourceHelper(UtmSourceHelper $utmSourceHelper)
+    {
+        $this->utmSourceHelper = $utmSourceHelper;
     }
 
     /**
@@ -429,10 +433,9 @@ class CacheRepository extends CommonRepository
             }
 
             // Scope UTM Source
-            if ($scope & self::SCOPE_UTM_SOURCE && $this->container) {
+            if ($scope & self::SCOPE_UTM_SOURCE && $this->utmSourceHelper) {
                 // get the original / first utm source code for contact
-                $utmHelper = $this->container->get('mautic.contactsource.helper.utmsource');
-                $utmSource = $utmHelper->getFirstUtmSource($contact);
+                $utmSource = $this->utmSourceHelper->getFirstUtmSource($contact);
                 if (!empty($utmSource)) {
                     $orx['utm_source'] = $utmSource;
                 }
@@ -487,18 +490,6 @@ class CacheRepository extends CommonRepository
         }
 
         return $result;
-    }
-
-    /**
-     * @param \Symfony\Component\DependencyInjection\Container $container
-     *
-     * @return $this
-     */
-    public function setContainer($container)
-    {
-        $this->container = $container;
-
-        return $this;
     }
 
     /**

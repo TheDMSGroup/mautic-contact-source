@@ -22,8 +22,10 @@ use Mautic\CoreBundle\Helper\IpLookupHelper;
 use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\UtmTag;
+use Mautic\LeadBundle\Model\FieldModel;
 use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use Mautic\PluginBundle\Entity\IntegrationEntity;
+use Mautic\PluginBundle\Helper\IntegrationHelper;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Event\ContactLedgerContextEvent;
@@ -32,6 +34,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * Class Api.
@@ -149,6 +152,24 @@ class Api
     /** @var LoggerInterface */
     protected $logger;
 
+    /** @var IntegrationHelper */
+    protected $integrationHelper;
+
+    /** @var ContactSourceModel */
+    protected $contactSourceModel;
+
+    /** @var CampaignSettings */
+    protected $campaignSettingsModel;
+
+    /** @var CampaignExecutioner */
+    protected $campaignExecutioner;
+
+    /** @var FieldModel */
+    protected $fieldModel;
+
+    /** @var Session */
+    protected $session;
+
     /**
      * Api constructor.
      *
@@ -156,31 +177,47 @@ class Api
      * @param EntityManager            $em
      * @param IpLookupHelper           $ipLookupHelper
      * @param LoggerInterface          $logger
+     * @param IntegrationHelper        $integrationHelper
+     * @param ContactSourceModel       $contactSourceModel
+     * @param CampaignSettings         $campaignSettingsModel
+     * @param CampaignModel            $campaignModel
+     * @param CampaignExecutioner      $campaignExecutioner
+     * @param FieldModel               $fieldModel
+     * @param ContactModel             $contactModel
+     * @param EmailValidator           $emailValidator
+     * @param Cache                    $cacheModel
+     * @param Session                  $session
      */
     public function __construct(
         EventDispatcherInterface $dispatcher,
         EntityManager $em,
         IpLookupHelper $ipLookupHelper,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        IntegrationHelper $integrationHelper,
+        ContactSourceModel $contactSourceModel,
+        CampaignSettings $campaignSettingsModel,
+        CampaignModel $campaignModel,
+        CampaignExecutioner $campaignExecutioner,
+        FieldModel $fieldModel,
+        ContactModel $contactModel,
+        EmailValidator $emailValidator,
+        Cache $cacheModel,
+        Session $session
     ) {
-        $this->dispatcher     = $dispatcher;
-        $this->em             = $em;
-        $this->ipLookupHelper = $ipLookupHelper;
-        $this->logger         = $logger;
-    }
-
-    /**
-     * Setting container instead of making this container aware for performance (DDoS mitigation).
-     *
-     * @param $container
-     *
-     * @return $this
-     */
-    public function setContainer(Container $container)
-    {
-        $this->container = $container;
-
-        return $this;
+        $this->dispatcher            = $dispatcher;
+        $this->em                    = $em;
+        $this->ipLookupHelper        = $ipLookupHelper;
+        $this->logger                = $logger;
+        $this->integrationHelper     = $integrationHelper;
+        $this->contactSourceModel    = $contactSourceModel;
+        $this->campaignSettingsModel = $campaignSettingsModel;
+        $this->campaignModel         = $campaignModel;
+        $this->campaignExecutioner   = $campaignExecutioner;
+        $this->fieldModel            = $fieldModel;
+        $this->contactModel          = $contactModel;
+        $this->emailValidator        = $emailValidator;
+        $this->cacheModel            = $cacheModel;
+        $this->session               = $session;
     }
 
     /**
@@ -267,8 +304,7 @@ class Api
     {
         if (null == $this->contactSource) {
             // Check Source existence and published status.
-            $sourceModel         = $this->container->get('mautic.contactsource.model.contactsource');
-            $this->contactSource = $sourceModel->getEntity($this->sourceId);
+            $this->contactSource = $this->contactSourceModel->getEntity($this->sourceId);
             if (!$this->contactSource) {
                 throw new ContactSourceException(
                     'The sourceId specified does not exist.',
@@ -300,10 +336,8 @@ class Api
     private function parseSourceCampaignSettings()
     {
         // Check that the campaign is in the whitelist for this source.
-        /** @var CampaignSettings $campaignSettingsModel */
-        $campaignSettingsModel = $this->container->get('mautic.contactsource.model.campaign_settings');
-        $campaignSettingsModel->setContactSource($this->contactSource);
-        $campaignSettings = $campaignSettingsModel->getCampaignSettingsById($this->campaignId);
+        $campaignSettings = $this->campaignSettingsModel->setContactSource($this->contactSource)
+            ->getCampaignSettingsById($this->campaignId);
 
         // @todo - Support or thwart multiple copies of the same campaign, should it occur. In the meantime...
         $campaignSettings = reset($campaignSettings);
@@ -321,9 +355,7 @@ class Api
         $this->limits    = isset($campaignSettings->limits) ? $campaignSettings->limits : [];
         $this->scrubRate = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
         $this->cost      = isset($campaignSettings->cost) ? (abs(floatval($campaignSettings->cost))) : 0;
-        $this->utmSource = !empty(
-        $this->contactSource->getUtmSource()
-        ) ? $this->contactSource->getUtmSource() : null;
+        $this->utmSource = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
         // Apply field overrides
         if ($this->utmSource) {
             $this->fieldsProvided['utm_source'] = $this->utmSource;
@@ -342,8 +374,7 @@ class Api
     {
         if (null == $this->campaign) {
             // Check Campaign existence and published status.
-            /* @var Campaign $campaign */
-            $this->campaign = $this->getCampaignModel()->getEntity($this->campaignId);
+            $this->campaign = $this->campaignModel->getEntity($this->campaignId);
             if (!$this->campaign) {
                 throw new ContactSourceException(
                     'The campaignId specified does not exist.',
@@ -491,10 +522,8 @@ class Api
         if (null !== $verboseHeader) {
             // The default key is 1, for BC.
             $verboseKey = '1';
-            /** @var \Mautic\PluginBundle\Helper\IntegrationHelper $helper */
-            $helper = $this->dispatcher->getContainer()->get('mautic.helper.integration');
             /** @var \Mautic\PluginBundle\Integration\AbstractIntegration $object */
-            $object = $helper->getIntegrationObject('Source');
+            $object = $this->integrationHelper->getIntegrationObject('Source');
             if ($object) {
                 $objectSettings = $object->getIntegrationSettings();
                 if ($objectSettings) {
@@ -761,11 +790,8 @@ class Api
     {
         if (null === $this->allowedFields) {
             try {
-                /** @var \Mautic\LeadBundle\Model\FieldModel $fieldModel */
-                $fieldModel = $this->container->get('mautic.lead.model.field');
-
                 // Exclude company fields as they cannot be created/related on insert due to performance implications.
-                $this->allowedFieldEntities = $fieldModel->getEntities(
+                $this->allowedFieldEntities = $this->fieldModel->getEntities(
                     [
                         'filter'         => [
                             'force' => [
@@ -978,11 +1004,11 @@ class Api
         unset($fieldData['ownerusername']);
 
         if (null !== $owner) {
-            $contact->setOwner($this->getContactModel()->getReference('MauticUserBundle:User', $owner));
+            $contact->setOwner($this->contactModel->getReference('MauticUserBundle:User', $owner));
         }
 
         if (null !== $tags) {
-            $this->getContactModel()->modifyTags($contact, $tags, null, false);
+            $this->contactModel->modifyTags($contact, $tags, null, false);
         }
 
         // Alteration to core: Use AllowedFields array instead of allowing all...
@@ -995,9 +1021,9 @@ class Api
                     continue;
                 }
                 try {
-                    $this->getContactModel()->cleanFields($fieldData, $contactField);
+                    $this->contactModel->cleanFields($fieldData, $contactField);
                     if ('email' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
-                        $this->getEmailValidator()->validate($fieldData[$contactField['alias']], false);
+                        $this->emailValidator->validate($fieldData[$contactField['alias']], false);
                     }
                 } catch (\Exception $exception) {
                     throw new ContactSourceException(
@@ -1086,14 +1112,7 @@ class Api
      */
     private function getCacheModel()
     {
-        if (!$this->cacheModel) {
-            /* @var \MauticPlugin\MauticContactSourceBundle\Model\Cache $cacheModel */
-            $this->cacheModel = $this->container->get('mautic.contactsource.model.cache');
-            $this->cacheModel->setContactSource($this->contactSource);
-        }
-        if ($this->contact) {
-            $this->cacheModel->setContact($this->contact);
-        }
+        $this->cacheModel->setContactSource($this->contactSource);
 
         return $this->cacheModel;
     }
@@ -1106,12 +1125,12 @@ class Api
         $exception = null;
         $this->dispatchContextCreate();
         try {
-            $this->getContactModel()->saveEntity($this->contact);
+            $this->contactModel->saveEntity($this->contact);
         } catch (\Exception $exception) {
         }
         if ($exception || !$this->contact->getId()) {
             throw new ContactSourceException(
-                'Could not confirm the contact was saved.',
+                'Could not confirm the contact was saved. '.($exception ? $exception->getMessage() : ''),
                 Codes::HTTP_INTERNAL_SERVER_ERROR,
                 $exception,
                 Stat::TYPE_ERROR
@@ -1171,12 +1190,12 @@ class Api
             $campaignContact->setDateAdded(new \DateTime());
             $campaignContact->setLead($contact);
             $campaignContact->setManuallyAdded($manuallyAdded);
-            $saved = $this->getCampaignModel()->saveCampaignLead($campaignContact);
+            $saved = $this->campaignModel->saveCampaignLead($campaignContact);
 
             // @todo - Support non realtime event firing.
             // if (!$realTime) {
             //     // Only trigger events if not in realtime where events would be followed directly.
-            //     if ($saved && $this->getCampaignModel()->hasListeners(CampaignEvents::CAMPAIGN_ON_LEADCHANGE)) {
+            //     if ($saved && $this->campaignModel->hasListeners(CampaignEvents::CAMPAIGN_ON_LEADCHANGE)) {
             //         $event = new CampaignLeadChangeEvent($campaign, $contact, 'added');
             //         $this->dispatcher->dispatch(CampaignEvents::CAMPAIGN_ON_LEADCHANGE, $event);
             //         unset($event);
@@ -1233,13 +1252,10 @@ class Api
     private function processRealTime()
     {
         if ($this->realTime) {
-            /** @var CampaignExecutioner $executioner */
-            $executioner = $this->container->get('mautic.contactsource.model.campaign_executioner');
-            $executioner->execute($this->campaign, [$this->contact->getId()]);
+            $this->campaignExecutioner->execute($this->campaign, [$this->contact->getId()]);
 
             // Retrieve events fired by MauticContactClientBundle (if any)
-            $session = $this->container->get('session');
-            $events  = $session->get('mautic.contactClient.events', []);
+            $events = $this->session->get('mautic.contactClient.events', []);
 
             $contactId = $this->contact->getId();
             if (
@@ -1289,7 +1305,7 @@ class Api
     private function applyAttribution()
     {
         if ($this->valid && $this->cost && Stat::TYPE_ACCEPTED === $this->status) {
-            $this->contact       = $this->getContactModel()->getEntity($this->contact->getId());
+            $this->contact       = $this->contactModel->getEntity($this->contact->getId());
             $originalAttribution = $this->contact->getAttribution();
             // Attribution is always a negative number to represent cost.
             $this->attribution = ($this->cost * -1);
@@ -1299,7 +1315,7 @@ class Api
                 $originalAttribution
             );
             $this->dispatchContextCreate();
-            $this->getContactModel()->saveEntity($this->contact);
+            $this->contactModel->saveEntity($this->contact);
         }
     }
 
@@ -1311,8 +1327,7 @@ class Api
     private function createCache()
     {
         if ($this->contact->getId()) {
-            $this->getCacheModel()
-                ->setContact($this->contact)
+            $this->getCacheModel()->setContact($this->contact)
                 ->setContactSource($this->contactSource)
                 ->create($this->campaignId);
         }
@@ -1323,9 +1338,6 @@ class Api
      */
     private function logResults()
     {
-        /** @var ContactSourceModel $sourceModel */
-        $sourceModel = $this->container->get('mautic.contactsource.model.contactsource');
-
         if ($this->valid) {
             $statLevel = 'INFO';
             $message   = 'Contact '.$this->contact->getId(
@@ -1339,7 +1351,7 @@ class Api
         }
 
         // Add log entry for statistics / charts.
-        $sourceModel->addStat(
+        $this->contactSourceModel->addStat(
             $this->contactSource,
             $this->status,
             $this->contact,
@@ -1367,7 +1379,7 @@ class Api
         );
 
         // Add transactional event for deep dive into logs.
-        $sourceModel->addEvent(
+        $this->contactSourceModel->addEvent(
             $this->contactSource,
             $this->status,
             $this->contact,

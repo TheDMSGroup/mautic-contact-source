@@ -12,10 +12,49 @@
 namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
+use MauticPlugin\MauticContactSourceBundle\Model\Api;
 use Symfony\Component\HttpFoundation\Request;
 
 class PublicController extends CommonController
 {
+    /** @var Api */
+    protected $apiModel;
+
+    /**
+     * PublicController constructor.
+     *
+     * @param Api $api
+     */
+    public function __construct(Api $api)
+    {
+        $this->apiModel = $api;
+    }
+
+    // @todo - Add documentation autogenerator.
+    public function getDocumentationAction($sourceId = null, $campaignId = null)
+    {
+        // @todo - Check Source existence and published status.
+
+        // @todo - Check if documentation is turned on, if not 403.
+
+        // @todo - Get list of assigned and published Campaigns.
+
+        // @todo - Get list of Source+Campaign required fields.
+
+        // @todo - Get list of Source+Campaign limits.
+
+        // @todo - Get sync status (async/sync).
+
+        // @todo - Generate document.
+
+        return $this->render(
+            'MauticContactSourceBundle:Documentation:details.html.php',
+            [
+                'documentation' => 'documentation to go here',
+            ]
+        );
+    }
+
     /**
      * @param Request $request
      * @param null    $sourceId
@@ -35,9 +74,8 @@ class PublicController extends CommonController
         $action
     ) {
         /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
-        $ApiModel = $this->get('mautic.contactsource.model.api')
+        $ApiModel = $this->apiModel
             ->setRequest($request)
-            ->setContainer($this->container)
             ->setSourceId((int) $sourceId)
             ->setCampaignId((int) $campaignId)
             ->setVerbose(true)
