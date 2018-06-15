@@ -164,7 +164,7 @@
   --header <span class="s1">'Cache-Control: no-cache'</span> <span class="se">\</span>
   --header <span class="s1">'Content-Type: application/x-www-form-urlencoded'</span> <span class="se">\</span>
   --header <span class="s1">'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'</span> <span class="se">\</span>
-  --header <span class="s1">'token: b4d7637c60963938c854d5d0a5b471b17dd64135'</span> <span class="se">\</span>
+  --header <span class="s1">'token: 000000000000000000000000000000'</span> <span class="se">\</span>
   --header <span class="s1">'verbose: 1'</span> <span class="se">\</span>
   --form <span class="nv">firstname</span><span class="o">=</span>Greg <span class="se">\</span>
   --form <span class="nv">lastname</span><span class="o">=</span>Scott <span class="se">\</span>
@@ -182,7 +182,7 @@
   <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setHeaders</span><span class="p">(</span><span class="k">array</span><span class="p">(</span>
     <span class="s1">'Cache-Control'</span> <span class="o">=&gt;</span> <span class="s1">'no-cache'</span><span class="p">,</span>
     <span class="s1">'Content-Type'</span> <span class="o">=&gt;</span> <span class="s1">'application/x-www-form-urlencoded'</span><span class="p">,</span>
-    <span class="s1">'token'</span> <span class="o">=&gt;</span> <span class="s1">'b4d7637c60963938c854d5d0a5b471b17dd64135'</span><span class="p">,</span>
+    <span class="s1">'token'</span> <span class="o">=&gt;</span> <span class="s1">'000000000000000000000000000000'</span><span class="p">,</span>
     <span class="s1">'verbose'</span> <span class="o">=&gt;</span> <span class="s1">'1'</span><span class="p">,</span>
     <span class="s1">'content-type'</span> <span class="o">=&gt;</span> <span class="s1">'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'</span>
   <span class="p">));</span>
