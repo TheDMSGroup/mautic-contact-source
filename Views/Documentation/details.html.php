@@ -165,7 +165,6 @@
   --header <span class="s1">'Content-Type: application/x-www-form-urlencoded'</span> <span class="se">\</span>
   --header <span class="s1">'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'</span> <span class="se">\</span>
   --header <span class="s1">'token: 000000000000000000000000000000'</span> <span class="se">\</span>
-  --header <span class="s1">'verbose: 1'</span> <span class="se">\</span>
   --form <span class="nv">firstname</span><span class="o">=</span>Greg <span class="se">\</span>
   --form <span class="nv">lastname</span><span class="o">=</span>Scott <span class="se">\</span>
   --form <span class="nv">email</span><span class="o">=</span>gregscott@email.com <span class="se">\</span>
@@ -183,7 +182,6 @@
     <span class="s1">'Cache-Control'</span> <span class="o">=&gt;</span> <span class="s1">'no-cache'</span><span class="p">,</span>
     <span class="s1">'Content-Type'</span> <span class="o">=&gt;</span> <span class="s1">'application/x-www-form-urlencoded'</span><span class="p">,</span>
     <span class="s1">'token'</span> <span class="o">=&gt;</span> <span class="s1">'000000000000000000000000000000'</span><span class="p">,</span>
-    <span class="s1">'verbose'</span> <span class="o">=&gt;</span> <span class="s1">'1'</span><span class="p">,</span>
     <span class="s1">'content-type'</span> <span class="o">=&gt;</span> <span class="s1">'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'</span>
   <span class="p">));</span>
 
@@ -228,7 +226,6 @@
         <span class="p">});</span>
 
         <span class="nx">xhr</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s2">"POST"</span><span class="p">,</span> <span class="s2">"https://pre.dmsengage.com/source/3/campaign/1"</span><span class="p">);</span>
-        <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"verbose"</span><span class="p">,</span> <span class="s2">"1"</span><span class="p">);</span>
         <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"token"</span><span class="p">,</span> <span class="s2">"000000000000000000000000000000"</span><span class="p">);</span>
         <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"Content-Type"</span><span class="p">,</span> <span class="s2">"application/x-www-form-urlencoded"</span><span class="p">);</span>
         <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"Cache-Control"</span><span class="p">,</span> <span class="s2">"no-cache"</span><span class="p">);</span>
