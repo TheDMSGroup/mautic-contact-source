@@ -159,55 +159,56 @@
 
         <pre class="highlight shell tab-shell"><p>Example Shell script "create contacts" call</p>
             <code>
-    curl --request POST \
-      --url https://pre.dmsengage.com/source/3/campaign/1 \
-      --header 'Cache-Control: no-cache' \
-      --header 'Content-Type: application/x-www-form-urlencoded' \
-      --header 'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW' \
-      --header 'token: b4d7637c60963938c854d5d0a5b471b17dd64135' \
-      --header 'verbose: 1' \
-      --form firstname=Greg \
-      --form lastname=Scott \
-      --form email=gregscott@email.com \
+  curl --request POST <span class="se">\</span>
+  --url http://mautic.loc/source/3/campaign/1 <span class="se">\</span>
+  --header <span class="s1">'Cache-Control: no-cache'</span> <span class="se">\</span>
+  --header <span class="s1">'Content-Type: application/x-www-form-urlencoded'</span> <span class="se">\</span>
+  --header <span class="s1">'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'</span> <span class="se">\</span>
+  --header <span class="s1">'token: b4d7637c60963938c854d5d0a5b471b17dd64135'</span> <span class="se">\</span>
+  --header <span class="s1">'verbose: 1'</span> <span class="se">\</span>
+  --form <span class="nv">firstname</span><span class="o">=</span>Greg <span class="se">\</span>
+  --form <span class="nv">lastname</span><span class="o">=</span>Scott <span class="se">\</span>
+  --form <span class="nv">email</span><span class="o">=</span>gregscott@email.com <span class="se">\</span>
 
             </code>
         </pre>
         <pre class="highlight php tab-php"><p>Example PHP "create contacts" call</p>
             <code>
-      $request = new HttpRequest();
-      $request-&gt;setUrl('https://pre.dmsengage.com/source/3/campaign/1');
-      $request-&gt;setMethod(HTTP_METH_POST);
+      <span class="cp">&lt;?php</span>
+  <span class="nv">$request</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">HttpRequest</span><span class="p">();</span>
+  <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setUrl</span><span class="p">(</span><span class="s1">'http://mautic.loc/source/3/campaign/1'</span><span class="p">);</span>
+  <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setMethod</span><span class="p">(</span><span class="nx">HTTP_METH_POST</span><span class="p">);</span>
 
-      $request-&gt;setHeaders(array(
-        'Cache-Control' =&gt; 'no-cache',
-        'Content-Type' =&gt; 'application/x-www-form-urlencoded',
-        'token' =&gt; 'b4d7637c60963938c854d5d0a5b471b17dd64135',
-        'verbose' =&gt; '1',
-        'content-type' =&gt; 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'
-      ));
+  <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setHeaders</span><span class="p">(</span><span class="k">array</span><span class="p">(</span>
+    <span class="s1">'Cache-Control'</span> <span class="o">=&gt;</span> <span class="s1">'no-cache'</span><span class="p">,</span>
+    <span class="s1">'Content-Type'</span> <span class="o">=&gt;</span> <span class="s1">'application/x-www-form-urlencoded'</span><span class="p">,</span>
+    <span class="s1">'token'</span> <span class="o">=&gt;</span> <span class="s1">'b4d7637c60963938c854d5d0a5b471b17dd64135'</span><span class="p">,</span>
+    <span class="s1">'verbose'</span> <span class="o">=&gt;</span> <span class="s1">'1'</span><span class="p">,</span>
+    <span class="s1">'content-type'</span> <span class="o">=&gt;</span> <span class="s1">'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'</span>
+  <span class="p">));</span>
 
-      $request-&gt;setBody('------WebKitFormBoundary7MA4YWxkTrZu0gW
-      Content-Disposition: form-data; name="firstname"
+  <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setBody</span><span class="p">(</span><span class="s1">'------WebKitFormBoundary7MA4YWxkTrZu0gW
+  Content-Disposition: form-data; name="firstname"
 
-      Greg
-      ------WebKitFormBoundary7MA4YWxkTrZu0gW
-      Content-Disposition: form-data; name="lastname"
+  Greg
+  ------WebKitFormBoundary7MA4YWxkTrZu0gW
+  Content-Disposition: form-data; name="lastname"
 
-      Scott
-      ------WebKitFormBoundary7MA4YWxkTrZu0gW
-      Content-Disposition: form-data; name="email"
+  Scott
+  ------WebKitFormBoundary7MA4YWxkTrZu0gW
+  Content-Disposition: form-data; name="email"
 
-      gregscott@email.com
+  mgoodman@thedmsgrp.com
+  ------WebKitFormBoundary7MA4YWxkTrZu0gW--'</span><span class="p">);</span>
 
-      ------WebKitFormBoundary7MA4YWxkTrZu0gW--');
+  <span class="k">try</span> <span class="p">{</span>
+    <span class="nv">$response</span> <span class="o">=</span> <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">send</span><span class="p">();</span>
 
-      try {
-        $response = $request-&gt;send();
+    <span class="k">echo</span> <span class="nv">$response</span><span class="o">-&gt;</span><span class="na">getBody</span><span class="p">();</span>
+  <span class="p">}</span> <span class="k">catch</span> <span class="p">(</span><span class="nx">HttpException</span> <span class="nv">$ex</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="nv">$ex</span><span class="p">;</span>
+  <span class="p">}</span>
 
-        echo $response-&gt;getBody();
-      } catch (HttpException $ex) {
-        echo $ex;
-      }
             </code>
         </pre>
         <pre class="highlight javascript tab-javascript"><p>Example Javascript "create contacts" call</p>
