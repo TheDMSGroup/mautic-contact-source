@@ -398,6 +398,21 @@ class Api
     }
 
     /**
+     * @return CampaignModel|object
+     *
+     * @throws \Exception
+     */
+    private function getCampaignModel()
+    {
+        if (!$this->campaignModel) {
+            /* @var CampaignModel */
+            $this->campaignModel = $this->container->get('mautic.campaign.model.campaign');
+        }
+
+        return $this->campaignModel;
+    }
+
+    /**
      * @param \Exception $exception
      */
     private function handleException(\Exception $exception)
@@ -1038,6 +1053,45 @@ class Api
     }
 
     /**
+     * @return ContactSource
+     */
+    public function getContactSource()
+    {
+        return $this->contactSource;
+    }
+
+    /**
+     * Return our extended contact model.
+     *
+     * @return ContactModel|object
+     *
+     * @throws \Exception
+     */
+    private function getContactModel()
+    {
+        if (!$this->contactModel) {
+            /* @var ContactModel */
+            $this->contactModel = $this->container->get('mautic.lead.model.lead');
+        }
+
+        return $this->contactModel;
+    }
+
+    /**
+     * @return EmailValidator|object
+     *
+     * @throws \Exception
+     */
+    private function getEmailValidator()
+    {
+        if (!$this->emailValidator) {
+            $this->emailValidator = $this->container->get('mautic.validator.email');
+        }
+
+        return $this->emailValidator;
+    }
+
+    /**
      * Evaluate Source & Campaign limits using the Cache.
      *
      * @throws ContactSourceException
@@ -1490,5 +1544,17 @@ class Api
         }
 
         return $result;
+    }
+
+    /**
+     * Retrieve a list of campaign fields.
+     *
+     * @param bool $asEntities
+     *
+     * @return array|null
+     */
+    public function getCampaignFields($asEntities = false)
+    {
+        return null;
     }
 }

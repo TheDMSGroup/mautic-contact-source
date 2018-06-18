@@ -85,6 +85,18 @@ class ContactSourceModel extends FormModel
     /**
      * @return string
      */
+    public function getCampaignList($contactSource)
+    {
+        if (!empty($contactSource)) {
+            return $this->getCampaignsBySource($contactSource);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @return string
+     */
     public function getPermissionBase()
     {
         return 'plugin:contactsource:items';
