@@ -432,6 +432,12 @@ class Api
                 // We'll use these as HTTP status codes.
                 $this->statusCode = $code;
             }
+            if (method_exists($exception, 'getData')) {
+                $data = $exception->getData();
+                if ($data) {
+                    $this->logs['exceptionData'] = $data;
+                }
+            }
         } elseif (!$this->statusCode) {
             // Unexpected exceptions should send 500.
             $this->statusCode = Codes::HTTP_INTERNAL_SERVER_ERROR;
