@@ -372,7 +372,7 @@ class Cache extends AbstractCommonModel
             'router',
             'userHelper',
             'logger',
-            'coreParamtersHelper',
+            'coreParametersHelper',
         ]
     ) {
         foreach (array_diff_key(
