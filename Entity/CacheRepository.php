@@ -133,40 +133,37 @@ class CacheRepository extends CommonRepository
     /**
      * Support non-rolling durations when P is not prefixing.
      *
-     * @param      $duration
-     * @param null $timezone
+     * @param                $duration
+     * @param string|null    $timezone
+     * @param \DateTime|null $dateSend
      *
      * @return string
      *
      * @throws \Exception
      */
-    public function oldestDateAdded($duration, $timezone = null)
+    public function oldestDateAdded($duration, string $timezone = null, \DateTime $dateSend = null)
     {
-        if (0 === strpos($duration, 'P')) {
-            // Standard rolling interval.
-            $oldest = new \DateTime();
-        } else {
+        $oldest = $dateSend ? $dateSend : new \DateTime();
+        if (!$timezone) {
+            $timezone = date_default_timezone_get();
+        }
+        $oldest->setTimezone(new \DateTimeZone($timezone));
+        if (0 !== strpos($duration, 'P')) {
             // Non-rolling interval, go to previous interval segment.
             // Will only work for simple (singular) intervals.
-            if (!$timezone) {
-                $timezone = date_default_timezone_get();
-            }
-            $timezone = new \DateTimeZone($timezone);
             switch (strtoupper(substr($duration, -1))) {
                 case 'Y':
-                    $oldest = new \DateTime('next year jan 1 midnight', $timezone);
+                    $oldest->modify('next year jan 1 midnight');
                     break;
                 case 'M':
-                    $oldest = new \DateTime('first day of next month midnight', $timezone);
+                    $oldest->modify('first day of next month midnight');
                     break;
                 case 'W':
-                    $oldest = new \DateTime('sunday next week midnight', $timezone);
+                    $oldest->modify('sunday next week midnight');
                     break;
                 case 'D':
-                    $oldest = new \DateTime('tomorrow midnight', $timezone);
+                    $oldest->modify('tomorrow midnight');
                     break;
-                default:
-                    $oldest = new \DateTime();
             }
             // Add P so that we can now use standard interval
             $duration = 'P'.$duration;
@@ -178,7 +175,6 @@ class CacheRepository extends CommonRepository
             $interval = new \DateInterval('P1M');
         }
         $oldest->sub($interval);
-        $oldest->setTimezone(new \DateTimeZone('UTC'));
 
         return $oldest->format('Y-m-d H:i:s');
     }
