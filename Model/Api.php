@@ -1227,21 +1227,16 @@ class Api
 
             // Retrieve events fired by MauticContactClientBundle (if any)
             $events = $this->session->get('mautic.contactClient.events', []);
-
-            $contactId = $this->contact->getId();
-            if (
-                !empty($events)
-                && !empty($events[$contactId])
-            ) {
-                $this->events      = $events[$contactId];
+            if (!empty($events)) {
+                $this->events      = $events;
                 $this->eventErrors = [];
-                foreach ($this->events as $eventId => $event) {
+                foreach ($this->events as $event) {
                     if (!empty($event['error'])) {
                         $eventName = !empty($event['name']) ? $event['name'] : '';
                         if (!is_array($event['errors'])) {
                             $event['errors'] = [$event['errors']];
                         }
-                        $this->eventErrors[$eventId] = $eventName.' ('.$eventId.'): '.implode(', ', $event['errors']);
+                        $this->eventErrors[] = $eventName.' ('.$event['id'].'): '.implode(', ', $event['errors']);
                     }
                     if (isset($event['valid']) && $event['valid']) {
                         // One valid Contact Client was found to accept the lead.
