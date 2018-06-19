@@ -73,7 +73,7 @@
           "default": false,
           "options": {
             "grid_columns": 1,
-            "infoText": "We will attempt to synchronously process contacts through the entire workflow at the time of posting. This will ignore any delays configured. Warning: Performance will be impacted by the latency of all third-party integrations combined."
+            "infoText": "We will synchronously process contacts through the campaign workflow at the time of posting, stopping only when a delay is met. If any client in the campaign accepts the lead, we will consider the contact accepted and the Source will be notified."
           }
         },
         "scrubRate": {

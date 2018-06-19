@@ -95,6 +95,10 @@
     margin-left: 5px;
 }
 
+.contactsource_jsoneditor div[data-schemapath$=".campaignId"] label.control-label {
+    font-size: 16px;
+}
+
 .contactsource_jsoneditor .glyphicon-info-sign:before {
     content: "\f059";
     display: inline-block;
