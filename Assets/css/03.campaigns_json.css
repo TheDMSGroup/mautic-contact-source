@@ -99,6 +99,11 @@
     font-size: 16px;
 }
 
+.contactsource_jsoneditor span.slidervalue {
+    display: inline-block;
+    width: 50px;
+}
+
 .contactsource_jsoneditor .glyphicon-info-sign:before {
     content: "\f059";
     display: inline-block;
