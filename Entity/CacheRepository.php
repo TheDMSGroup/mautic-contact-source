@@ -120,6 +120,7 @@ class CacheRepository extends CommonRepository
                 'rule'       => $rule,
                 'name'       => $name ? $this->translateRule($rule) : '',
                 'eventType'  => 'action',
+                'filters'    => $filters,
             ];
             if ($hit && $break) {
                 // Break at the first limit found (for fast assessment during ingestion).

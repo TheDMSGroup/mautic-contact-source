@@ -1292,10 +1292,10 @@ class Api
      */
     private function createCache()
     {
-        if ($this->contact->getId()) {
+        if ($this->valid && $this->contact->getId()) {
             $this->getCacheModel()->setContact($this->contact)
                 ->setContactSource($this->contactSource)
-                ->create($this->campaignId);
+                ->create($this->campaignId); 
         }
     }
 
