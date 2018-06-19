@@ -322,9 +322,23 @@ class Api
                     'sourceId'
                 );
             }
+            $this->addTrace('contactSourceId', (int) $this->sourceId);
         }
 
         return $this;
+    }
+
+    /**
+     * If available add a parameter to NewRelic tracing to aid in debugging.
+     *
+     * @param $parameter
+     * @param $value
+     */
+    private function addTrace($parameter, $value)
+    {
+        if (function_exists('newrelic_add_custom_parameter')) {
+            call_user_func('newrelic_add_custom_parameter', $parameter, $value);
+        }
     }
 
     /**
@@ -360,6 +374,9 @@ class Api
         if ($this->utmSource) {
             $this->fieldsProvided['utm_source'] = $this->utmSource;
         }
+        $this->addTrace('contactSourceRealTime', $this->realTime);
+        $this->addTrace('contactSourceCost', $this->cost);
+        $this->addTrace('contactSourceUtmSource', $this->utmSource);
     }
 
     /**
@@ -392,24 +409,10 @@ class Api
                     'campaignId'
                 );
             }
+            $this->addTrace('contactSourceCampaignId', (int) $this->campaignId);
         }
 
         return $this;
-    }
-
-    /**
-     * @return CampaignModel|object
-     *
-     * @throws \Exception
-     */
-    private function getCampaignModel()
-    {
-        if (!$this->campaignModel) {
-            /* @var CampaignModel */
-            $this->campaignModel = $this->container->get('mautic.campaign.model.campaign');
-        }
-
-        return $this->campaignModel;
     }
 
     /**
@@ -1059,45 +1062,6 @@ class Api
     }
 
     /**
-     * @return ContactSource
-     */
-    public function getContactSource()
-    {
-        return $this->contactSource;
-    }
-
-    /**
-     * Return our extended contact model.
-     *
-     * @return ContactModel|object
-     *
-     * @throws \Exception
-     */
-    private function getContactModel()
-    {
-        if (!$this->contactModel) {
-            /* @var ContactModel */
-            $this->contactModel = $this->container->get('mautic.lead.model.lead');
-        }
-
-        return $this->contactModel;
-    }
-
-    /**
-     * @return EmailValidator|object
-     *
-     * @throws \Exception
-     */
-    private function getEmailValidator()
-    {
-        if (!$this->emailValidator) {
-            $this->emailValidator = $this->container->get('mautic.validator.email');
-        }
-
-        return $this->emailValidator;
-    }
-
-    /**
      * Evaluate Source & Campaign limits using the Cache.
      *
      * @throws ContactSourceException
@@ -1142,6 +1106,7 @@ class Api
                 Stat::TYPE_ERROR
             );
         }
+        $this->addTrace('contactSourceContactId', $this->contact->getId());
     }
 
     /**
@@ -1352,9 +1317,17 @@ class Api
             $statLevel = 'ERROR';
             $message   = isset($this->errors) ? implode(PHP_EOL, $this->errors) : '';
             if ($this->eventErrors) {
+                if (!is_array($this->eventErrors)) {
+                    $this->eventErrors = [$this->eventErrors];
+                }
                 $message = implode(PHP_EOL.'  ', $this->eventErrors);
             }
+            $message = trim($message);
+            if ($this->realTime && !$message) {
+                $message = 'Contact was not accepted by any clients in real-time.';
+            }
         }
+        $this->addTrace('contactSourceStatType', $this->status);
 
         // Add log entry for statistics / charts.
         $this->contactSourceModel->addStat(
@@ -1459,6 +1432,14 @@ class Api
         }
 
         return $newIntegrationEntity;
+    }
+
+    /**
+     * @return ContactSource
+     */
+    public function getContactSource()
+    {
+        return $this->contactSource;
     }
 
     /**
