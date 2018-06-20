@@ -16,7 +16,8 @@
 </div>
 <div class="tab-pane fade in bdr-w-0 page-list" id="budgets-widget-wrqpper">
     <table class="table table-striped table-bordered" width="100%" id="budgets-widget">
-</table>
+    </table>
+</div>
 <script>
     var widgetHeight = <?php echo $data['height']; ?>;
     mQuery('#budget-widget-overlay').show();
