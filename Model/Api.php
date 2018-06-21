@@ -1295,7 +1295,7 @@ class Api
         if ($this->valid && $this->contact->getId()) {
             $this->getCacheModel()->setContact($this->contact)
                 ->setContactSource($this->contactSource)
-                ->create($this->campaignId); 
+                ->create($this->campaignId);
         }
     }
 
