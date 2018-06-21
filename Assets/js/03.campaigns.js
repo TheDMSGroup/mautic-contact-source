@@ -111,6 +111,14 @@ Mautic.contactsourceCampaigns = function () {
                             //         }).addClass('scope-checked').trigger('change');
                             //     });
                             // }).addClass('.utmsource-checked').trigger('change');
+
+                            // Clickable Campaign headers.
+                            $campaignsJSONEditor.find('div[data-schematype="string"][data-schemapath*=".campaignId"] .control-label').each(function () {
+                                var label = mQuery(this).text();
+                                if (label !== 'Campaign 0') {
+                                    mQuery(this).html('<a href="' + mauticBasePath + '/s/campaigns/edit/' + label.split(' ')[1] + '" target="_blank">' + label + '</a>');
+                                }
+                            });
                         });
 
                         $campaigns.addClass('hide');
