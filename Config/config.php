@@ -197,6 +197,18 @@ return [
                 'class' => 'MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper',
             ],
         ],
+        'extension' => [
+            'mautic.contactsource.extension.lead_import' => [
+                'class' => 'MauticPlugin\MauticContactSourceBundle\Form\Extension\LeadImportExtension',
+                'arguments' => [
+                    'doctrine.orm.entity_manager',
+                ],
+                'tag'          => 'form.type_extension',
+                'tagArguments' => [
+                    'extended_type' => 'Mautic\LeadBundle\Form\Type\LeadImportType',
+                ],
+            ],
+        ],
     ],
 
     'menu' => [
