@@ -1228,9 +1228,13 @@ class Api
             // Retrieve events fired by MauticContactClientBundle (if any)
             $events = $this->session->get('mautic.contactClient.events', []);
             if (!empty($events)) {
-                $this->events      = $events;
                 $this->eventErrors = [];
-                foreach ($this->events as $event) {
+                foreach ($events as $event) {
+                    if (isset($event['contactId']) && $event['contactId'] !== $this->contact->getId()) {
+                        // For not ignore/exclude all events not relating to the current contact.
+                        continue;
+                    }
+                    $this->events[] = $event;
                     if (!empty($event['error'])) {
                         $eventName = !empty($event['name']) ? $event['name'] : '';
                         if (!is_array($event['errors'])) {
