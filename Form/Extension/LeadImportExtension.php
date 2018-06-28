@@ -18,6 +18,7 @@ use Symfony\Component\Form\AbstractTypeExtension;
 use Mautic\LeadBundle\Form\Type\LeadImportType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\CallbackTransformer;
 
 class LeadImportExtension extends AbstractTypeExtension
 {
@@ -67,11 +68,21 @@ class LeadImportExtension extends AbstractTypeExtension
               'choice_label' => function ($source) {
                   return $source->getName();
               },
-              'choice_value' => function (ContactSource $source = null) {
-                  return $source ? $source->getId() : '';
-              },
           )
         );
+
+        $builder->get('source')
+            ->addModelTransformer(new CallbackTransformer(
+                function ($source) {
+                    // transform the ID back to an Object
+                    return $source ? $this->em->getRepository('MauticCampaignBundle:Event')->find($source) : null;
+                },
+                function ($source) {
+                    // transform the object to a ID
+                    return $source ? $source->getID() : null;
+
+                }
+            ));
 
         $builder->add(
             'campaign',
@@ -82,11 +93,21 @@ class LeadImportExtension extends AbstractTypeExtension
                 'choice_label' => function ($campaign) {
                     return $campaign->getName();
                 },
-                'choice_value' => function (Campaign $campaign = null) {
-                    return $campaign ? $campaign->getId() : '';
-                },
             )
         );
+
+        $builder->get('campaign')
+            ->addModelTransformer(new CallbackTransformer(
+                function ($campaign) {
+                    // transform the ID back to an Object
+                    return $campaign ? $this->em->getRepository('MauticCampaignBundle:Campaign')->find($campaign) : null;
+                },
+                function ($campaign) {
+                    // transform the object to a ID
+                    return $campaign ? $campaign->getID() : null;
+
+                }
+            ));
 
     }
 }
