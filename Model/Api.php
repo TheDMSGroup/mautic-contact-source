@@ -1310,8 +1310,8 @@ class Api
     {
         if ($this->valid) {
             $statLevel = 'INFO';
-            $message   = 'Contact '.$this->contact->getId(
-                ).' was imported successfully into campaign '.$this->campaign->getname();
+            $message   = 'Contact '.$this->contact->getId().
+                ' was imported successfully into campaign '.$this->campaign->getName();
         } else {
             $statLevel = 'ERROR';
             $message   = isset($this->errors) ? implode(PHP_EOL, $this->errors) : '';
