@@ -170,6 +170,9 @@ class Api
     /** @var Session */
     protected $session;
 
+    /** @var boolean */
+    protected $authenticated = false;
+
     /**
      * Api constructor.
      *
@@ -264,10 +267,13 @@ class Api
     public function handleInputPublic()
     {
         try {
+            $this->parseToken();
             $this->parseSourceId();
             $this->parseSource();
-            $this->parseSourceCampaignSettings();
+            $this->parseCampaignId();
             $this->parseCampaign();
+            $this->parseSourceCampaignSettings();
+            $this->validateToken();
         } catch (\Exception $exception) {
             $this->handleException($exception);
         }
@@ -416,6 +422,67 @@ class Api
     }
 
     /**
+     * Ensure the required parameters were provided and not empty while parsing.
+     *
+     * @throws ContactSourceException
+     */
+    private function parseToken()
+    {
+        // There are many ways to send a simple token... Let's support them all to be friendly to our Sources.
+        $this->token = trim($this->request->get('token'));
+        if (!$this->token) {
+            $this->token = trim($this->request->headers->get('token'));
+            if (!$this->token) {
+                $this->token = trim($this->request->headers->get('X-Auth-Token'));
+                if (!$this->token) {
+                    $bearer = $this->request->headers->get('authorization');
+                    if ($bearer) {
+                        $this->token = trim(str_ireplace('Bearer ', '', $bearer));
+                    }
+                    // Re-use the last token provided for this user for this source.
+                    if (!$this->token && $this->sourceId) {
+                        $tokens = $this->session->get('mautic.contactSource.tokens');
+                        if ($tokens && isset($tokens[$this->sourceId])) {
+                            $this->token = $tokens[$this->sourceId];
+                        }
+                    }
+                }
+            }
+        }
+        if (!$this->token) {
+            throw new ContactSourceException(
+                'The token was not supplied. Please provide your authentication token.',
+                Codes::HTTP_UNAUTHORIZED,
+                null,
+                Stat::TYPE_INVALID,
+                'token'
+            );
+        }
+    }
+
+    /**
+     * @throws ContactSourceException
+     */
+    private function validateToken()
+    {
+        if ($this->token !== $this->contactSource->getToken()) {
+            throw new ContactSourceException(
+                'The token specified is invalid. Please request a new token.',
+                Codes::HTTP_UNAUTHORIZED,
+                null,
+                Stat::TYPE_INVALID,
+                'token'
+            );
+        }
+        if ($this->sourceId) {
+            $tokens                  = $this->session->get('mautic.contactSource.tokens', []);
+            $tokens[$this->sourceId] = $this->token;
+            $this->session->set('mautic.contactSource.tokens', $tokens);
+        }
+        $this->authenticated = true;
+    }
+
+    /**
      * @param \Exception $exception
      */
     private function handleException(\Exception $exception)
@@ -509,10 +576,10 @@ class Api
     {
         $this->parseVerbosity();
         $this->parseFieldsProvided();
-        $this->parseSourceId();
-        $this->parseCampaignId();
         $this->parseToken();
+        $this->parseSourceId();
         $this->parseSource();
+        $this->parseCampaignId();
         $this->validateToken();
         $this->parseSourceCampaignSettings();
         $this->parseCampaign();
@@ -619,54 +686,6 @@ class Api
                 null,
                 Stat::TYPE_INVALID,
                 'campaignId'
-            );
-        }
-    }
-
-    /**
-     * Ensure the required parameters were provided and not empty while parsing.
-     *
-     * @throws ContactSourceException
-     */
-    private function parseToken()
-    {
-        // There are many ways to send a simple token... Let's support them all to be friendly to our Sources.
-        $this->token = trim($this->request->get('token'));
-        if (!$this->token) {
-            $this->token = trim($this->request->headers->get('token'));
-            if (!$this->token) {
-                $this->token = trim($this->request->headers->get('X-Auth-Token'));
-                if (!$this->token) {
-                    $bearer = $this->request->headers->get('authorization');
-                    if ($bearer) {
-                        $this->token = trim(str_ireplace('Bearer ', '', $bearer));
-                    }
-                }
-                if (!$this->token) {
-                    throw new ContactSourceException(
-                        'The token was not supplied. Please provide your authentication token.',
-                        Codes::HTTP_UNAUTHORIZED,
-                        null,
-                        Stat::TYPE_INVALID,
-                        'token'
-                    );
-                }
-            }
-        }
-    }
-
-    /**
-     * @throws ContactSourceException
-     */
-    private function validateToken()
-    {
-        if ($this->token !== $this->contactSource->getToken()) {
-            throw new ContactSourceException(
-                'The token specified is invalid. Please request a new token.',
-                Codes::HTTP_UNAUTHORIZED,
-                null,
-                Stat::TYPE_INVALID,
-                'token'
             );
         }
     }
@@ -1459,6 +1478,11 @@ class Api
         if ($this->verbose) {
             // Attribution in this context is the revenue/cost for the third party.
             $result['attribution'] = $this->attribution;
+        }
+
+        // Authentication.
+        if ($this->verbose) {
+            $result['authenticated'] = $this->authenticated;
         }
 
         // Campaign.
