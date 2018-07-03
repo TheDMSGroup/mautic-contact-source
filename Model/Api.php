@@ -170,7 +170,7 @@ class Api
     /** @var Session */
     protected $session;
 
-    /** @var boolean */
+    /** @var bool */
     protected $authenticated = false;
 
     /**
@@ -270,10 +270,10 @@ class Api
             $this->parseToken();
             $this->parseSourceId();
             $this->parseSource();
+            $this->validateToken();
             $this->parseCampaignId();
             $this->parseCampaign();
             $this->parseSourceCampaignSettings();
-            $this->validateToken();
         } catch (\Exception $exception) {
             $this->handleException($exception);
         }

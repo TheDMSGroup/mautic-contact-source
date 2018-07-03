@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="robots" content="noindex, nofollow" />
+    <meta name="robots" content="noindex, nofollow"/>
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title><?php echo isset($title) ? $title : ''; ?></title>
@@ -49,7 +49,11 @@
             <?php if (!empty($campaign)): ?>
                 <ul class="toc-list-h2">
                     <li>
-                        <a href="#<?php echo str_replace(' ', '', $campaign['name']); ?>" class="toc-h2 toc-link" data-title="<?php echo $campaign['name']; ?>"><?php echo $campaign['name']; ?></a>
+                        <a href="#<?php echo str_replace(
+                            ' ',
+                            '',
+                            $campaign['name']
+                        ); ?>" class="toc-h2 toc-link" data-title="<?php echo $campaign['name']; ?>"><?php echo $campaign['name']; ?></a>
                     </li>
                 </ul>
             <?php endif; ?>
@@ -78,7 +82,7 @@
             <p><?php echo $global['introduction']; ?></p>
         <?php endif; ?>
         <?php /* <h2><?php echo $source['name']; ?></h2> */ ?>
-            <?php if (!empty($source['description'])): ?>
+        <?php if (!empty($source['description'])): ?>
             <p><?php echo $source['description']; ?></p>
         <?php endif; ?>
 
@@ -87,9 +91,10 @@
         <!-- Dark Block ------------------------------------->
         <!-- Light Block ---------------------------------->
         <p>Pushing Contacts to Engage requires the use of personalized API token. This token was created when the Data Source
-        was added to the Engage portal.</p>
+            was added to the Engage portal.</p>
         <p>To learn how to manage your source configuration via a Private API, please visit our
-            <a target="_new" href="https://github.com/TheDMSGroup/engage-documentation/blob/master/API_Documentation.md">developer documentation portal</a>.</p>
+            <a target="_new" href="https://github.com/TheDMSGroup/engage-documentation/blob/master/API_Documentation.md">developer documentation portal</a>.
+        </p>
         <p>Contact API calls expect the API token to be included in all API requests to the server, like the following:</p>
         <ul>
             <li>As a Header (Recommended) - <code>token: 000000000000000000000000000000</code></li>
@@ -106,35 +111,40 @@
         <!-- # Campaigns ------------------------------>
         <h1 id='campaigns'>Campaigns</h1>
 
-            <?php if (empty($campaignList)): ?>
-                <p>There are no campaigns configured for this Source. You can push contacts into campaigns by
-                    editing the <a href="/s/contactsource/edit/<?php echo $source['id']; ?>">Source Configuration</a> to add campaigns.</p>
-            <aside class="notice"> Managing the Source Configuration requires portal login credentials.</aside>
-            <?php endif; ?>
-        <ul>
-            <?php foreach ($campaignList as $campaignItem): ?>
-                <li><a href="<?php echo $global['domain']; ?>/source/<?php echo $source['id']; ?>/campaign/<?php echo $campaignItem['campaign_id']; ?>"><?php echo $campaignItem['name']; ?></a></li>
-            <?php endforeach; ?>
-        </ul>
+        <?php if (empty($campaignList)): ?>
+            <p>There are no campaigns configured for this Source. You can push contacts into campaigns by
+                editing the
+                <a href="/s/contactsource/edit/<?php echo $source['id']; ?>">Source Configuration</a> to add campaigns.
+            </p>
+            <aside class="notice">Managing the Source Configuration requires portal login credentials.</aside>
+        <?php else: ?>
+            <ul>
+                <?php foreach ($campaignList as $campaignItem): ?>
+                    <li>
+                        <a href="<?php echo $global['domain']; ?>/source/<?php echo $source['id']; ?>/campaign/<?php echo $campaignItem['campaign_id']; ?>"><?php echo $campaignItem['name']; ?></a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
 
         <!-- # <Campaign Name> ------------------------------>
         <?php if (!empty($campaign)): ?>
             <h2 id='<?php echo str_replace(' ', '', $campaign['name']); ?>'><?php echo $campaign['name']; ?></h2>
-        <!-- Dark Block ------------------------------------->
-        <!-- Light Block ------------------------------------->
+            <!-- Dark Block ------------------------------------->
+            <!-- Light Block ------------------------------------->
             <p><?php echo $campaign['description']; ?></p>
             <h3 id='http-request'>Field List</h3>
             <p>Required Field settings for <?php echo $campaign['description']; ?></p>
             <table>
                 <thead>
-                    <tr>
-                        <th>Field Name</th>
-                        <th>Field Description</th>
-                        <th>Required?</th>
-                    </tr>
+                <tr>
+                    <th>Field Name</th>
+                    <th>Field Description</th>
+                    <th>Required?</th>
+                </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($campaignFields as $campaignFieldName=>$campaignFieldDescription): ?>
+                <?php foreach ($campaignFields as $campaignFieldName => $campaignFieldDescription): ?>
                     <tr>
                         <td>
                             <?php echo $campaignFieldName; ?>
@@ -161,7 +171,7 @@
         <pre class="highlight shell tab-shell"><p>Example Shell script "create contacts" call</p>
             <code>
   curl --request POST <span class="se">\</span>
-  --url https://pre.dmsengage.com/source/3/campaign/1 <span class="se">\</span>
+  --url <?php echo $global['domain']; ?>/source/3/campaign/1 <span class="se">\</span>
   --header <span class="s1">'Cache-Control: no-cache'</span> <span class="se">\</span>
   --header <span class="s1">'Content-Type: application/x-www-form-urlencoded'</span> <span class="se">\</span>
   --header <span class="s1">'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'</span> <span class="se">\</span>
@@ -176,7 +186,7 @@
             <code>
       <span class="cp">&lt;?php</span>
   <span class="nv">$request</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">HttpRequest</span><span class="p">();</span>
-  <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setUrl</span><span class="p">(</span><span class="s1">'https://pre.dmsengage.com/source/3/campaign/1'</span><span class="p">);</span>
+  <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setUrl</span><span class="p">(</span><span class="s1">'<?php echo $global['domain']; ?>/source/3/campaign/1'</span><span class="p">);</span>
   <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setMethod</span><span class="p">(</span><span class="nx">HTTP_METH_POST</span><span class="p">);</span>
 
   <span class="nv">$request</span><span class="o">-&gt;</span><span class="na">setHeaders</span><span class="p">(</span><span class="k">array</span><span class="p">(</span>
@@ -226,7 +236,7 @@
           <span class="p">}</span>
         <span class="p">});</span>
 
-        <span class="nx">xhr</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s2">"POST"</span><span class="p">,</span> <span class="s2">"https://pre.dmsengage.com/source/3/campaign/1"</span><span class="p">);</span>
+        <span class="nx">xhr</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="s2">"POST"</span><span class="p">,</span> <span class="s2">"<?php echo $global['domain']; ?>/source/3/campaign/1"</span><span class="p">);</span>
         <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"token"</span><span class="p">,</span> <span class="s2">"000000000000000000000000000000"</span><span class="p">);</span>
         <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"Content-Type"</span><span class="p">,</span> <span class="s2">"application/x-www-form-urlencoded"</span><span class="p">);</span>
         <span class="nx">xhr</span><span class="p">.</span><span class="nx">setRequestHeader</span><span class="p">(</span><span class="s2">"Cache-Control"</span><span class="p">,</span> <span class="s2">"no-cache"</span><span class="p">);</span>
@@ -236,37 +246,37 @@
         </pre>
 
 
-                <!-- Light Block ------------------------------------->
+        <!-- Light Block ------------------------------------->
         <p>This endpoint submits a contact for processing.</p>
         <h3 id='http-request'>HTTP Request</h3>
         <p><code>POST <?php echo $global['domain']; ?>/source/{sourceId}/campaign/{campaignId}</code></p>
         <p><code>PUT <?php echo $global['domain']; ?>/source/{sourceId}/campaign/{campaignId}</code></p>
         <h3 id='query-parameters'>Form Data Options</h3>
         <p>The full list of available fields to send as form-data:</p>
-            <table id="FieldList" style="height:400px; overflow:hidden;">
-                <thead>
+        <table id="FieldList" style="height:400px; overflow:hidden;">
+            <thead>
+            <tr>
+                <th>Field Name</th>
+                <th>Field Description</th>
+                <th>Required?</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($FieldList as $fieldName => $fieldDescription): ?>
                 <tr>
-                    <th>Field Name</th>
-                    <th>Field Description</th>
-                    <th>Required?</th>
+                    <td>
+                        <?php echo $fieldName; ?>
+                    </td>
+                    <td>
+                        <?php echo $fieldDescription; ?>
+                    </td>
+                    <td>
+                        &nbsp;
+                    </td>
                 </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($FieldList as $fieldName=>$fieldDescription): ?>
-                    <tr>
-                        <td>
-                            <?php echo $fieldName; ?>
-                        </td>
-                        <td>
-                            <?php echo $fieldDescription; ?>
-                        </td>
-                        <td>
-                            &nbsp;
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
         <p>
             <span style="margin:auto; width:75%; text-align:center; display:block;">
                 <a id="toggleFieldList" onClick="toggleFieldListEvent(this)" style="cursor: pointer;"><< show more >></a>
@@ -337,17 +347,18 @@
     </div>
 </div>
 <script>
-    function toggleFieldListEvent(elem){
+    function toggleFieldListEvent (elem) {
         var table = document.getElementById('FieldList');
         var anchor = document.getElementById('toggleFieldList');
-        if (table.classList.contains('expanded')){
+        if (table.classList.contains('expanded')) {
             table.classList.remove('expanded');
-            table.style.height = "400px";
-            anchor.innerText = "<< show more >>";
-        } else {
-            table.classList.add("expanded");
-            table.style.height = "auto";
-            anchor.innerText = "<< show less >>";
+            table.style.height = '400px';
+            anchor.innerText = '<< show more >>';
+        }
+        else {
+            table.classList.add('expanded');
+            table.style.height = 'auto';
+            anchor.innerText = '<< show less >>';
         }
     };
 </script>

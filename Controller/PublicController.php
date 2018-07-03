@@ -12,10 +12,12 @@
 namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use Symfony\Component\HttpFoundation\Request;
 
 class PublicController extends CommonController
 {
+    use ContactSourceAccessTrait;
 
     /**
      * @param Request $request
@@ -70,10 +72,11 @@ class PublicController extends CommonController
             $parameters['global']['domain'] = $this->get('mautic.helper.core_parameters')->getParameter('site_url');
         }
         $parameters['global']['domain'] = rtrim('/', $parameters['global']['domain']);
-        $parameters['source']           = $result['source'];
+        $parameters['source']           = isset($result['source']) ? $result['source'] : null;
+        $parameters['sourceId']         = $sourceId;
         $parameters['FieldList']        = $ApiModel->getAllowedFields(false);
         $parameters['authenticated']    = $result['authenticated'];
-        if (!isset($result['campaign']['name'])) {
+        if (!isset($result['campaign']['name']) && isset($result['source']['name'])) {
             // No valid campaign specified, should show the listing of all campaigns.
             $parameters['title'] = $this->translator->trans(
                 'mautic.contactsource.api.docs.source_title',
@@ -81,7 +84,7 @@ class PublicController extends CommonController
                     '%source%' => $result['source']['name'],
                 ]
             );
-        } elseif (isset($result['campaign']['name'])) {
+        } elseif (isset($result['campaign']['name']) && isset($result['source']['name'])) {
             // Valid campaign is specified, should include hash or direct link to that campaign.
             $parameters['title']          = $this->translator->trans(
                 'mautic.contactsource.api.docs.campaign_title',
@@ -96,6 +99,18 @@ class PublicController extends CommonController
             // Completely invalid source.
             $this->notFound('mautic.contactsource.api.docs.not_found');
         }
+
+        // Attempt auth by permissions (assuming logged in user).
+        if (!$parameters['authenticated']) {
+            $anonymous = $this->get('mautic.security')->isAnonymous();
+            if (!$anonymous) {
+                $contactSource = $this->checkContactSourceAccess($sourceId, 'view');
+                if ($contactSource instanceof ContactSource) {
+                    $parameters['authenticated'] = true;
+                }
+            }
+        }
+
         if (!$parameters['authenticated']) {
             $parameters['title'] = $this->translator->trans('mautic.contactsource.api.docs.auth_title');
             $view                = 'MauticContactSourceBundle:Documentation:auth.html.php';

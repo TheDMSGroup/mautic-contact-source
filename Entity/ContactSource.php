@@ -399,12 +399,22 @@ class ContactSource extends FormEntity
     }
 
     /**
-     * @param array $list
+     * @param $list
+     *
+     * @return $this
      */
     public function setCampaignList($list)
     {
         $this->campaignList = $list;
 
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPermissionUser()
+    {
+        return $this->getCreatedBy();
     }
 }
