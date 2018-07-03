@@ -61,6 +61,23 @@ class ApiController extends CommonApiController
     ) {
         $start = microtime(true);
 
+        // Handle documentation authentication.
+        if ($request->get('documentationAuthAttempt')) {
+            if (!$sourceId) {
+                $sourceId = (int) $request->get('sourceId');
+            }
+
+            /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
+            $ApiModel = $this->get('mautic.contactsource.model.api');
+            $ApiModel
+                ->setRequest($request)
+                ->setSourceId((int) $sourceId)
+                ->setCampaignId((int) $campaignId)
+                ->handleInputPublic();
+
+            return $this->redirect($this->request->getUri());
+        }
+
         $object = strtolower($object);
         if ('contact' == $object) {
             /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
@@ -83,7 +100,6 @@ class ApiController extends CommonApiController
                 'statusCode' => Codes::HTTP_NOT_IMPLEMENTED,
             ];
         }
-
         $result['time'] = [
             'completed' => new \DateTime(),
             'duration'  => microtime(true) - $start,
