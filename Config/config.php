@@ -115,6 +115,15 @@ return [
             'mautic.contactsource.dashboard.subscriber'       => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\DashboardSubscriber',
             ],
+            'mautic.contactsource.subscriber.batch' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\BatchSubscriber',
+                'arguments' => [
+                    'mautic.contactsource.model.contactsource',
+                    'mautic.campaign.model.campaign',
+                    'mautic.contactsource.model.api',
+                    'mautic.lead.model.import',
+                ],
+            ],
         ],
         'forms'  => [
             'mautic.contactsource.form.type.contactsourceshow_list' => [

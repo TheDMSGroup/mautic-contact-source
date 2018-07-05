@@ -109,5 +109,21 @@ class LeadImportExtension extends AbstractTypeExtension
                 }
             ));
 
+        // make sure if checked that cache record and evaluate limits are bypassed
+        // $builder->add(
+        //     'evaluate',
+        //     'yesno_button_group',
+        //     [
+        //         'label'      => 'Evaluate Limits?',
+        //         'label_attr' => ['class' => 'control-label'],
+        //         'attr'       => [
+        //             'class'   => 'form-control',
+        //             'tooltip' => 'Should the leads in the uploaded file apply towards limits, duplicates or other validations?',
+        //         ],
+        //         'required'   => true,
+        //         'data'       => 1,
+        //     ]
+        // );
+
     }
 }
