@@ -73,8 +73,8 @@ trait ContactSourceAccessTrait
                 return $this->notFound('mautic.contact.error.notfound');
             }
         } elseif (!$this->get('mautic.security')->hasEntityAccess(
-            'contactSource:contactSources:'.$action.'own',
-            'contactSource:contactSources:'.$action.'other',
+            'contactsource:items:'.$action.'own',
+            'contactsource:items:'.$action.'other',
             $contactSource->getPermissionUser()
         )
         ) {
@@ -116,8 +116,8 @@ trait ContactSourceAccessTrait
 
         foreach ($contactSources as $contactSource) {
             if (!$this->get('mautic.security')->hasEntityAccess(
-                'contactSource:contactSources:'.$action.'own',
-                'contactSource:contactSources:'.$action.'other',
+                'contactsource:items:'.$action.'own',
+                'contactsource:items:'.$action.'other',
                 $contactSource['createdBy']
             )
             ) {

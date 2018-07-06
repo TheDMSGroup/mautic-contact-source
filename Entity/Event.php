@@ -78,7 +78,10 @@ class Event
         $builder->setTable('contactsource_events')
             ->setCustomRepositoryClass('MauticPlugin\MauticContactSourceBundle\Entity\EventRepository')
             ->addIndex(['type', 'contact_id'], 'type_contact')
-            ->addIndex(['date_added'], 'date_added');
+            ->addIndex(['type', 'message'], 'type_message')
+            ->addIndex(['date_added'], 'date_added')
+            ->addIndex(['contactsource_id', 'date_added'], 'contactsource_id_date_added')
+            ->addIndex(['contact_id'], 'contact_id');
 
         $builder->addId();
 
