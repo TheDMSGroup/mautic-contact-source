@@ -41,16 +41,6 @@ class LeadImportExtension extends AbstractTypeExtension
         return LeadImportType::class;
     }
 
-    // public function configureOptions(OptionsResolver $resolver)
-    // {
-    //
-    // }
-    //
-    // public function buildView(FormView $view, FormInterface $form, array $options)
-    // {
-    //
-    // }
-
     /**
      * Add a custom 'object' type to write to a corresponding table for that new custom value.
      *
@@ -106,21 +96,5 @@ class LeadImportExtension extends AbstractTypeExtension
                     return $campaign ? $campaign->getID() : null;
                 }
             ));
-
-        // make sure if checked that cache record and evaluate limits are bypassed
-        // $builder->add(
-        //     'evaluate',
-        //     'yesno_button_group',
-        //     [
-        //         'label'      => 'Evaluate Limits?',
-        //         'label_attr' => ['class' => 'control-label'],
-        //         'attr'       => [
-        //             'class'   => 'form-control',
-        //             'tooltip' => 'Should the leads in the uploaded file apply towards limits, duplicates or other validations?',
-        //         ],
-        //         'required'   => true,
-        //         'data'       => 1,
-        //     ]
-        // );
     }
 }
