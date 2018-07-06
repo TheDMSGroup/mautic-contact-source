@@ -50,12 +50,12 @@ class Cache extends AbstractCommonModel
     /**
      * Cache constructor.
      *
-     * @param TranslatorInterface  $translator
+     * @param                      $translator
      * @param UtmSourceHelper      $utmSourceHelper
      * @param CoreParametersHelper $coreParametersHelper
      */
     public function __construct(
-        TranslatorInterface $translator,
+        $translator,
         UtmSourceHelper $utmSourceHelper,
         CoreParametersHelper $coreParametersHelper
     ) {
