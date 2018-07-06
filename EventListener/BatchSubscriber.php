@@ -70,8 +70,8 @@ class BatchSubscriber extends CommonSubscriber
      */
     public static function getSubscribedEvents()
     {
-        return [LeadEvents::LEAD_PRE_SAVE            => 'onLeadPreSave'];
-        return [LeadEvents::LEAD_POST_SAVE            => 'onLeadPostSave'];
+        return [LeadEvents::LEAD_PRE_SAVE            => 'onLeadPreSave',
+                LeadEvents::LEAD_POST_SAVE           => 'onLeadPostSave'];
     }
 
     public function onLeadPreSave(LeadEvent $leadEvent)
@@ -103,7 +103,7 @@ class BatchSubscriber extends CommonSubscriber
 
     public function onLeadPostSave(LeadEvent $leadEvent)
     {
-        if('import' == $leadEvent->getLead()->getManipulator()->getObjectName()
+        if(true == $leadEvent->getLead()->imported
         && $this->em->getUnitOfWork()->getIdentityMap()['Mautic\LeadBundle\Entity\Import'])
         {
             $this->apiModel->setImported(true);

@@ -1283,7 +1283,9 @@ class Api
     public function applyAttribution()
     {
         if ($this->valid && $this->cost && Stat::TYPE_ACCEPTED === $this->status) {
-            $this->contact       = $this->contactModel->getEntity($this->contact->getId());
+            // NOTE TO ME   check if an id exists and attribution field exists and if not load this weird way
+
+            //$this->contact       = $this->contactModel->getEntity($this->contact->getId());
             $originalAttribution = $this->contact->getAttribution();
             // Attribution is always a negative number to represent cost.
             $this->attribution = ($this->cost * -1);
@@ -1307,7 +1309,6 @@ class Api
      * @throws \Exception
      */
     private function createCache()
-
         {
             if ($this->valid && $this->contact->getId()) {
                 $this->getCacheModel()->setContact($this->contact)
