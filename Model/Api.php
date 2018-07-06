@@ -54,7 +54,7 @@ class Api
     protected $contactModel;
 
     /** @var ContactSource */
-    public $contactSource;
+    protected $contactSource;
 
     /** @var Cache */
     protected $cacheModel;
@@ -63,7 +63,7 @@ class Api
     protected $valid;
 
     /** @var Contact */
-    public $contact;
+    protected $contact;
 
     /** @var array */
     protected $errors = [];
@@ -93,7 +93,7 @@ class Api
     protected $campaignModel;
 
     /** @var Campaign */
-    public $campaign;
+    protected $campaign;
 
     /** @var array */
     protected $fieldsStored;
@@ -156,7 +156,7 @@ class Api
     protected $integrationHelper;
 
     /** @var ContactSourceModel */
-    public $contactSourceModel;
+    protected $contactSourceModel;
 
     /** @var CampaignSettings */
     protected $campaignSettingsModel;
@@ -251,6 +251,30 @@ class Api
     }
 
     /**
+ * @param ContactSource $contactSource
+ *
+ * @return $this
+ */
+    public function setContactSource($contactSource = null)
+    {
+        $this->contactSource = $contactSource;
+
+        return $this;
+    }
+
+    /**
+     * @param Contact $contact
+     *
+     * @return $this
+     */
+    public function setContact($contact = null)
+    {
+        $this->contact = $contact;
+
+        return $this;
+    }
+
+    /**
      * @param int $campaignId
      *
      * @return $this
@@ -258,6 +282,18 @@ class Api
     public function setCampaignId($campaignId = null)
     {
         $this->campaignId = $campaignId;
+
+        return $this;
+    }
+
+    /**
+     * @param Campaign $campaign
+     *
+     * @return $this
+     */
+    public function setCampaign($campaign = null)
+    {
+        $this->campaign = $campaign;
 
         return $this;
     }
@@ -1473,11 +1509,27 @@ class Api
     }
 
     /**
+     * @return Contact
+     */
+    public function getContact()
+    {
+        return $this->contact;
+    }
+
+    /**
      * @return ContactSource
      */
     public function getContactSource()
     {
         return $this->contactSource;
+    }
+
+    /**
+     * @return ContactSourceModel
+     */
+    public function getContactSourceModel()
+    {
+        return $this->contactSourceModel;
     }
 
     /**
@@ -1586,6 +1638,14 @@ class Api
     public function getCampaignFields($asEntities = false)
     {
         return null;
+    }
+
+    /**
+     * @return Campaign
+     */
+    public function getCampaign()
+    {
+        return $this->campaign;
     }
 
     /**

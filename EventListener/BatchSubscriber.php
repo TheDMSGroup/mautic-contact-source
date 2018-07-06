@@ -87,9 +87,9 @@ class BatchSubscriber extends CommonSubscriber
 
             $this->apiModel->contact = $leadEvent->getLead();
             $this->apiModel->setCampaignId($campaignId);
-            $this->apiModel->campaign =  $this->campaignModel->getEntity($campaignId);
+            $this->apiModel->setCampaign($this->campaignModel->getEntity($campaignId));
             $this->apiModel->setSourceId($sourceId);
-            $this->apiModel->contactSource = $this->apiModel->contactSourceModel->getEntity($sourceId);
+            $this->apiModel->setContactSource($this->apiModel->getContactSourceModel()->getEntity($sourceId));
 
             $this->apiModel->parseSourceCampaignSettings();
             $this->apiModel->processOffline();
@@ -111,17 +111,17 @@ class BatchSubscriber extends CommonSubscriber
             $campaignId = $importProperties['parser']['campaign'];
             $sourceId   = $importProperties['parser']['source'];
 
-            $this->apiModel->contact = $leadEvent->getLead();
+            $this->apiModel->setContact($leadEvent->getLead());
             $this->apiModel->setCampaignId($campaignId);
-            $this->apiModel->campaign =  $this->campaignModel->getEntity($campaignId);
+            $this->apiModel->setCampaign($this->campaignModel->getEntity($campaignId));
             $this->apiModel->setSourceId($sourceId);
-            $this->apiModel->contactSource = $this->apiModel->contactSourceModel->getEntity($sourceId);
+            $this->apiModel->setContactSource($this->apiModel->getContactSourceModel()->getEntity($sourceId));
             $this->apiModel->parseSourceCampaignSettings();
 
-            $this->apiModel->addContactsToCampaign($this->apiModel->campaign, [$leadEvent->getLead()], true);
+            $this->apiModel->addContactsToCampaign($this->apiModel->getCampaign(), [$leadEvent->getLead()], true);
             $this->apiModel->logResults();
 
-            $leadEvent->setLead($this->apiModel->contact);
+            $leadEvent->setLead($this->apiModel->getContact());
         }
     }
 }
