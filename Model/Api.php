@@ -1183,7 +1183,11 @@ class Api
     ) {
         foreach ($contacts as $contact) {
             $campaignContact = new CampaignContact();
-            $alreadyExists   = $this->em->getRepository('MauticCampaignBundle:Lead')->checkLeadInCampaigns($contact, ['campaigns' => [$campaign->getId()]]);
+            $alreadyExists = false;
+            if(!null == $contact->getDateModified()){ // see if New Contact b/c isNew() is unreliable on PostSave Event
+                $leadRepository = $this->em->getRepository('MauticCampaignBundle:Lead');
+                    $alreadyExists = $leadRepository->checkLeadInCampaigns($contact, ['campaigns' => [$campaign->getId()]]);
+            }
             if (!$alreadyExists) {
                 $campaignContact->setCampaign($campaign);
                 $campaignContact->setDateAdded(new \DateTime());
