@@ -698,22 +698,6 @@ class Api
     }
 
     /**
-     * @throws ContactSourceException
-     */
-    private function validateToken()
-    {
-        if ($this->token !== $this->contactSource->getToken()) {
-            throw new ContactSourceException(
-                    'The token specified is invalid. Please request a new token.',
-                    Codes::HTTP_UNAUTHORIZED,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'token'
-                );
-        }
-    }
-
-    /**
      * Generate a new contact entity (not yet saved so that we can use it for validations).
      *
      * @throws ContactSourceException
