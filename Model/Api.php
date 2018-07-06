@@ -173,8 +173,8 @@ class Api
     /** @var bool */
     protected $authenticated = false;
 
-    /** @var imported */
-    protected $imported;
+    /** @var bool */
+    protected $imported = false;
 
     /**
      * Api constructor.
@@ -224,7 +224,6 @@ class Api
         $this->emailValidator        = $emailValidator;
         $this->cacheModel            = $cacheModel;
         $this->session               = $session;
-        $this->imported              = false;
     }
 
     /**
@@ -1590,7 +1589,7 @@ class Api
     }
 
     /**
-     * @return bool|imported
+     * @return bool
      */
     public function getImported()
     {
