@@ -1353,9 +1353,11 @@ class Api
     public function applyAttribution()
     {
         if ($this->valid && $this->cost && Stat::TYPE_ACCEPTED === $this->status) {
-            // NOTE TO ME   check if an id exists and attribution field exists and if not load this weird way
-
-            //$this->contact       = $this->contactModel->getEntity($this->contact->getId());
+            // check if an id exists and attribution field exists b/c sometimes its not a well-formed entity
+            if($this->contact->getId() && !property_exists($this->contact, 'attribution'))
+            {
+                $this->contact       = $this->contactModel->getEntity($this->contact->getId());
+            }
             $originalAttribution = $this->contact->getAttribution();
             // Attribution is always a negative number to represent cost.
             $this->attribution = ($this->cost * -1);
