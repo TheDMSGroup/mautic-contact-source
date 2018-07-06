@@ -698,38 +698,6 @@ class Api
     }
 
     /**
-     * Ensure the required parameters were provided and not empty while parsing.
-     *
-     * @throws ContactSourceException
-     */
-    private function parseToken()
-    {
-        // There are many ways to send a simple token... Let's support them all to be friendly to our Sources.
-        $this->token = trim($this->request->get('token'));
-        if (!$this->token) {
-            $this->token = trim($this->request->headers->get('token'));
-            if (!$this->token) {
-                $this->token = trim($this->request->headers->get('X-Auth-Token'));
-                if (!$this->token) {
-                    $bearer = $this->request->headers->get('authorization');
-                    if ($bearer) {
-                        $this->token = trim(str_ireplace('Bearer ', '', $bearer));
-                    }
-                }
-                if (!$this->token) {
-                    throw new ContactSourceException(
-                            'The token was not supplied. Please provide your authentication token.',
-                            Codes::HTTP_UNAUTHORIZED,
-                            null,
-                            Stat::TYPE_INVALID,
-                            'token'
-                        );
-                }
-            }
-        }
-    }
-
-    /**
      * @throws ContactSourceException
      */
     private function validateToken()
