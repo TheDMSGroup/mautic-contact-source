@@ -289,18 +289,18 @@ class Api
      * @throws ContactSourceException
      */
     private function parseSourceId()
-        {
-            $this->sourceId = intval($this->request->get('sourceId'));
-            if (!$this->sourceId) {
-                throw new ContactSourceException(
+    {
+        $this->sourceId = intval($this->request->get('sourceId'));
+        if (!$this->sourceId) {
+            throw new ContactSourceException(
                     'The sourceId was not supplied. Please provide your sourceId.',
                     Codes::HTTP_BAD_REQUEST,
                     null,
                     Stat::TYPE_INVALID,
                     'sourceId'
                 );
-            }
         }
+    }
 
     /**
      * Find and validate the source matching our parameters.
@@ -312,28 +312,28 @@ class Api
      */
     private function parseSource()
     {
-            if (null == $this->contactSource) {
-                // Check Source existence and published status.
-                $this->contactSource = $this->contactSourceModel->getEntity($this->sourceId);
-                if (!$this->contactSource) {
-                    throw new ContactSourceException(
+        if (null == $this->contactSource) {
+            // Check Source existence and published status.
+            $this->contactSource = $this->contactSourceModel->getEntity($this->sourceId);
+            if (!$this->contactSource) {
+                throw new ContactSourceException(
                         'The sourceId specified does not exist.',
                         Codes::HTTP_NOT_FOUND,
                         null,
                         Stat::TYPE_INVALID,
                         'sourceId'
                     );
-                } elseif (false === $this->contactSource->getIsPublished()) {
-                    throw new ContactSourceException(
+            } elseif (false === $this->contactSource->getIsPublished()) {
+                throw new ContactSourceException(
                         'The sourceId specified has been unpublished (deactivated).',
                         Codes::HTTP_GONE,
                         null,
                         Stat::TYPE_INVALID,
                         'sourceId'
                     );
-                }
-                $this->addTrace('contactSourceId', (int) $this->sourceId);
             }
+            $this->addTrace('contactSourceId', (int) $this->sourceId);
+        }
 
         return $this;
     }
@@ -359,39 +359,38 @@ class Api
      */
     public function parseSourceCampaignSettings()
     {
-            // Check that the campaign is in the whitelist for this source.
-            $campaignSettings = $this->campaignSettingsModel->setContactSource($this->contactSource)
+        // Check that the campaign is in the whitelist for this source.
+        $campaignSettings = $this->campaignSettingsModel->setContactSource($this->contactSource)
                 ->getCampaignSettingsById($this->campaignId);
 
-            // @todo - Support or thwart multiple copies of the same campaign, should it occur. In the meantime...
-            $campaignSettings = reset($campaignSettings);
-            if (!$campaignSettings && !$this->imported) {
-                throw new ContactSourceException(
+        // @todo - Support or thwart multiple copies of the same campaign, should it occur. In the meantime...
+        $campaignSettings = reset($campaignSettings);
+        if (!$campaignSettings && !$this->imported) {
+            throw new ContactSourceException(
                     'The campaignId supplied is not currently in the permitted list of campaigns for this source.',
                     Codes::HTTP_GONE,
                     null,
                     Stat::TYPE_INVALID,
                     'campaignId'
                 );
-            }
-            // Establish parameters from campaign settings; skip some settings on contact import from file.
-            if(!$this->imported)
-            {
-                $this->realTime  = (bool) isset($campaignSettings->realTime) && $campaignSettings->realTime;
-                $this->limits    = isset($campaignSettings->limits) ? $campaignSettings->limits : [];
-                $this->scrubRate = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
-            }
-
-            $this->cost      = isset($campaignSettings->cost) ? (abs(floatval($campaignSettings->cost))) : 0;
-            $this->utmSource = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
-            // Apply field overrides
-            if ($this->utmSource) {
-                $this->fieldsProvided['utm_source'] = $this->utmSource;
-            }
-            $this->addTrace('contactSourceRealTime', $this->realTime);
-            $this->addTrace('contactSourceCost', $this->cost);
-            $this->addTrace('contactSourceUtmSource', $this->utmSource);
         }
+        // Establish parameters from campaign settings; skip some settings on contact import from file.
+        if (!$this->imported) {
+            $this->realTime  = (bool) isset($campaignSettings->realTime) && $campaignSettings->realTime;
+            $this->limits    = isset($campaignSettings->limits) ? $campaignSettings->limits : [];
+            $this->scrubRate = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
+        }
+
+        $this->cost      = isset($campaignSettings->cost) ? (abs(floatval($campaignSettings->cost))) : 0;
+        $this->utmSource = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
+        // Apply field overrides
+        if ($this->utmSource) {
+            $this->fieldsProvided['utm_source'] = $this->utmSource;
+        }
+        $this->addTrace('contactSourceRealTime', $this->realTime);
+        $this->addTrace('contactSourceCost', $this->cost);
+        $this->addTrace('contactSourceUtmSource', $this->utmSource);
+    }
 
     /**
      * Load and validate the campaign based on our parameters.
@@ -403,28 +402,28 @@ class Api
      */
     private function parseCampaign()
     {
-            if (null == $this->campaign) {
-                // Check Campaign existence and published status.
-                $this->campaign = $this->campaignModel->getEntity($this->campaignId);
-                if (!$this->campaign) {
-                    throw new ContactSourceException(
+        if (null == $this->campaign) {
+            // Check Campaign existence and published status.
+            $this->campaign = $this->campaignModel->getEntity($this->campaignId);
+            if (!$this->campaign) {
+                throw new ContactSourceException(
                         'The campaignId specified does not exist.',
                         Codes::HTTP_GONE,
                         null,
                         Stat::TYPE_INVALID,
                         'campaignId'
                     );
-                } elseif (false === $this->campaign->getIsPublished()) {
-                    throw new ContactSourceException(
+            } elseif (false === $this->campaign->getIsPublished()) {
+                throw new ContactSourceException(
                         'The campaignId specified has been unpublished (deactivated).',
                         Codes::HTTP_GONE,
                         null,
                         Stat::TYPE_INVALID,
                         'campaignId'
                     );
-                }
-                $this->addTrace('contactSourceCampaignId', (int) $this->campaignId);
             }
+            $this->addTrace('contactSourceCampaignId', (int) $this->campaignId);
+        }
 
         return $this;
     }
@@ -601,36 +600,36 @@ class Api
      * @throws ContactSourceException
      */
     private function parseVerbosity()
-        {
-            $verboseHeader = $this->request->headers->get('verbose');
-            if (null !== $verboseHeader) {
-                // The default key is 1, for BC.
-                $verboseKey = '1';
-                /** @var \Mautic\PluginBundle\Integration\AbstractIntegration $object */
-                $object = $this->integrationHelper->getIntegrationObject('Source');
-                if ($object) {
-                    $objectSettings = $object->getIntegrationSettings();
-                    if ($objectSettings) {
-                        $featureSettings = $objectSettings->getFeatureSettings();
-                        if (!empty($featureSettings['verbose'])) {
-                            $verboseKey = $featureSettings['verbose'];
-                        }
+    {
+        $verboseHeader = $this->request->headers->get('verbose');
+        if (null !== $verboseHeader) {
+            // The default key is 1, for BC.
+            $verboseKey = '1';
+            /** @var \Mautic\PluginBundle\Integration\AbstractIntegration $object */
+            $object = $this->integrationHelper->getIntegrationObject('Source');
+            if ($object) {
+                $objectSettings = $object->getIntegrationSettings();
+                if ($objectSettings) {
+                    $featureSettings = $objectSettings->getFeatureSettings();
+                    if (!empty($featureSettings['verbose'])) {
+                        $verboseKey = $featureSettings['verbose'];
                     }
                 }
-                $verbose = $verboseHeader == $verboseKey;
-                if ($verbose) {
-                    $this->setVerbose(true);
-                } else {
-                    throw new ContactSourceException(
+            }
+            $verbose = $verboseHeader == $verboseKey;
+            if ($verbose) {
+                $this->setVerbose(true);
+            } else {
+                throw new ContactSourceException(
                         'The verbose token passed was not correct. This field should only be used for debugging.',
                         Codes::HTTP_UNAUTHORIZED,
                         null,
                         Stat::TYPE_INVALID,
                         'verbose'
                     );
-                }
             }
         }
+    }
 
     /**
      * @param bool $verbose
@@ -686,17 +685,17 @@ class Api
      */
     private function parseCampaignId()
     {
-            $this->campaignId = intval($this->request->get('campaignId'));
-            if (!$this->campaignId) {
-                throw new ContactSourceException(
+        $this->campaignId = intval($this->request->get('campaignId'));
+        if (!$this->campaignId) {
+            throw new ContactSourceException(
                     'The campaignId was not supplied. Please provide your campaignId.',
                     Codes::HTTP_BAD_REQUEST,
                     null,
                     Stat::TYPE_INVALID,
                     'campaignId'
                 );
-            }
         }
+    }
 
     /**
      * Ensure the required parameters were provided and not empty while parsing.
@@ -705,46 +704,46 @@ class Api
      */
     private function parseToken()
     {
-            // There are many ways to send a simple token... Let's support them all to be friendly to our Sources.
-            $this->token = trim($this->request->get('token'));
+        // There are many ways to send a simple token... Let's support them all to be friendly to our Sources.
+        $this->token = trim($this->request->get('token'));
+        if (!$this->token) {
+            $this->token = trim($this->request->headers->get('token'));
             if (!$this->token) {
-                $this->token = trim($this->request->headers->get('token'));
+                $this->token = trim($this->request->headers->get('X-Auth-Token'));
                 if (!$this->token) {
-                    $this->token = trim($this->request->headers->get('X-Auth-Token'));
-                    if (!$this->token) {
-                        $bearer = $this->request->headers->get('authorization');
-                        if ($bearer) {
-                            $this->token = trim(str_ireplace('Bearer ', '', $bearer));
-                        }
+                    $bearer = $this->request->headers->get('authorization');
+                    if ($bearer) {
+                        $this->token = trim(str_ireplace('Bearer ', '', $bearer));
                     }
-                    if (!$this->token) {
-                        throw new ContactSourceException(
+                }
+                if (!$this->token) {
+                    throw new ContactSourceException(
                             'The token was not supplied. Please provide your authentication token.',
                             Codes::HTTP_UNAUTHORIZED,
                             null,
                             Stat::TYPE_INVALID,
                             'token'
                         );
-                    }
                 }
             }
         }
+    }
 
     /**
      * @throws ContactSourceException
      */
     private function validateToken()
     {
-            if ($this->token !== $this->contactSource->getToken()) {
-                throw new ContactSourceException(
+        if ($this->token !== $this->contactSource->getToken()) {
+            throw new ContactSourceException(
                     'The token specified is invalid. Please request a new token.',
                     Codes::HTTP_UNAUTHORIZED,
                     null,
                     Stat::TYPE_INVALID,
                     'token'
                 );
-            }
         }
+    }
 
     /**
      * Generate a new contact entity (not yet saved so that we can use it for validations).
@@ -1143,12 +1142,12 @@ class Api
      * @throws \Exception
      */
     private function evaluateLimits()
-        {
-            $limitRules        = new \stdClass();
-            $limitRules->rules = $this->limits;
+    {
+        $limitRules        = new \stdClass();
+        $limitRules->rules = $this->limits;
 
-            $this->getCacheModel()->evaluateLimits($limitRules, $this->campaignId);
-        }
+        $this->getCacheModel()->evaluateLimits($limitRules, $this->campaignId);
+    }
 
     /**
      * @return Cache
@@ -1232,8 +1231,8 @@ class Api
     ) {
         foreach ($contacts as $contact) {
             $campaignContact = new CampaignContact();
-            $alreadyExists = $this->em->getRepository('MauticCampaignBundle:Lead')->checkLeadInCampaigns($contact, ['campaigns' => [$campaign->getId()]]);
-            if(!$alreadyExists){
+            $alreadyExists   = $this->em->getRepository('MauticCampaignBundle:Lead')->checkLeadInCampaigns($contact, ['campaigns' => [$campaign->getId()]]);
+            if (!$alreadyExists) {
                 $campaignContact->setCampaign($campaign);
                 $campaignContact->setDateAdded(new \DateTime());
                 $campaignContact->setLead($contact);
@@ -1338,11 +1337,11 @@ class Api
             }
 
             // Apply scrub only to accepted contacts in real-time mode after evaluation.
-                if ($this->valid && $this->isScrubbed()) {
-                    $this->status = Stat::TYPE_SCRUBBED;
-                    $this->valid  = false;
-                }
+            if ($this->valid && $this->isScrubbed()) {
+                $this->status = Stat::TYPE_SCRUBBED;
+                $this->valid  = false;
             }
+        }
     }
 
     /**
@@ -1354,8 +1353,7 @@ class Api
     {
         if ($this->valid && $this->cost && Stat::TYPE_ACCEPTED === $this->status) {
             // check if an id exists and attribution field exists b/c sometimes its not a well-formed entity
-            if($this->contact->getId() && !property_exists($this->contact, 'attribution'))
-            {
+            if ($this->contact->getId() && !property_exists($this->contact, 'attribution')) {
                 $this->contact       = $this->contactModel->getEntity($this->contact->getId());
             }
             $originalAttribution = $this->contact->getAttribution();
@@ -1368,7 +1366,7 @@ class Api
             );
             $this->dispatchContextCreate();
 
-            if(!$this->imported){
+            if (!$this->imported) {
                 // contacts imported via file upload hit this method via a pre-save event so dont save here.
                 $this->contactModel->saveEntity($this->contact);
             }
@@ -1381,13 +1379,13 @@ class Api
      * @throws \Exception
      */
     private function createCache()
-        {
-            if ($this->valid && $this->contact->getId()) {
-                $this->getCacheModel()->setContact($this->contact)
+    {
+        if ($this->valid && $this->contact->getId()) {
+            $this->getCacheModel()->setContact($this->contact)
                     ->setContactSource($this->contactSource)
                     ->create($this->campaignId);
-            }
         }
+    }
 
     /**
      * Use LeadTimelineEvent.
@@ -1651,6 +1649,7 @@ class Api
     public function setImported($imported)
     {
         $this->imported = $imported;
+
         return $this;
     }
 }

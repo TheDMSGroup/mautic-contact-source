@@ -208,7 +208,7 @@ return [
         ],
         'extension' => [
             'mautic.contactsource.extension.lead_import' => [
-                'class' => 'MauticPlugin\MauticContactSourceBundle\Form\Extension\LeadImportExtension',
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Extension\LeadImportExtension',
                 'arguments' => [
                     'doctrine.orm.entity_manager',
                 ],

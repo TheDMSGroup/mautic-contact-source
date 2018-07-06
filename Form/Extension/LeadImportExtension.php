@@ -13,12 +13,12 @@ namespace MauticPlugin\MauticContactSourceBundle\Form\Extension;
 
 use Doctrine\ORM\EntityManager;
 use Mautic\CampaignBundle\Entity\Campaign;
-use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
-use Symfony\Component\Form\AbstractTypeExtension;
 use Mautic\LeadBundle\Form\Type\LeadImportType;
-use Symfony\Component\Form\FormBuilderInterface;
+use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\FormBuilderInterface;
 
 class LeadImportExtension extends AbstractTypeExtension
 {
@@ -62,13 +62,13 @@ class LeadImportExtension extends AbstractTypeExtension
         $builder->add(
           'source',
           EntityType::class,
-          array(
-              'class'       => 'MauticContactSourceBundle:ContactSource',
-              'empty_value' => 'Select A Source',
+          [
+              'class'        => 'MauticContactSourceBundle:ContactSource',
+              'empty_value'  => 'Select A Source',
               'choice_label' => function ($source) {
                   return $source->getName();
               },
-          )
+          ]
         );
 
         $builder->get('source')
@@ -80,20 +80,19 @@ class LeadImportExtension extends AbstractTypeExtension
                 function ($source) {
                     // transform the object to a ID
                     return $source ? $source->getID() : null;
-
                 }
             ));
 
         $builder->add(
             'campaign',
             EntityType::class,
-            array(
-                'class'       => 'MauticCampaignBundle:Campaign',
-                'empty_value' => 'Select A Campaign',
+            [
+                'class'        => 'MauticCampaignBundle:Campaign',
+                'empty_value'  => 'Select A Campaign',
                 'choice_label' => function ($campaign) {
                     return $campaign->getName();
                 },
-            )
+            ]
         );
 
         $builder->get('campaign')
@@ -105,7 +104,6 @@ class LeadImportExtension extends AbstractTypeExtension
                 function ($campaign) {
                     // transform the object to a ID
                     return $campaign ? $campaign->getID() : null;
-
                 }
             ));
 
@@ -124,6 +122,5 @@ class LeadImportExtension extends AbstractTypeExtension
         //         'data'       => 1,
         //     ]
         // );
-
     }
 }

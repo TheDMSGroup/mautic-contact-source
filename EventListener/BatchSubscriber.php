@@ -13,11 +13,11 @@ namespace MauticPlugin\MauticContactSourceBundle\EventListener;
 
 use Mautic\CampaignBundle\Model\CampaignModel;
 use Mautic\CoreBundle\EventListener\CommonSubscriber;
-use MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel;
 use Mautic\LeadBundle\Event\LeadEvent;
-use MauticPlugin\MauticContactSourceBundle\Model\Api as ApiModel;
 use Mautic\LeadBundle\LeadEvents;
 use Mautic\LeadBundle\Model\ImportModel;
+use MauticPlugin\MauticContactSourceBundle\Model\Api as ApiModel;
+use MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel;
 
 /**
  * Class BatchSubscriber.
@@ -48,21 +48,20 @@ class BatchSubscriber extends CommonSubscriber
      * FormSubscriber constructor.
      *
      * @param ContactSourceModel $sourceModel
-     * @param CampaignModel $campaignModel
-     * @param ApiModel $apiModel
-     * @param ImportModel $importModel
+     * @param CampaignModel      $campaignModel
+     * @param ApiModel           $apiModel
+     * @param ImportModel        $importModel
      */
     public function __construct(
         ContactSourceModel $sourceModel,
         CampaignModel $campaignModel,
         ApiModel $apiModel,
         ImportModel $importModel
-    )
-    {
-        $this->sourceModel = $sourceModel;
+    ) {
+        $this->sourceModel   = $sourceModel;
         $this->campaignModel = $campaignModel;
-        $this->apiModel = $apiModel;
-        $this->importModel = $importModel;
+        $this->apiModel      = $apiModel;
+        $this->importModel   = $importModel;
     }
 
     /**
@@ -71,21 +70,20 @@ class BatchSubscriber extends CommonSubscriber
     public static function getSubscribedEvents()
     {
         return [LeadEvents::LEAD_PRE_SAVE            => 'onLeadPreSave',
-                LeadEvents::LEAD_POST_SAVE           => 'onLeadPostSave'];
+                LeadEvents::LEAD_POST_SAVE           => 'onLeadPostSave', ];
     }
 
     public function onLeadPreSave(LeadEvent $leadEvent)
     {
-        if(true == $leadEvent->getLead()->imported
-            && $this->em->getUnitOfWork()->getIdentityMap()['Mautic\LeadBundle\Entity\Import'])
-        {
+        if (true == $leadEvent->getLead()->imported
+            && $this->em->getUnitOfWork()->getIdentityMap()['Mautic\LeadBundle\Entity\Import']) {
             $this->apiModel->setImported(true);
 
-            $import  = array_shift($this->em->getUnitOfWork()->getIdentityMap()['Mautic\LeadBundle\Entity\Import']);
+            $import           = array_shift($this->em->getUnitOfWork()->getIdentityMap()['Mautic\LeadBundle\Entity\Import']);
             $importProperties = $import->getProperties();
 
             $campaignId = $importProperties['parser']['campaign'];
-            $sourceId = $importProperties['parser']['source'];
+            $sourceId   = $importProperties['parser']['source'];
 
             $this->apiModel->contact = $leadEvent->getLead();
             $this->apiModel->setCampaignId($campaignId);
@@ -103,16 +101,15 @@ class BatchSubscriber extends CommonSubscriber
 
     public function onLeadPostSave(LeadEvent $leadEvent)
     {
-        if(true == $leadEvent->getLead()->imported
-        && $this->em->getUnitOfWork()->getIdentityMap()['Mautic\LeadBundle\Entity\Import'])
-        {
+        if (true == $leadEvent->getLead()->imported
+        && $this->em->getUnitOfWork()->getIdentityMap()['Mautic\LeadBundle\Entity\Import']) {
             $this->apiModel->setImported(true);
 
-            $import  = array_shift($this->em->getUnitOfWork()->getIdentityMap()['Mautic\LeadBundle\Entity\Import']);
+            $import           = array_shift($this->em->getUnitOfWork()->getIdentityMap()['Mautic\LeadBundle\Entity\Import']);
             $importProperties = $import->getProperties();
 
             $campaignId = $importProperties['parser']['campaign'];
-            $sourceId = $importProperties['parser']['source'];
+            $sourceId   = $importProperties['parser']['source'];
 
             $this->apiModel->contact = $leadEvent->getLead();
             $this->apiModel->setCampaignId($campaignId);
