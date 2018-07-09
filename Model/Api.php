@@ -251,10 +251,10 @@ class Api
     }
 
     /**
- * @param ContactSource $contactSource
- *
- * @return $this
- */
+     * @param ContactSource $contactSource
+     *
+     * @return $this
+     */
     public function setContactSource($contactSource = null)
     {
         $this->contactSource = $contactSource;
