@@ -115,6 +115,15 @@ return [
             'mautic.contactsource.dashboard.subscriber'       => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\DashboardSubscriber',
             ],
+            'mautic.contactsource.subscriber.batch' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\BatchSubscriber',
+                'arguments' => [
+                    'mautic.contactsource.model.contactsource',
+                    'mautic.campaign.model.campaign',
+                    'mautic.contactsource.model.api',
+                    'mautic.lead.model.import',
+                ],
+            ],
         ],
         'forms'  => [
             'mautic.contactsource.form.type.contactsourceshow_list' => [
@@ -195,6 +204,18 @@ return [
             ],
             'mautic.contactsource.helper.json' => [
                 'class' => 'MauticPlugin\MauticContactSourceBundle\Helper\JSONHelper',
+            ],
+        ],
+        'extension' => [
+            'mautic.contactsource.extension.lead_import' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Extension\LeadImportExtension',
+                'arguments' => [
+                    'doctrine.orm.entity_manager',
+                ],
+                'tag'          => 'form.type_extension',
+                'tagArguments' => [
+                    'extended_type' => 'Mautic\LeadBundle\Form\Type\LeadImportType',
+                ],
             ],
         ],
     ],
