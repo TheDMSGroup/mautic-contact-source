@@ -21,7 +21,7 @@ $header = ($entity->getId())
     $view['translator']->trans('mautic.contactsource.new');
 $view['slots']->set('headerTitle', $header);
 
-echo $view['assets']->includeScript('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.js');
+echo $view['assets']->includeScript('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.js', 'Mautic.contactsourceOnLoad', 'Mautic.contactsourceOnLoad');
 echo $view['assets']->includeStylesheet('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.css');
 
 echo $view['form']->start($form);

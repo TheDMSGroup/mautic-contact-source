@@ -35,6 +35,20 @@
     border-radius: 3px;
 }
 
+/* Move delete buttons to the right */
+.contactsource_jsoneditor div[data-schematype="object"][data-schemapath^="root.campaigns."] > h3 > div.btn-group.btn-right {
+    position: absolute;
+    right: 0;
+}
+
+.contactsource_jsoneditor div[data-schematype="object"][data-schemapath^="root.campaigns."] > h3 > div.btn-group.btn-right > .delete:after {
+    content: " from Source";
+}
+
+.contactsource_jsoneditor div[data-schematype="object"][data-schemapath^="root.campaigns."] > h3 {
+    padding-bottom: 33px;
+}
+
 .contactsource_jsoneditor .btn-group .btn-secondary {
     background: transparent;
 }
