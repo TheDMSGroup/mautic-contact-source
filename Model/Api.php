@@ -173,6 +173,9 @@ class Api
     /** @var bool */
     protected $authenticated = false;
 
+    /** @var bool */
+    protected $imported = false;
+
     /**
      * Api constructor.
      *
@@ -248,6 +251,30 @@ class Api
     }
 
     /**
+     * @param ContactSource $contactSource
+     *
+     * @return $this
+     */
+    public function setContactSource($contactSource = null)
+    {
+        $this->contactSource = $contactSource;
+
+        return $this;
+    }
+
+    /**
+     * @param Contact $contact
+     *
+     * @return $this
+     */
+    public function setContact($contact = null)
+    {
+        $this->contact = $contact;
+
+        return $this;
+    }
+
+    /**
      * @param int $campaignId
      *
      * @return $this
@@ -255,6 +282,18 @@ class Api
     public function setCampaignId($campaignId = null)
     {
         $this->campaignId = $campaignId;
+
+        return $this;
+    }
+
+    /**
+     * @param Campaign $campaign
+     *
+     * @return $this
+     */
+    public function setCampaign($campaign = null)
+    {
+        $this->campaign = $campaign;
 
         return $this;
     }
@@ -289,12 +328,12 @@ class Api
         $this->sourceId = intval($this->request->get('sourceId'));
         if (!$this->sourceId) {
             throw new ContactSourceException(
-                'The sourceId was not supplied. Please provide your sourceId.',
-                Codes::HTTP_BAD_REQUEST,
-                null,
-                Stat::TYPE_INVALID,
-                'sourceId'
-            );
+                    'The sourceId was not supplied. Please provide your sourceId.',
+                    Codes::HTTP_BAD_REQUEST,
+                    null,
+                    Stat::TYPE_INVALID,
+                    'sourceId'
+                );
         }
     }
 
@@ -313,20 +352,20 @@ class Api
             $this->contactSource = $this->contactSourceModel->getEntity($this->sourceId);
             if (!$this->contactSource) {
                 throw new ContactSourceException(
-                    'The sourceId specified does not exist.',
-                    Codes::HTTP_NOT_FOUND,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'sourceId'
-                );
+                        'The sourceId specified does not exist.',
+                        Codes::HTTP_NOT_FOUND,
+                        null,
+                        Stat::TYPE_INVALID,
+                        'sourceId'
+                    );
             } elseif (false === $this->contactSource->getIsPublished()) {
                 throw new ContactSourceException(
-                    'The sourceId specified has been unpublished (deactivated).',
-                    Codes::HTTP_GONE,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'sourceId'
-                );
+                        'The sourceId specified has been unpublished (deactivated).',
+                        Codes::HTTP_GONE,
+                        null,
+                        Stat::TYPE_INVALID,
+                        'sourceId'
+                    );
             }
             $this->addTrace('contactSourceId', (int) $this->sourceId);
         }
@@ -353,27 +392,30 @@ class Api
      * @throws ContactSourceException
      * @throws \Exception
      */
-    private function parseSourceCampaignSettings()
+    public function parseSourceCampaignSettings()
     {
         // Check that the campaign is in the whitelist for this source.
         $campaignSettings = $this->campaignSettingsModel->setContactSource($this->contactSource)
-            ->getCampaignSettingsById($this->campaignId);
+                ->getCampaignSettingsById($this->campaignId);
 
         // @todo - Support or thwart multiple copies of the same campaign, should it occur. In the meantime...
         $campaignSettings = reset($campaignSettings);
-        if (!$campaignSettings) {
+        if (!$campaignSettings && !$this->imported) {
             throw new ContactSourceException(
-                'The campaignId supplied is not currently in the permitted list of campaigns for this source.',
-                Codes::HTTP_GONE,
-                null,
-                Stat::TYPE_INVALID,
-                'campaignId'
-            );
+                    'The campaignId supplied is not currently in the permitted list of campaigns for this source.',
+                    Codes::HTTP_GONE,
+                    null,
+                    Stat::TYPE_INVALID,
+                    'campaignId'
+                );
         }
-        // Establish parameters from campaign settings.
-        $this->realTime  = (bool) isset($campaignSettings->realTime) && $campaignSettings->realTime;
-        $this->limits    = isset($campaignSettings->limits) ? $campaignSettings->limits : [];
-        $this->scrubRate = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
+        // Establish parameters from campaign settings; skip some settings on contact import from file.
+        if (!$this->imported) {
+            $this->realTime  = (bool) isset($campaignSettings->realTime) && $campaignSettings->realTime;
+            $this->limits    = isset($campaignSettings->limits) ? $campaignSettings->limits : [];
+            $this->scrubRate = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
+        }
+
         $this->cost      = isset($campaignSettings->cost) ? (abs(floatval($campaignSettings->cost))) : 0;
         $this->utmSource = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
         // Apply field overrides
@@ -400,20 +442,20 @@ class Api
             $this->campaign = $this->campaignModel->getEntity($this->campaignId);
             if (!$this->campaign) {
                 throw new ContactSourceException(
-                    'The campaignId specified does not exist.',
-                    Codes::HTTP_GONE,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'campaignId'
-                );
+                        'The campaignId specified does not exist.',
+                        Codes::HTTP_GONE,
+                        null,
+                        Stat::TYPE_INVALID,
+                        'campaignId'
+                    );
             } elseif (false === $this->campaign->getIsPublished()) {
                 throw new ContactSourceException(
-                    'The campaignId specified has been unpublished (deactivated).',
-                    Codes::HTTP_GONE,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'campaignId'
-                );
+                        'The campaignId specified has been unpublished (deactivated).',
+                        Codes::HTTP_GONE,
+                        null,
+                        Stat::TYPE_INVALID,
+                        'campaignId'
+                    );
             }
             $this->addTrace('contactSourceCampaignId', (int) $this->campaignId);
         }
@@ -614,12 +656,12 @@ class Api
                 $this->setVerbose(true);
             } else {
                 throw new ContactSourceException(
-                    'The verbose token passed was not correct. This field should only be used for debugging.',
-                    Codes::HTTP_UNAUTHORIZED,
-                    null,
-                    Stat::TYPE_INVALID,
-                    'verbose'
-                );
+                        'The verbose token passed was not correct. This field should only be used for debugging.',
+                        Codes::HTTP_UNAUTHORIZED,
+                        null,
+                        Stat::TYPE_INVALID,
+                        'verbose'
+                    );
             }
         }
     }
@@ -681,12 +723,12 @@ class Api
         $this->campaignId = intval($this->request->get('campaignId'));
         if (!$this->campaignId) {
             throw new ContactSourceException(
-                'The campaignId was not supplied. Please provide your campaignId.',
-                Codes::HTTP_BAD_REQUEST,
-                null,
-                Stat::TYPE_INVALID,
-                'campaignId'
-            );
+                    'The campaignId was not supplied. Please provide your campaignId.',
+                    Codes::HTTP_BAD_REQUEST,
+                    null,
+                    Stat::TYPE_INVALID,
+                    'campaignId'
+                );
         }
     }
 
@@ -1176,11 +1218,18 @@ class Api
     ) {
         foreach ($contacts as $contact) {
             $campaignContact = new CampaignContact();
-            $campaignContact->setCampaign($campaign);
-            $campaignContact->setDateAdded(new \DateTime());
-            $campaignContact->setLead($contact);
-            $campaignContact->setManuallyAdded($manuallyAdded);
-            $saved = $this->campaignModel->saveCampaignLead($campaignContact);
+            $alreadyExists   = false;
+            if (!null == $contact->getDateModified()) { // see if New Contact b/c isNew() is unreliable on PostSave Event
+                $leadRepository = $this->em->getRepository('MauticCampaignBundle:Lead');
+                $alreadyExists  = $leadRepository->checkLeadInCampaigns($contact, ['campaigns' => [$campaign->getId()]]);
+            }
+            if (!$alreadyExists) {
+                $campaignContact->setCampaign($campaign);
+                $campaignContact->setDateAdded(new \DateTime());
+                $campaignContact->setLead($contact);
+                $campaignContact->setManuallyAdded($manuallyAdded);
+                $saved = $this->campaignModel->saveCampaignLead($campaignContact);
+            }
 
             // @todo - Support non realtime event firing.
             // if (!$realTime) {
@@ -1202,7 +1251,7 @@ class Api
     /**
      * Assign the status for an offline (not real-time) contact acceptance/rejection.
      */
-    private function processOffline()
+    public function processOffline()
     {
         if (!$this->realTime) {
             // Establish scrub now.
@@ -1291,10 +1340,13 @@ class Api
      *
      * @throws \Exception
      */
-    private function applyAttribution()
+    public function applyAttribution()
     {
         if ($this->valid && $this->cost && Stat::TYPE_ACCEPTED === $this->status) {
-            $this->contact       = $this->contactModel->getEntity($this->contact->getId());
+            // check if an id exists and attribution field exists b/c sometimes its not a well-formed entity
+            if ($this->contact->getId() && !property_exists($this->contact, 'attribution')) {
+                $this->contact       = $this->contactModel->getEntity($this->contact->getId());
+            }
             $originalAttribution = $this->contact->getAttribution();
             // Attribution is always a negative number to represent cost.
             $this->attribution = ($this->cost * -1);
@@ -1304,7 +1356,11 @@ class Api
                 $originalAttribution
             );
             $this->dispatchContextCreate();
-            $this->contactModel->saveEntity($this->contact);
+
+            if (!$this->imported) {
+                // contacts imported via file upload hit this method via a pre-save event so dont save here.
+                $this->contactModel->saveEntity($this->contact);
+            }
         }
     }
 
@@ -1317,15 +1373,15 @@ class Api
     {
         if ($this->valid && $this->contact->getId()) {
             $this->getCacheModel()->setContact($this->contact)
-                ->setContactSource($this->contactSource)
-                ->create($this->campaignId);
+                    ->setContactSource($this->contactSource)
+                    ->create($this->campaignId);
         }
     }
 
     /**
      * Use LeadTimelineEvent.
      */
-    private function logResults()
+    public function logResults()
     {
         if ($this->valid) {
             $statLevel = 'INFO';
@@ -1453,11 +1509,27 @@ class Api
     }
 
     /**
+     * @return Contact
+     */
+    public function getContact()
+    {
+        return $this->contact;
+    }
+
+    /**
      * @return ContactSource
      */
     public function getContactSource()
     {
         return $this->contactSource;
+    }
+
+    /**
+     * @return ContactSourceModel
+     */
+    public function getContactSourceModel()
+    {
+        return $this->contactSourceModel;
     }
 
     /**
@@ -1566,5 +1638,33 @@ class Api
     public function getCampaignFields($asEntities = false)
     {
         return null;
+    }
+
+    /**
+     * @return Campaign
+     */
+    public function getCampaign()
+    {
+        return $this->campaign;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getImported()
+    {
+        return $this->imported;
+    }
+
+    /**
+     * @param $imported
+     *
+     * @return $this
+     */
+    public function setImported($imported)
+    {
+        $this->imported = $imported;
+
+        return $this;
     }
 }
