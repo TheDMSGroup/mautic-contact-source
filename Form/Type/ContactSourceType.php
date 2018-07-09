@@ -117,7 +117,7 @@ class ContactSourceType extends AbstractType
                 'label'      => 'mautic.contactsource.form.campaign.settings',
                 'label_attr' => ['class' => 'control-label'],
                 'attr'       => [
-                    'class' => 'form-control',
+                    'class' => 'form-control hide',
                     'rows'  => 12,
                 ],
                 'required'   => false,

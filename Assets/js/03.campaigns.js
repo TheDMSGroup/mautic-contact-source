@@ -1,6 +1,6 @@
 // Campaigns field.
 Mautic.contactsourceCampaigns = function () {
-    var $campaigns = mQuery('#contactsource_campaign_settings:not(.hide):first');
+    var $campaigns = mQuery('#contactsource_campaign_settings:first:not(.campaigns-checked)');
     if ($campaigns.length) {
         // Retrieve the list of available campaigns via Ajax
         var campaigns = {},
@@ -121,7 +121,7 @@ Mautic.contactsourceCampaigns = function () {
                             });
                         });
 
-                        $campaigns.addClass('hide');
+                        $campaigns.addClass('campaigns-checked');
                         $campaignsJSONEditor.show();
                     }
                 });

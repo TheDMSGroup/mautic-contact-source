@@ -1,7 +1,7 @@
 // Logic for the documentation switch.
 Mautic.contactsourceDocumentation = function () {
 
-    var $documentation = mQuery('input[name="contactsource[documentation]"]');
+    var $documentation = mQuery('input[name="contactsource[documentation]"]:not(.docs-checked)');
     if ($documentation.length) {
 
         // Trigger payload tab visibility based on contactSource documentation.
@@ -35,5 +35,6 @@ Mautic.contactsourceDocumentation = function () {
                 }
             }
         });
+        $documentation.addClass('docs-checked');
     }
 };
