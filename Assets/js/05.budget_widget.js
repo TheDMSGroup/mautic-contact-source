@@ -24,6 +24,11 @@ Mautic.loadCampaignBudgetsWidget = function () {
                         order: [[2, 'asc'], [4, 'asc']],
                         bLengthChange: false,
                         lengthMenu: [[rowCount]],
+                        dom: '<<lBf>rtip>',
+                        buttons: [
+                            'excelHtml5',
+                            'csvHtml5'
+                        ],
                         columnDefs: [
                             {
                                 render: function (data, type, row) {
@@ -58,6 +63,7 @@ Mautic.loadCampaignBudgetsWidget = function () {
                         ]
                     });
                     mQuery('#budget-widget-overlay').hide();
+                    mQuery('#budgets-widget_wrapper .dt-buttons').css({float: "right", marginLeft: "10px"});
                 }
             });
         });
