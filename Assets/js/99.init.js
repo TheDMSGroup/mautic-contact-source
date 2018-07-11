@@ -26,4 +26,8 @@ Mautic.contactsourceOnLoad = function () {
     if (mQuery('#contactsource-timeline').length) {
         Mautic.contactsourceTimelineOnLoad();
     }
+
+    if (mQuery('#budgets-widget').length) {
+        Mautic.loadCampaignBudgetsWidget();
+    }
 };
