@@ -80,7 +80,6 @@ function renderForecast(value, forecast) {
     // danger or success
     var forecastClass = 'success';
     var forecastInt = parseInt(forecast);
-    console.log(forecastInt);
     if(forecastInt >=90){
         forecastClass = 'danger';
     }
