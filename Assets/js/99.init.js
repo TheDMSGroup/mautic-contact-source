@@ -28,6 +28,6 @@ Mautic.contactsourceOnLoad = function () {
     }
 
     if (mQuery('#budgets-widget').length) {
-        Mautic.loadCampaignBudgetsWidget();
+        Mautic.contactsourceLoadCampaignBudgetsWidget();
     }
 };

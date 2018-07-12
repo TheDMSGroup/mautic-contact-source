@@ -22,6 +22,6 @@
     mQuery('#budget-widget-overlay').show();
 </script>
 <?php
-    echo $view['assets']->includeScript('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.js', 'loadCampaignBudgetsWidget', 'loadCampaignBudgetsWidget');
+    echo $view['assets']->includeScript('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.js', 'contactsourceLoadCampaignBudgetsWidget', 'contactsourceLoadCampaignBudgetsWidget');
     echo $view['assets']->includeStylesheet('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.css');
 ?>

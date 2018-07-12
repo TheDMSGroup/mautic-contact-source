@@ -1,4 +1,4 @@
-Mautic.loadCampaignBudgetsWidget = function () {
+Mautic.contactsourceLoadCampaignBudgetsWidget = function () {
     var $sourcetarget = mQuery('#budgets-widget');
     if ($sourcetarget.length) {
         mQuery('#budgets-widget:first:not(.table-initialized)').addClass('table-initialized').each(function () {
@@ -68,32 +68,27 @@ Mautic.loadCampaignBudgetsWidget = function () {
             });
         });
     }
+    function renderStatusToggle (icon) {
+        var color = '#cb4641';
+        if (icon == 'fa-heartbeat') {
+            color = '#2a84c5';
+        }
+        return '<i style="color:' + color + ';" class="fa ' + icon + '"></i>';
+    };
+
+    function renderLink (label, link) {
+        return '<a href="' + link + '">' + label + '</a>';
+    };
+
+    function renderForecast(value, forecast) {
+        // danger or success
+        var forecastClass = 'success';
+        var forecastInt = parseInt(forecast);
+        if(forecastInt >=90){
+            forecastClass = 'danger';
+        }
+        return '<span class="label label-' + forecastClass + '">' + value + '</span>&nbsp;<span class="label label-' + forecastClass + '">' + forecast + '</span>';
+    }
 };
 
-function renderStatusToggle (icon) {
-    var color = '#cb4641';
-    if (icon == 'fa-heartbeat') {
-        color = '#2a84c5';
-    }
-    return '<i style="color:' + color + ';" class="fa ' + icon + '"></i>';
-};
 
-function renderLink (label, link) {
-    return '<a href="' + link + '">' + label + '</a>';
-};
-
-function renderForecast(value, forecast) {
-    // danger or success
-    var forecastClass = 'success';
-    var forecastInt = parseInt(forecast);
-    if(forecastInt >=90){
-        forecastClass = 'danger';
-    }
-    return '<span class="label label-' + forecastClass + '">' + value + '</span>&nbsp;<span class="label label-' + forecastClass + '">' + forecast + '</span>';
-}
-
-mQuery(document).ready(function () {
-    if (!mQuery('#budgets-widget').hasClass('table-done')) {
-        Mautic.loadCampaignBudgetsWidget();
-    }
-});
