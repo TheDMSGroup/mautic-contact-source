@@ -132,6 +132,12 @@ class ContactSourceController extends FormController
 
             // For line graphs in the view
             $chartFilterValues = $this->request->get('sourcechartfilter', []);
+            if (!isset($chartFilterValues['date_from'])) {
+                $from                           = new \DateTime($this->factory->getParameter('default_daterange_filter', '-1 month'));
+                $to                             = new \DateTime();
+                $chartFilterValues['date_from'] = $from->format('Y-m-d H:i:s');
+                $chartFilterValues['date_to']   = $to->format('Y-m-d H:i:s');
+            }
             $chartFilterForm   = $this->get('form.factory')->create(
                 'sourcechartfilter',
                 $chartFilterValues,

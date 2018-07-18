@@ -13,7 +13,7 @@ Mautic.contactsourceTimelineOnLoad = function (container, response) {
                         name: 'javascript',
                         json: true
                     },
-                    theme: 'material',
+                    theme: 'cc',
                     gutters: [],
                     lineNumbers: false,
                     lineWrapping: true,
