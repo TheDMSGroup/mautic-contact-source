@@ -1,4 +1,4 @@
-# Mautic Contact Source [![Latest Stable Version](https://poser.pugx.org/thedmsgroup/mautic-contact-source-bundle/v/stable)](https://packagist.org/packages/thedmsgroup/mautic-contact-source-bundle) [![License](https://poser.pugx.org/thedmsgroup/mautic-contact-source-bundle/license)](https://packagist.org/packages/thedmsgroup/mautic-contact-source-bundle) [![Build Status](https://travis-ci.org/TheDMSGroup/mautic-contact-source.svg?branch=master)](https://travis-ci.org/TheDMSGroup/mautic-contact-source)
+# Mautic Contact Source [![Latest Stable Version](https://poser.pugx.org/thedmsgroup/mautic-contact-source-bundle/v/stable)](https://packagist.org/packages/thedmsgroup/mautic-contact-source-bundle) [![License](https://poser.pugx.org/thedmsgroup/mautic-contact-source-bundle/license)](https://packagist.org/packages/thedmsgroup/mautic-contact-source-bundle) [![Build Status](https://travis-ci.com/TheDMSGroup/mautic-contact-source.svg?branch=master)](https://travis-ci.com/TheDMSGroup/mautic-contact-source)
 
 ![](./Assets/img/source.png)
 
