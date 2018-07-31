@@ -191,9 +191,12 @@ class ContactSourceModel extends FormModel
         if ($contact) {
             $event->setContact($contact);
         }
-        if ($logs) {
-            $event->setLogs($logs);
+        if (!$logs) {
+            // [ENG-418] Exception report - logs can not be null.
+            $logs='';
         }
+        $event->setLogs($logs);
+
         if ($message) {
             $event->setMessage($message);
         }
