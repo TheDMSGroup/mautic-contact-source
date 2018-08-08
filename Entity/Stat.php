@@ -167,6 +167,10 @@ class Stat
             ],
             'contactclient_ledger'
         );
+        $builder->addIndex(
+            ['contact_id'],
+            'contact_id'
+        );
     }
 
     /**
