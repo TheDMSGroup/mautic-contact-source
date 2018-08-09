@@ -92,6 +92,17 @@ class ContactSource extends FormEntity
     }
 
     /**
+     * Allow these entities to be cloned like core entities.
+     */
+    public function __clone()
+    {
+        $this->id    = null;
+        $this->token = sha1(uniqid());
+
+        parent::__clone();
+    }
+
+    /**
      * @param ORM\ClassMetadata $metadata
      */
     public static function loadMetadata(ORM\ClassMetadata $metadata)
