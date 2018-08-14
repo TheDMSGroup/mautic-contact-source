@@ -71,6 +71,11 @@ class TimelineController extends CommonController
         );
     }
 
+    /**
+     * @param Request $request
+     *
+     * @return array|\Symfony\Component\HttpFoundation\JsonResponse|\Symfony\Component\HttpFoundation\RedirectResponse|Response
+     */
     public function pluginIndexAction(Request $request)
     {
         $limit          = 25;
@@ -117,7 +122,7 @@ class TimelineController extends CommonController
                     'contactSources' => $contactSources,
                     'page'           => $page,
                     'events'         => $events,
-                    'integration'    => $integration,
+                    // 'integration'    => $integration,
                     'tmpl'           => (!$this->request->isXmlHttpRequest()) ? 'index' : '',
                     'newCount'       => (array_key_exists('count', $query) && $query['count']) ? $query['count'] : 0,
                 ],
