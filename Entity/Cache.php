@@ -131,9 +131,10 @@ class Cache
 
         $builder->addIndex(
             [
+                'contactsource_id',
                 'date_added',
             ],
-            'contactsource_cache_date_added'
+            'contactsource_cache_id_date_added'
         );
 
         // $builder->addIndex(
