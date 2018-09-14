@@ -69,7 +69,6 @@ $page             = isset($events['page']) && !empty($events['page']) ? $events[
         var dateFrom = document.createElement('input');
         dateFrom.type = 'hidden';
         dateFrom.name = 'dateFrom';
-        console.log(mQuery('#sourcechartfilter_date_from').val());
         dateFrom.value = mQuery('#sourcechartfilter_date_from').val();
 
         var dateTo = document.createElement('input');
