@@ -69,12 +69,12 @@ $page             = isset($events['page']) && !empty($events['page']) ? $events[
         var dateFrom = document.createElement('input');
         dateFrom.type = 'hidden';
         dateFrom.name = 'dateFrom';
-        dateFrom.value = mQuery('#chartfilter_date_from').val();
+        dateFrom.value = mQuery('#sourcechartfilter_date_from').val();
 
         var dateTo = document.createElement('input');
         dateTo.type = 'hidden';
         dateTo.name = 'dateTo';
-        dateTo.value = mQuery('#chartfilter_date_to').val();
+        dateTo.value = mQuery('#sourcechartfilter_date_to').val();
 
         filterForm.append(dateFrom);
         filterForm.append(dateTo);
