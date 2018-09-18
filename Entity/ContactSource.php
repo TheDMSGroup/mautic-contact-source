@@ -69,6 +69,10 @@ class ContactSource extends FormEntity
         if (!$this->token) {
             $this->token = sha1(uniqid());
         }
+
+        if ($this->documentation === null) {
+            $this->documentation = true;
+        }
     }
 
     /**
