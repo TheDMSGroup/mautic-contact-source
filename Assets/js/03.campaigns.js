@@ -67,7 +67,7 @@ Mautic.contactsourceCampaigns = function () {
                         }).trigger('change');
 
                         // Persist the value to the JSON Editor.
-                        campaignsJSONEditor.on('change', function () {
+                        campaignsJSONEditor.on('change', function (event) {
                             var obj = campaignsJSONEditor.getValue();
                             if (typeof obj === 'object') {
                                 var raw = JSON.stringify(obj, null, '  ');
@@ -88,9 +88,11 @@ Mautic.contactsourceCampaigns = function () {
                             }
                             // Clickable Campaign headers.
                             $campaignsJSONEditor.find('div[data-schematype="string"][data-schemapath*=".campaignId"] .control-label').each(function () {
-                                var label = mQuery(this).text();
+                                var campaignForLabel = mQuery(this).parent().find('select:first').val();
+
+                                var label = 'Campaign ' + campaignForLabel;
                                 if (label !== 'Campaign 0') {
-                                    mQuery(this).html('<a href="' + mauticBasePath + '/s/campaigns/edit/' + label.split(' ')[1] + '" target="_blank">' + label + '</a>');
+                                    mQuery(this).html('<a href="' + mauticBasePath + '/s/campaigns/edit/' + campaignForLabel + '" target="_blank">' + label + '</a>');
                                 }
                             });
                         });
