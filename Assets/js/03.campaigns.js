@@ -90,8 +90,9 @@ Mautic.contactsourceCampaigns = function () {
                             $campaignsJSONEditor.find('div[data-schematype="string"][data-schemapath*=".campaignId"] .control-label').each(function () {
                                 var campaignForLabel = mQuery(this).parent().find('select:first').val();
 
-                                var label = 'Campaign ' + campaignForLabel;
-                                if (label !== 'Campaign 0') {
+                                if (0 < campaignForLabel) {
+				    var label = 'Campaign ' + campaignForLabel;
+
                                     mQuery(this).html('<a href="' + mauticBasePath + '/s/campaigns/edit/' + campaignForLabel + '" target="_blank">' + label + '</a>');
                                 }
                             });
