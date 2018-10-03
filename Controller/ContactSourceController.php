@@ -46,7 +46,14 @@ class ContactSourceController extends FormController
         $session = $this->get('session');
         $search  = $this->request->get('search', $session->get('mautic.'.$this->getSessionBase().'.filter', ''));
         if (isset($search) && is_numeric(trim($search))) {
-            $search          = 'ids:'.trim($search);
+            $search          = trim($search).' OR id:'.trim($search);
+            $query           = $this->request->query->all();
+            $query['search'] = $search;
+            $this->request   = $this->request->duplicate($query);
+            $session->set('mautic.'.$this->getSessionBase().'.filter', $search);
+        } elseif (false === strpos($search, '%')) {
+            $search          = '%'.trim($search, ' \t\n\r\0\x0B"%').'%';
+            $search          = strpos($search, ' ') ? '"'.$search.'"' : $search;
             $query           = $this->request->query->all();
             $query['search'] = $search;
             $this->request   = $this->request->duplicate($query);
@@ -144,12 +151,14 @@ class ContactSourceController extends FormController
             // For line graphs in the view
             $chartFilterValues = $this->request->get('sourcechartfilter', []);
             if (!isset($chartFilterValues['date_from'])) {
-                $from                           = new \DateTime($this->factory->getParameter('default_daterange_filter', '-1 month'));
+                $from                           = new \DateTime(
+                    $this->factory->getParameter('default_daterange_filter', '-1 month')
+                );
                 $to                             = new \DateTime();
                 $chartFilterValues['date_from'] = $from->format('Y-m-d H:i:s');
                 $chartFilterValues['date_to']   = $to->format('Y-m-d H:i:s');
             }
-            $chartFilterForm   = $this->get('form.factory')->create(
+            $chartFilterForm = $this->get('form.factory')->create(
                 'sourcechartfilter',
                 $chartFilterValues,
                 [
