@@ -194,7 +194,7 @@ class ApiController extends CommonApiController
                             $setting['campaignName']        = $campaignName;
                             $setting['campaignDescription'] = $campaignDescription;
                             $list[$setting['campaignId']]   = $setting;
-                            unset($campaign, $campaignName);
+                            unset($campaign, $campaignName, $campaignDescription);
                         }
                     }
                 }
