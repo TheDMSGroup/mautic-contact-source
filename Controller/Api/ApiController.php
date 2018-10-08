@@ -184,12 +184,11 @@ class ApiController extends CommonApiController
         $campaignModel    = $this->container->get('mautic.campaign.model.campaign');
         if (!empty($campaignSettings)) {
             foreach ($campaignSettings as $campaignSetting) {
-                if(!empty($campaignSetting)) {
+                if (!empty($campaignSetting)) {
                     foreach ($campaignSetting as $setting) {
                         // get campaign name or other fields to merge with this data.
                         $campaign                       = $campaignModel->getEntity($setting['campaignId']);
-                        if($campaign && $campaign instanceof Campaign)
-                        {
+                        if ($campaign && $campaign instanceof Campaign) {
                             $campaignName                   = $campaign->getName();
                             $campaignDescription            = $campaign->getDescription();
                             $setting['campaignName']        = $campaignName;
@@ -197,7 +196,6 @@ class ApiController extends CommonApiController
                             $list[$setting['campaignId']]   = $setting;
                             unset($campaign, $campaignName);
                         }
-
                     }
                 }
             }
