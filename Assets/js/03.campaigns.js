@@ -89,11 +89,14 @@ Mautic.contactsourceCampaigns = function () {
                             // Clickable Campaign headers.
                             $campaignsJSONEditor.find('div[data-schematype="string"][data-schemapath*=".campaignId"] .control-label').each(function () {
                                 var campaignForLabel = mQuery(this).parent().find('select:first').val();
+                                var label = 'Campaign';
 
-                                var label = 'Campaign ' + campaignForLabel;
-                                if (label !== 'Campaign 0') {
+                                if (null !== campaignForLabel && 0 < campaignForLabel) {
+                                    label += ' ' + campaignForLabel;
+
                                     mQuery(this).html('<a href="' + mauticBasePath + '/s/campaigns/edit/' + campaignForLabel + '" target="_blank">' + label + '</a>');
                                 }
+
                             });
                         });
 
