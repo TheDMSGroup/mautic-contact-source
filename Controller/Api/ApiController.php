@@ -13,6 +13,7 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller\Api;
 
 use FOS\RestBundle\Util\Codes;
 use Mautic\ApiBundle\Controller\CommonApiController;
+use Mautic\CampaignBundle\Entity\Campaign;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
@@ -183,14 +184,19 @@ class ApiController extends CommonApiController
         $campaignModel    = $this->container->get('mautic.campaign.model.campaign');
         if (!empty($campaignSettings)) {
             foreach ($campaignSettings as $campaignSetting) {
-                foreach ($campaignSetting as $setting) {
-                    // get campaign name or other fields to merge with this data.
-                    $campaign                       = $campaignModel->getEntity($setting['campaignId']);
-                    $campaignName                   = $campaign->getName();
-                    $campaignDescription            = $campaign->getDescription();
-                    $setting['campaignName']        = $campaignName;
-                    $setting['campaignDescription'] = $campaignDescription;
-                    $list[$setting['campaignId']]   = $setting;
+                if (!empty($campaignSetting)) {
+                    foreach ($campaignSetting as $setting) {
+                        // get campaign name or other fields to merge with this data.
+                        $campaign                       = $campaignModel->getEntity($setting['campaignId']);
+                        if ($campaign && $campaign instanceof Campaign) {
+                            $campaignName                   = $campaign->getName();
+                            $campaignDescription            = $campaign->getDescription();
+                            $setting['campaignName']        = $campaignName;
+                            $setting['campaignDescription'] = $campaignDescription;
+                            $list[$setting['campaignId']]   = $setting;
+                            unset($campaign, $campaignName, $campaignDescription);
+                        }
+                    }
                 }
             }
             $entity->setCampaignList($list);
