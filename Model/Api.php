@@ -1676,11 +1676,12 @@ class Api
     public function setUtmSourceTag(Contact $contact)
     {
         if ($this->utmSource) {
-            $utmTag = $this->getUtmTag();
-            $utmTag->setLead($contact);
-            $utmTag->setUtmSource($this->utmSource);
-            $utmTag->setDateAdded(new \DateTime());
-            $contact->setUtmTags($utmTag);
+            $utmTags = $this->getUtmTag();
+            $utmTags->setLead($contact);
+            $utmTags->setUtmSource($this->utmSource);
+            $utmTags->setDateAdded(new \DateTime());
+            $this->em->persist($utmTags);
+            $contact->setUtmTags($utmTags);
         }
     }
 }
