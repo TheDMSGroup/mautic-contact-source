@@ -931,6 +931,7 @@ class Api
     {
         if (null === $this->utmTag) {
             $this->utmTag = new UtmTag();
+            $this->em->persist($this->utmTag);
         }
 
         return $this->utmTag;
