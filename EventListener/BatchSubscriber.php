@@ -140,6 +140,7 @@ class BatchSubscriber extends CommonSubscriber
             $this->apiModel->setSourceId($sourceId);
             $this->apiModel->setContactSource($this->apiModel->getContactSourceModel()->getEntity($sourceId));
             $this->apiModel->parseSourceCampaignSettings();
+            $this->apiModel->setUtmSourceTag($contact);
 
             try {
                 $this->apiModel->addContactsToCampaign($this->apiModel->getCampaign(), [$contact], true);

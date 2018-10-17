@@ -931,7 +931,6 @@ class Api
     {
         if (null === $this->utmTag) {
             $this->utmTag = new UtmTag();
-            $this->em->persist($this->utmTag);
         }
 
         return $this->utmTag;
@@ -1667,5 +1666,21 @@ class Api
         $this->imported = $imported;
 
         return $this;
+    }
+
+    /**
+     * Allow imports to set Utm Tags
+     *
+     * @param Contact $contact
+     */
+    public function setUtmSourceTag(Contact $contact)
+    {
+        if ($this->utmSource) {
+            $utmTag = $this->getUtmTag();
+            $utmTag->setLead($contact);
+            $utmTag->setUtmSource($this->utmSource);
+            $utmTag->setDateAdded(new \DateTime());
+            $contact->setUtmTags($utmTag);
+        }
     }
 }
