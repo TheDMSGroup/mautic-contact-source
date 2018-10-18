@@ -104,7 +104,9 @@ class BatchSubscriber extends CommonSubscriber
             $this->apiModel->setContactSource($this->apiModel->getContactSourceModel()->getEntity($sourceId));
 
             $this->apiModel->parseSourceCampaignSettings();
+            $this->apiModel->setUtmSourceTag($contact);
             $this->apiModel->processOffline();
+
             try {
                 $this->apiModel->applyAttribution();
             } catch (\Exception $e) {
