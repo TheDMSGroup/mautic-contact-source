@@ -1669,7 +1669,7 @@ class Api
     }
 
     /**
-     * Allow imports to set Utm Tags
+     * Allow imports to set Utm Tags.
      *
      * @param Contact $contact
      */
