@@ -49,12 +49,17 @@ class LeadImportExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        if (isset($_GET['source'])) {
+            $sourceName = $this->em->getRepository('MauticContactSourceBundle:ContactSource')->find($_GET['source'])->getName();
+        }
+        $emptySource = isset($_GET['source']) ? $sourceName : 'Select A Source';
+
         $builder->add(
           'source',
           EntityType::class,
           [
               'class'        => 'MauticContactSourceBundle:ContactSource',
-              'empty_value'  => 'Select A Source',
+              'empty_value'  => $emptySource,
               'choice_label' => function ($source) {
                   return $source->getName();
               },
@@ -62,10 +67,11 @@ class LeadImportExtension extends AbstractTypeExtension
         );
 
         $builder->get('source')
+
             ->addModelTransformer(new CallbackTransformer(
                 function ($source) {
                     // transform the ID back to an Object
-                    return $source ? $this->em->getRepository('MauticCampaignBundle:Event')->find($source) : null;
+                    return $source ? $this->em->getRepository('MauticContactSourceBundle:ContactSource')->find($source) : null;
                 },
                 function ($source) {
                     // transform the object to a ID
