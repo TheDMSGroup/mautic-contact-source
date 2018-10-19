@@ -237,14 +237,10 @@ $token = $item->getToken();
 <input type="hidden" name="entityId" id="entityId" value="<?php echo $item->getId(); ?>"/>
 <script>
     if (mQuery('#toolbar .dropdown-menu.dropdown-menu-right').not('.importAdded').first().length > 0){
-        console.log('found it');
         // Add an Import button Option to the Page Actions.
         var buttonContainer = mQuery('#toolbar .dropdown-menu.dropdown-menu-right').not('.importAdded').first()
-            console.log(buttonContainer);
         buttonContainer.append('<li><a href="' + mauticBasePath + '/s/contacts/import/new?source=<?php echo $item->getId(); ?>"><span><i class="fa fs-fw fa-sign-in text-success"></i><span> Import Contacts</span></span></a></li>');
-
         buttonContainer.addClass('importAdded');
-        console.log('added the class');
     }
 
 
