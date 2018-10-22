@@ -1667,4 +1667,21 @@ class Api
 
         return $this;
     }
+
+    /**
+     * Allow imports to set Utm Tags.
+     *
+     * @param Contact $contact
+     */
+    public function setUtmSourceTag(Contact $contact)
+    {
+        if ($this->utmSource) {
+            $utmTags = $this->getUtmTag();
+            $utmTags->setLead($contact);
+            $utmTags->setUtmSource($this->utmSource);
+            $utmTags->setDateAdded(new \DateTime());
+            $this->em->persist($utmTags);
+            $contact->setUtmTags($utmTags);
+        }
+    }
 }
