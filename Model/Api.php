@@ -400,7 +400,11 @@ class Api
 
         // @todo - Support or thwart multiple copies of the same campaign, should it occur. In the meantime...
         $campaignSettings = reset($campaignSettings);
-        if (!$campaignSettings && !$this->imported) {
+        if (
+            !$campaignSettings
+            && !$this->imported
+            && !$this->contactSource->getAll()
+        ) {
             throw new ContactSourceException(
                     'The campaignId supplied is not currently in the permitted list of campaigns for this source.',
                     Codes::HTTP_GONE,
@@ -411,14 +415,15 @@ class Api
         }
         // Establish parameters from campaign settings; skip some settings on contact import from file.
         if (!$this->imported) {
-            $this->realTime  = (bool) isset($campaignSettings->realTime) && $campaignSettings->realTime;
+            // Establish defaults (especially for allCampaigns).
+            $this->realTime  = isset($campaignSettings->realTime) ? boolval($campaignSettings->realTime) : true;
             $this->limits    = isset($campaignSettings->limits) ? $campaignSettings->limits : [];
             $this->scrubRate = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
         }
-
         $this->cost      = isset($campaignSettings->cost) ? (abs(floatval($campaignSettings->cost))) : 0;
         $this->utmSource = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
-        // Apply field overrides
+
+        // Apply field overrides.
         if ($this->utmSource) {
             $this->fieldsProvided['utm_source'] = $this->utmSource;
         }
@@ -448,7 +453,10 @@ class Api
                         Stat::TYPE_INVALID,
                         'campaignId'
                     );
-            } elseif (false === $this->campaign->getIsPublished()) {
+            } elseif (
+                false === $this->campaign->getIsPublished()
+                && !$this->contactSource->getAll()
+            ) {
                 throw new ContactSourceException(
                         'The campaignId specified has been unpublished (deactivated).',
                         Codes::HTTP_GONE,

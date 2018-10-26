@@ -96,19 +96,20 @@ class ContactSourceType extends AbstractType
             ]
         );
 
-        $builder->add(
-            'documentation',
-            'boolean',
-            [
-                'label'      => 'mautic.contactsource.form.documentation',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'   => 'form-control',
-                    'tooltip' => 'mautic.contactsource.form.website.tooltip',
-                ],
-                'required'   => false,
-            ]
-        );
+        // Appears to be a duplicate?
+        // $builder->add(
+        //     'documentation',
+        //     'boolean',
+        //     [
+        //         'label'      => 'mautic.contactsource.form.documentation',
+        //         'label_attr' => ['class' => 'control-label'],
+        //         'attr'       => [
+        //             'class'   => 'form-control',
+        //             'tooltip' => 'mautic.contactsource.form.website.tooltip',
+        //         ],
+        //         'required'   => false,
+        //     ]
+        // );
 
         $builder->add(
             'campaign_settings',
@@ -192,7 +193,7 @@ class ContactSourceType extends AbstractType
                 'label'             => 'mautic.contactsource.form.documentation',
                 'label_attr'        => ['class' => 'control-label'],
                 'choices_as_values' => true,
-                'required'          => true,
+                'required'          => false,
                 'attr'              => [
                     'class'   => 'form-control',
                     'tooltip' => 'mautic.contactsource.form.documentation.tooltip',
@@ -206,12 +207,32 @@ class ContactSourceType extends AbstractType
             [
                 'label'      => 'mautic.contactsource.form.token',
                 'label_attr' => ['class' => 'control-label'],
-                'required'   => false,
+                'required'   => true,
                 'attr'       => [
                     'class'   => 'form-control',
                     'tooltip' => 'mautic.contactsource.form.token.tooltip',
                 ],
             ]
+        );
+
+        $all = [
+            'label'             => 'mautic.contactsource.form.all_campaigns',
+            'label_attr'        => ['class' => 'control-label'],
+            'choices_as_values' => true,
+            'required'          => false,
+            'attr'              => [
+                'class'   => 'form-control',
+                'tooltip' => 'mautic.contactsource.form.all_campaigns.tooltip',
+            ],
+        ];
+        if (!$this->security->isAdmin()) {
+            $all['disabled']         = true;
+            $all['attr']['disabled'] = 'disabled';
+        }
+        $builder->add(
+            'all',
+            'yesno_button_group',
+            $all
         );
 
         if (!empty($options['action'])) {
