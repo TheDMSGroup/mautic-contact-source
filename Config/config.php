@@ -33,14 +33,6 @@ return [
                     'objectId'        => '\d+',
                 ],
             ],
-            'mautic_contactsource_import_index' => [
-                'path'       => '/contacts/import/',
-                'controller' => 'MauticLeadBundle:Import:execute',
-            ],
-            'mautic_contactsource_import_new' => [
-                'path'       => '/contacts/import/new',
-                'controller' => 'MauticLeadBundle:Import:execute',
-            ],
         ],
         'api'    => [
             'mautic_api_contactsourcestandard'      => [
@@ -236,20 +228,6 @@ return [
                 'id'        => 'mautic_contactsource_root',
                 'iconClass' => 'fa-cloud-download',
                 'priority'  => 65,
-                'checks'    => [
-                    'integration' => [
-                        'Source' => [
-                            'enabled' => true,
-                        ],
-                    ],
-                ],
-            ],
-            'mautic.contactsource.import' => [
-                'route'     => 'mautic_contactsource_import_index',
-                'access'    => ['lead:leads:viewown', 'lead:leads:viewother'],
-                'id'        => 'mautic_contactsource_import',
-                'iconClass' => 'fa-sign-in',
-                'priority'  => 64,
                 'checks'    => [
                     'integration' => [
                         'Source' => [
