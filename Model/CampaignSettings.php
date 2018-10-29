@@ -88,7 +88,8 @@ class CampaignSettings
     public function setContactSource(ContactSource $contactSource)
     {
         $this->contactSource = $contactSource;
-        $this->setCampaignSettings($this->contactSource->getCampaignSettings());
+        $campaignSettings = $this->contactSource->getCampaignSettings() == null ? "{}" : $this->contactSource->getCampaignSettings();
+        $this->setCampaignSettings($campaignSettings);
 
         return $this;
     }

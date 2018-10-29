@@ -234,7 +234,6 @@ class ApiController extends CommonApiController
         if (empty($campaignEntity)) {
             return $this->returnError('mautic.contactsource.api.error.error.add_campaign.not_found', Codes::HTTP_BAD_REQUEST);
         }
-
         $campaignSettingsModel->setContactSource($sourceEntity);
         $campaignSettings = $campaignSettingsModel->getCampaignSettings();
         $existingCampaign = $campaignSettingsModel->getCampaignSettingsById($parameters['campaignId']);
