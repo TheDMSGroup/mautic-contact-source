@@ -403,7 +403,7 @@ class Api
         if (
             !$campaignSettings
             && !$this->imported
-            && !$this->contactSource->getAll()
+            && !$this->contactSource->getInternal()
         ) {
             throw new ContactSourceException(
                     'The campaignId supplied is not currently in the permitted list of campaigns for this source.',
@@ -455,7 +455,7 @@ class Api
                     );
             } elseif (
                 false === $this->campaign->getIsPublished()
-                && !$this->contactSource->getAll()
+                && !$this->contactSource->getInternal()
             ) {
                 throw new ContactSourceException(
                         'The campaignId specified has been unpublished (deactivated).',

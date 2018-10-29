@@ -103,7 +103,7 @@ echo $view['form']->start($form);
                 echo $view['form']->row($form['isPublished']);
                 echo $view['form']->row($form['publishUp']);
                 echo $view['form']->row($form['publishDown']);
-                echo $view['form']->row($form['all']);
+                echo $view['form']->row($form['internal']);
                 ?>
             </div>
         </div>

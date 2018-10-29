@@ -62,7 +62,7 @@ class ContactSource extends FormEntity
     private $campaignList;
 
     /** @var bool Sets the Source as capable of sending to ANY campaign. */
-    private $all;
+    private $internal;
 
     /**
      * ContactSource constructor.
@@ -77,8 +77,8 @@ class ContactSource extends FormEntity
             $this->documentation = true;
         }
 
-        if (null === $this->all) {
-            $this->all = false;
+        if (null === $this->internal) {
+            $this->internal = false;
         }
     }
 
@@ -137,7 +137,7 @@ class ContactSource extends FormEntity
 
         $builder->addField('documentation', 'boolean');
 
-        $builder->addField('all', 'boolean');
+        $builder->addField('internal', 'boolean');
 
         $builder->addNullableField('campaign_settings', 'text');
     }
@@ -164,7 +164,6 @@ class ContactSource extends FormEntity
                     'utmSource',
                     'token',
                     'documentation',
-                    // 'all',
                     'publishUp',
                     'publishDown',
                     'campaignList',
@@ -234,21 +233,21 @@ class ContactSource extends FormEntity
     /**
      * @return bool
      */
-    public function getAll()
+    public function getInternal()
     {
-        return $this->all;
+        return $this->internal;
     }
 
     /**
-     * @param bool $all
+     * @param bool $internal
      *
      * @return $this
      */
-    public function setAll($all)
+    public function setInternal($internal)
     {
-        $this->isChanged('all', $all);
+        $this->isChanged('internal', $internal);
 
-        $this->all = $all;
+        $this->internal = $internal;
 
         return $this;
     }

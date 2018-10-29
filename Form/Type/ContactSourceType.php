@@ -215,24 +215,24 @@ class ContactSourceType extends AbstractType
             ]
         );
 
-        $all = [
-            'label'             => 'mautic.contactsource.form.all_campaigns',
+        $internal = [
+            'label'             => 'mautic.contactsource.form.internal',
             'label_attr'        => ['class' => 'control-label'],
             'choices_as_values' => true,
             'required'          => false,
             'attr'              => [
                 'class'   => 'form-control',
-                'tooltip' => 'mautic.contactsource.form.all_campaigns.tooltip',
+                'tooltip' => 'mautic.contactsource.form.internal.tooltip',
             ],
         ];
         if (!$this->security->isAdmin()) {
-            $all['disabled']         = true;
-            $all['attr']['disabled'] = 'disabled';
+            $internal['disabled']         = true;
+            $internal['attr']['disabled'] = 'disabled';
         }
         $builder->add(
-            'all',
+            'internal',
             'yesno_button_group',
-            $all
+            $internal
         );
 
         if (!empty($options['action'])) {
