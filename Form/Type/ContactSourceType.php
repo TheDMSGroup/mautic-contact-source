@@ -97,20 +97,6 @@ class ContactSourceType extends AbstractType
         );
 
         $builder->add(
-            'documentation',
-            'boolean',
-            [
-                'label'      => 'mautic.contactsource.form.documentation',
-                'label_attr' => ['class' => 'control-label'],
-                'attr'       => [
-                    'class'   => 'form-control',
-                    'tooltip' => 'mautic.contactsource.form.website.tooltip',
-                ],
-                'required'   => false,
-            ]
-        );
-
-        $builder->add(
             'campaign_settings',
             'textarea',
             [
@@ -192,7 +178,7 @@ class ContactSourceType extends AbstractType
                 'label'             => 'mautic.contactsource.form.documentation',
                 'label_attr'        => ['class' => 'control-label'],
                 'choices_as_values' => true,
-                'required'          => true,
+                'required'          => false,
                 'attr'              => [
                     'class'   => 'form-control',
                     'tooltip' => 'mautic.contactsource.form.documentation.tooltip',
@@ -206,12 +192,32 @@ class ContactSourceType extends AbstractType
             [
                 'label'      => 'mautic.contactsource.form.token',
                 'label_attr' => ['class' => 'control-label'],
-                'required'   => false,
+                'required'   => true,
                 'attr'       => [
                     'class'   => 'form-control',
                     'tooltip' => 'mautic.contactsource.form.token.tooltip',
                 ],
             ]
+        );
+
+        $internal = [
+            'label'             => 'mautic.contactsource.form.internal',
+            'label_attr'        => ['class' => 'control-label'],
+            'choices_as_values' => true,
+            'required'          => false,
+            'attr'              => [
+                'class'   => 'form-control',
+                'tooltip' => 'mautic.contactsource.form.internal.tooltip',
+            ],
+        ];
+        if (!$this->security->isAdmin()) {
+            $internal['disabled']         = true;
+            $internal['attr']['disabled'] = 'disabled';
+        }
+        $builder->add(
+            'internal',
+            'yesno_button_group',
+            $internal
         );
 
         if (!empty($options['action'])) {
