@@ -781,6 +781,7 @@ class Api
                 unset($this->fieldsProvided[$k]);
             }
         }
+        // @todo - Cycle through device data just as UTM.
 
         // Must have at least ONE valid contact field (some are to be ignored since we provide them or they are core).
         $ignore = ['ip', 'attribution', 'attribution_date', 'utm_source'];
@@ -838,6 +839,8 @@ class Api
                 $this->getUtmTag()->setLead($contact);
                 $contact->setUtmTags($this->getUtmTag());
             }
+
+            // @todo - Cycle through device data just as UTM.
         }
 
         // Done importing fields, let's make sure the entity was made.
@@ -902,6 +905,8 @@ class Api
                     $allowedFields[$q] = str_replace('Utm', 'UTM', ucwords(str_replace('_', ' ', $q)));
                 }
 
+                // @todo - Cycle through device data just as UTM.
+
                 unset($allowedFields['attribution']);
                 unset($allowedFields['attribution_date']);
 
@@ -926,6 +931,7 @@ class Api
         if (null === $this->utmSetters) {
             $utmSetters = $this->getUtmTag()->getFieldSetterList();
             unset($utmSetters['query']);
+            unset($utmSetters['date_added']);
             $this->utmSetters = $utmSetters;
         }
 
