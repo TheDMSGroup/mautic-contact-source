@@ -96,21 +96,6 @@ class ContactSourceType extends AbstractType
             ]
         );
 
-        // Appears to be a duplicate?
-        // $builder->add(
-        //     'documentation',
-        //     'boolean',
-        //     [
-        //         'label'      => 'mautic.contactsource.form.documentation',
-        //         'label_attr' => ['class' => 'control-label'],
-        //         'attr'       => [
-        //             'class'   => 'form-control',
-        //             'tooltip' => 'mautic.contactsource.form.website.tooltip',
-        //         ],
-        //         'required'   => false,
-        //     ]
-        // );
-
         $builder->add(
             'campaign_settings',
             'textarea',
