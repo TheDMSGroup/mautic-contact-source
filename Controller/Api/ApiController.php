@@ -222,9 +222,10 @@ class ApiController extends CommonApiController
             return $valid;
         }
 
-        $entity = $this->model->getEntity($contactSourceId);
+        /** var ContactSource $sourceEntity */
+        $sourceEntity = $this->model->getEntity($contactSourceId);
 
-        if (!$this->checkEntityAccess($entity, 'edit')) {
+        if (!$this->checkEntityAccess($sourceEntity, 'edit')) {
             return $this->accessDenied();
         }
 
@@ -234,7 +235,7 @@ class ApiController extends CommonApiController
             return $this->returnError('mautic.contactsource.api.error.error.add_campaign.not_found', Codes::HTTP_BAD_REQUEST);
         }
 
-        $campaignSettingsModel->setContactSource($entity);
+        $campaignSettingsModel->setContactSource($sourceEntity);
         $campaignSettings = $campaignSettingsModel->getCampaignSettings();
         $existingCampaign = $campaignSettingsModel->getCampaignSettingsById($parameters['campaignId']);
 
@@ -256,9 +257,9 @@ class ApiController extends CommonApiController
             return $this->returnError('mautic.contactsource.api.add_campaign.bad_request', Codes::HTTP_BAD_REQUEST);
         }
         $campaignSettingsJSON = json_encode($campaignSettings);
-        $entity->setCampaignSettings($campaignSettingsJSON);
+        $sourceEntity->setCampaignSettings($campaignSettingsJSON);
 
-        $this->model->saveEntity($entity);
+        $this->model->saveEntity($sourceEntity);
 
         $headers = [];
         //return the newly created entities location if applicable
@@ -269,13 +270,13 @@ class ApiController extends CommonApiController
             ? 'mautic_api_'.$this->entityNameMulti.'_getone' : 'mautic_api_get'.$this->entityNameOne;
         $headers['Location'] = $this->generateUrl(
             $route,
-            array_merge(['id' => $entity->getId()], $this->routeParams),
+            array_merge(['id' => $sourceEntity->getId()], $this->routeParams),
             true
         );
 
-        $this->preSerializeEntity($entity, 'edit');
+        $this->preSerializeEntity($sourceEntity, 'edit');
 
-        $view = $this->view([$this->entityNameOne => $entity], Codes::HTTP_OK, $headers);
+        $view = $this->view([$this->entityNameOne => $sourceEntity], Codes::HTTP_OK, $headers);
 
         $this->setSerializationContext($view);
 
