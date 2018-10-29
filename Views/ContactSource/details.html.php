@@ -8,6 +8,7 @@
  *
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
+
 $view->extend('MauticCoreBundle:Default:content.html.php');
 $view['slots']->set('mauticContent', 'contactsource');
 $view['slots']->set('headerTitle', $item->getName());
@@ -234,3 +235,13 @@ $token = $item->getToken();
 <!--/ end: box layout -->
 
 <input type="hidden" name="entityId" id="entityId" value="<?php echo $item->getId(); ?>"/>
+<script>
+    if (mQuery('#toolbar .dropdown-menu.dropdown-menu-right').not('.importAdded').first().length > 0){
+        // Add an Import button Option to the Page Actions.
+        var buttonContainer = mQuery('#toolbar .dropdown-menu.dropdown-menu-right').not('.importAdded').first()
+        buttonContainer.append('<li><a href="' + mauticBasePath + '/s/contacts/import/new?source=<?php echo $item->getId(); ?>"><span><i class="fa fs-fw fa-sign-in text-success"></i><span> Import Contacts</span></span></a></li>');
+        buttonContainer.addClass('importAdded');
+    }
+
+
+</script>
