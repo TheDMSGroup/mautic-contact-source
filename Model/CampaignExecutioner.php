@@ -53,6 +53,9 @@ class CampaignExecutioner
     {
         $limiter = new ContactLimiter($batchLimit, null, null, null, $contactIdList);
 
+        // Make sure these events show up as system triggered for summary counts to be accurate.
+        defined('MAUTIC_CAMPAIGN_SYSTEM_TRIGGERED') or define('MAUTIC_CAMPAIGN_SYSTEM_TRIGGERED', 1);
+
         /** @var Counter $counter */
         $counter = $this->kickoffExecutioner->execute($campaign, $limiter);
 
