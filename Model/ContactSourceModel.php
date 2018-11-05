@@ -29,6 +29,7 @@ use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceTimelineEvent;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
@@ -241,12 +242,19 @@ class ContactSourceModel extends FormModel
         $chart = new LineChart($unit, $dateFrom, $dateToAdjusted, $dateFormat);
         $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
 
+        $params = ['contactsource_id' => $contactSource->getId()];
+        $campaign_id = Request::createFromGlobals()->get('campaign_id');
+        if ($campaign_id) {
+            $params['campaign_id'] = $campaign_id;
+        }
+
         $stat = new Stat();
         foreach ($stat->getAllTypes() as $type) {
+            $params['type'] = $type;
             $q = $query->prepareTimeDataQuery(
                 'contactsource_stats',
                 'date_added',
-                ['contactsource_id' => $contactSource->getId(), 'type' => $type]
+                $params
             );
 
             if (!in_array($unit, ['H', 'i', 's'])) {
