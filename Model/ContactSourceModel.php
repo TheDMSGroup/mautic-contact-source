@@ -242,16 +242,16 @@ class ContactSourceModel extends FormModel
         $chart = new LineChart($unit, $dateFrom, $dateToAdjusted, $dateFormat);
         $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
 
-        $params = ['contactsource_id' => $contactSource->getId()];
-        $campaign_id = Request::createFromGlobals()->get('campaign_id');
-        if ($campaign_id) {
-            $params['campaign_id'] = $campaign_id;
+        $params     = ['contactsource_id' => $contactSource->getId()];
+        $campaignId = Request::createFromGlobals()->get('campaign');
+        if ($campaignId) {
+            $params['campaign_id'] = $campaignId;
         }
 
         $stat = new Stat();
         foreach ($stat->getAllTypes() as $type) {
             $params['type'] = $type;
-            $q = $query->prepareTimeDataQuery(
+            $q              = $query->prepareTimeDataQuery(
                 'contactsource_stats',
                 'date_added',
                 $params
@@ -512,6 +512,11 @@ class ContactSourceModel extends FormModel
         $forTimeline = true
     ) {
         $orderBy = empty($orderBy) ? ['date_added', 'DESC'] : $orderBy;
+
+        if (!isset($filters['search'])) {
+            $filters['search'] = null;
+        }
+
         $event   = $this->dispatcher->dispatch(
             ContactSourceEvents::TIMELINE_ON_GENERATE,
             new ContactSourceTimelineEvent(
@@ -524,10 +529,6 @@ class ContactSourceModel extends FormModel
                 $this->coreParametersHelper->getParameter('site_url')
             )
         );
-
-        if (!isset($filters['search'])) {
-            $filters['search'] = null;
-        }
         $payload = [
             'events'   => $event->getEvents(),
             'filters'  => $filters,
