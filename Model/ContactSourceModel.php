@@ -84,9 +84,11 @@ class ContactSourceModel extends FormModel
     }
 
     /**
-     * @return string
+     * @param ContactSource $contactSource
+     *
+     * @return array|null
      */
-    public function getCampaignList($contactSource)
+    public function getCampaignList(ContactSource $contactSource)
     {
         if (!empty($contactSource)) {
             return $this->getCampaignsBySource($contactSource);
@@ -138,7 +140,7 @@ class ContactSourceModel extends FormModel
      * @param int                $attribution
      * @param int                $campaign
      */
-    public function addStat(ContactSource $contactSource = null, $type, $contact = 0, $attribution = 0, $campaign = 0)
+    public function addStat(ContactSource $contactSource = null, $type = null, $contact = 0, $attribution = 0, $campaign = 0)
     {
         $stat = new Stat();
         if ($contactSource) {
@@ -180,7 +182,7 @@ class ContactSourceModel extends FormModel
      */
     public function addEvent(
         ContactSource $contactSource = null,
-        $type,
+        $type = null,
         $contact = null,
         $logs = null,
         $message = null
@@ -208,7 +210,7 @@ class ContactSourceModel extends FormModel
     /**
      * {@inheritdoc}
      *
-     * @return \MauticPlugin\MauticContactSourceBundle\Entity\StatRepository
+     * @return \MauticPlugin\MauticContactSourceBundle\Entity\EventRepository
      */
     public function getEventRepository()
     {
@@ -243,9 +245,19 @@ class ContactSourceModel extends FormModel
         $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
 
         $params     = ['contactsource_id' => $contactSource->getId()];
-        $campaignId = Request::createFromGlobals()->get('campaign');
-        if ($campaignId) {
-            $params['campaign_id'] = $campaignId;
+        $request    = Request::createFromGlobals();
+
+        if ($request->query->has('campaign')) {
+            $campaignId = $request->query->get('campaign');
+        } else {
+            $chartFilter = $request->request->get('sourcechartfilter', []);
+            if (isset($chartFilter['campaign'])) {
+                $campaignId = $chartFilter['campaign'];
+            }
+        }
+
+        if (isset($campaignId)) {
+            $params['campaign_id'] = (int) $campaignId;
         }
 
         $stat = new Stat();
@@ -379,6 +391,24 @@ class ContactSourceModel extends FormModel
         $chart     = new LineChart($unit, $dateFrom, $dateToAdjusted, $dateFormat);
         $query     = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
         $campaigns = $this->getCampaignsBySource($contactSource);
+
+        $request = Request::createFromGlobals();
+
+        if ($request->query->has('campaign')) {
+            $campaignId = $request->query->get('campaign');
+        } else {
+            $chartFilter = $request->request->get('sourcechartfilter', []);
+            if (isset($chartFilter['campaign'])) {
+                $campaignId = $chartFilter['campaign'];
+            }
+        }
+
+        if (isset($campaignId)) {
+            $campaign    = $this->getEntity($campaignId);
+            $campaigns[] = ['campaign_id' => $campaign->getId(), 'name' => $campaign->getName()];
+        } else {
+            $campaigns = $this->getCampaignList($contactSource);
+        }
 
         if ('cost' != $type) {
             foreach ($campaigns as $campaign) {
