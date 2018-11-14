@@ -11,9 +11,12 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Form\Type;
 
+use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CoreBundle\Factory\MauticFactory;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
+use MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /**
@@ -37,6 +40,37 @@ class ChartFilterType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $contactSourceId = substr($options['action'], strrpos($options['action'], '/') + 1);
+
+        /** @var ContactSourceModel $model */
+        $model         = $this->factory->getModel('contactsource');
+        $contactSource = $model->getEntity($contactSourceId);
+
+        $campaigns = [];
+        foreach ($model->getCampaignList($contactSource) as $index => $campaign) {
+            $campaigns[$campaign['campaign_id']] = $campaign['name'];
+        }
+
+        $builder->add(
+            'campaign',
+            ChoiceType::class,
+            [
+                'choices'     => $campaigns,
+                'attr'        => [
+                    'class'   => 'form-control',
+                    'tooltip' => 'mautic.contactclient.transactions.campaign_tooltip',
+                ],
+                'expanded'    => false,
+                'multiple'    => false,
+                'label'       => 'mautic.contactclient.transactions.campaign_select',
+                'label_attr'  => ['class' => 'control-label'],
+                'empty_data'  => 'All Campaigns',
+                'required'    => false,
+                'disabled'    => false,
+                'data'        => $options['data']['campaign'],
+            ]
+        );
+
         $typeChoices = [
             'cost' => 'Cost',
         ];

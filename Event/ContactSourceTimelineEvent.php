@@ -152,7 +152,7 @@ class ContactSourceTimelineEvent extends Event
         $siteDomain = null
     ) {
         $this->contactSource = $contactSource;
-        $this->filters       = !empty($filters) ? $filters : ['search' => ''];
+        $this->filters       = !empty($filters) ? $filters : ['search' => null];
         $this->orderBy       = empty($orderBy) ? ['date_added', 'DESC'] : $orderBy;
         $this->page          = $page;
         $this->limit         = $limit;

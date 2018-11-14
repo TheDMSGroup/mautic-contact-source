@@ -14,6 +14,12 @@ if (!isset($class)) {
 ?>
 
 <?php echo $view['form']->start($chartFilterForm, ['attr' => ['class' => 'form-filter '.$class, 'style' => 'max-width: 380px']]); ?>
+<div class="input-group">
+        <span class="input-group-addon">
+            <?php echo $view['form']->label($chartFilterForm['campaign']); ?>
+        </span>
+    <?php echo $view['form']->widget($chartFilterForm['campaign']); ?>
+</div>
     <div class="input-group">
         <span class="input-group-addon">
             <?php echo $view['form']->label($chartFilterForm['type']); ?>
