@@ -107,7 +107,7 @@
                                             $limit['percent']
                                         ).'%'; ?></span>
                             </div>
-                            <?php else: // Unlimited so show no numbers ?>
+                            <?php else: // Unlimited so show no numbers?>
                                 <div class="col-md-1 va-m">
                                     <span class="label label-info">N/A</span>
                                 </div>

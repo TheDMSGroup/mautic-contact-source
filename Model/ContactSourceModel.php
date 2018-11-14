@@ -712,9 +712,9 @@ class ContactSourceModel extends FormModel
                     }
                 } else {
                     $limitsPlaceholder = [
-                        0=>[
-                            'name'=>'Unlimited',
-                        ]
+                        0=> [
+                            'name'=> 'Unlimited',
+                        ],
                     ];
                     $campaignLimits[] = [
                         'sourceId' => $source['id'],
