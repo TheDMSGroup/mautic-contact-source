@@ -671,6 +671,21 @@ class ContactSourceModel extends FormModel
                             ),
                         ];
                     }
+                } else {
+                    $limitsPlaceholder = [
+                        0=>[
+                            'name'=>'Unlimited',
+                        ]
+                    ];
+                    $campaignLimits[] = [
+                        'sourceId' => $source['id'],
+                        'limits'   => $limitsPlaceholder,
+                        'name'     => $source['name'],
+                        'link'     => $this->buildUrl(
+                            'mautic_contactsource_action',
+                            ['objectAction' => 'view', 'objectId' => $source['id']]
+                        ),
+                    ];
                 }
             }
         }
