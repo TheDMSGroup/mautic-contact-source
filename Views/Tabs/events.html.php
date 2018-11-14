@@ -169,6 +169,6 @@
 </div>
 <script>
     mQuery(document).ready(function(){
-        $('[data-toggle="tooltip"]').tooltip();
+        mQuery('[data-toggle="tooltip"]').tooltip();
     });
 </script>
