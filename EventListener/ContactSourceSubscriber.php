@@ -194,10 +194,6 @@ class ContactSourceSubscriber extends CommonSubscriber
             $log = $row['logs'][0] === '{' ? json_encode(json_decode($row['logs']), JSON_PRETTY_PRINT) : $row['logs'];
 
             if (!$event->isEngagementCount()) {
-//                if (!$this->pageModel) {
-//                    $this->pageModel = new PageModel();
-//                }
-
                 $event->addEvent(
                     [
                         'event'           => $eventTypeKey,
@@ -212,7 +208,6 @@ class ContactSourceSubscriber extends CommonSubscriber
                         'eventType'       => $eventTypeName,
                         'timestamp'       => $row['date_added'],
                         'extra'           => [
-                            // 'page' => $this->pageModel->getEntity($row['page_id']),
                             'logs'        => $log,
                         ],
                         'contentTemplate' => 'MauticContactSourceBundle:SubscribedEvents\Timeline:index.html.php',

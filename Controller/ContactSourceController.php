@@ -158,6 +158,11 @@ class ContactSourceController extends FormController
                 $chartFilterValues['date_from'] = $from->format('Y-m-d H:i:s');
                 $chartFilterValues['date_to']   = $to->format('Y-m-d H:i:s');
             }
+
+            if ($this->request->query->has('campaign')) {
+                $chartFilterValues['campaign'] = $this->request->query->get('campaign');
+            }
+
             $chartFilterForm = $this->get('form.factory')->create(
                 'sourcechartfilter',
                 $chartFilterValues,

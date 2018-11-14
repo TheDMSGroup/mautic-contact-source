@@ -14,6 +14,7 @@ namespace MauticPlugin\MauticContactSourceBundle\Entity;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Mautic\CoreBundle\Entity\CommonRepository;
 use Mautic\LeadBundle\Entity\TimelineTrait;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class EventRepository.
@@ -77,7 +78,19 @@ class EventRepository extends CommonRepository
             ->setParameter('contactSourceId', $contactSourceId);
 
         if ($contactId) {
-            $query->andWhere('c.contact_id = '.(int) $contactId);
+            $query->andWhere('c.contact_id = :contact_id');
+            $query->setParameter('contact_id', $contactId);
+        }
+
+        $campaignId = Request::createFromGlobals()->get('campaign');
+        if ($campaignId) {
+            $query->join(
+                'c',
+                'contactsource_stats', 's',
+                'c.contactsource_id = s.contactsource_id AND c.contact_id = s.contact_id'
+            )
+            ->andWhere($query->expr()->eq('s.campaign_id', ':campaignId'))
+            ->setParameter('campaignId', $campaignId);
         }
 
         if (isset($options['search']) && $options['search']) {

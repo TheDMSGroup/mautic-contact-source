@@ -29,6 +29,7 @@ use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceTimelineEvent;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
@@ -83,9 +84,11 @@ class ContactSourceModel extends FormModel
     }
 
     /**
-     * @return string
+     * @param ContactSource $contactSource
+     *
+     * @return array|null
      */
-    public function getCampaignList($contactSource)
+    public function getCampaignList(ContactSource $contactSource)
     {
         if (!empty($contactSource)) {
             return $this->getCampaignsBySource($contactSource);
@@ -137,7 +140,7 @@ class ContactSourceModel extends FormModel
      * @param int                $attribution
      * @param int                $campaign
      */
-    public function addStat(ContactSource $contactSource = null, $type, $contact = 0, $attribution = 0, $campaign = 0)
+    public function addStat(ContactSource $contactSource = null, $type = null, $contact = 0, $attribution = 0, $campaign = 0)
     {
         $stat = new Stat();
         if ($contactSource) {
@@ -179,7 +182,7 @@ class ContactSourceModel extends FormModel
      */
     public function addEvent(
         ContactSource $contactSource = null,
-        $type,
+        $type = null,
         $contact = null,
         $logs = null,
         $message = null
@@ -207,7 +210,7 @@ class ContactSourceModel extends FormModel
     /**
      * {@inheritdoc}
      *
-     * @return \MauticPlugin\MauticContactSourceBundle\Entity\StatRepository
+     * @return \MauticPlugin\MauticContactSourceBundle\Entity\EventRepository
      */
     public function getEventRepository()
     {
@@ -241,12 +244,29 @@ class ContactSourceModel extends FormModel
         $chart = new LineChart($unit, $dateFrom, $dateToAdjusted, $dateFormat);
         $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
 
+        $params     = ['contactsource_id' => $contactSource->getId()];
+        $request    = Request::createFromGlobals();
+
+        if ($request->query->has('campaign')) {
+            $campaignId = $request->query->get('campaign');
+        } else {
+            $chartFilter = $request->request->get('sourcechartfilter', []);
+            if (isset($chartFilter['campaign'])) {
+                $campaignId = $chartFilter['campaign'];
+            }
+        }
+
+        if (isset($campaignId)) {
+            $params['campaign_id'] = (int) $campaignId;
+        }
+
         $stat = new Stat();
         foreach ($stat->getAllTypes() as $type) {
-            $q = $query->prepareTimeDataQuery(
+            $params['type'] = $type;
+            $q              = $query->prepareTimeDataQuery(
                 'contactsource_stats',
                 'date_added',
-                ['contactsource_id' => $contactSource->getId(), 'type' => $type]
+                $params
             );
 
             if (!in_array($unit, ['H', 'i', 's'])) {
@@ -371,6 +391,24 @@ class ContactSourceModel extends FormModel
         $chart     = new LineChart($unit, $dateFrom, $dateToAdjusted, $dateFormat);
         $query     = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
         $campaigns = $this->getCampaignsBySource($contactSource);
+
+        $request = Request::createFromGlobals();
+
+        if ($request->query->has('campaign')) {
+            $campaignId = $request->query->get('campaign');
+        } else {
+            $chartFilter = $request->request->get('sourcechartfilter', []);
+            if (isset($chartFilter['campaign'])) {
+                $campaignId = $chartFilter['campaign'];
+            }
+        }
+
+        if (isset($campaignId)) {
+            $campaign    = $this->getEntity($campaignId);
+            $campaigns[] = ['campaign_id' => $campaign->getId(), 'name' => $campaign->getName()];
+        } else {
+            $campaigns = $this->getCampaignList($contactSource);
+        }
 
         if ('cost' != $type) {
             foreach ($campaigns as $campaign) {
@@ -504,6 +542,11 @@ class ContactSourceModel extends FormModel
         $forTimeline = true
     ) {
         $orderBy = empty($orderBy) ? ['date_added', 'DESC'] : $orderBy;
+
+        if (!isset($filters['search'])) {
+            $filters['search'] = null;
+        }
+
         $event   = $this->dispatcher->dispatch(
             ContactSourceEvents::TIMELINE_ON_GENERATE,
             new ContactSourceTimelineEvent(
@@ -516,10 +559,6 @@ class ContactSourceModel extends FormModel
                 $this->coreParametersHelper->getParameter('site_url')
             )
         );
-
-        if (!isset($filters['search'])) {
-            $filters['search'] = null;
-        }
         $payload = [
             'events'   => $event->getEvents(),
             'filters'  => $filters,

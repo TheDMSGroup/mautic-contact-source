@@ -246,7 +246,7 @@ class ApiController extends CommonApiController
             '.',
             ''
         ) : 0;
-        $requestCampaign->realTime   = isset($parameters['realTime']) && ('false' !== $parameters['realTime']) ? true : false;
+        $requestCampaign->realTime   = isset($parameters['realTime']) && ('false' === $parameters['realTime'] || '0' === $parameters['realTime']) ? false : true;
         $requestCampaign->scrubRate  = isset($parameters['scrubRate']) ? (int) $parameters['scrubRate'] : 0;
         $requestCampaign->limits     = [];
 
