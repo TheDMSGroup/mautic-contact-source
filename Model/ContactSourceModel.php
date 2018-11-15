@@ -29,7 +29,6 @@ use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceTimelineEvent;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
@@ -218,12 +217,13 @@ class ContactSourceModel extends FormModel
     }
 
     /**
-     * @param ContactSource  $contactSource
-     * @param                $unit
+     * @param ContactSource $contactSource
+     * @param $unit
      * @param \DateTime|null $dateFrom
      * @param \DateTime|null $dateTo
-     * @param null           $dateFormat
-     * @param bool           $canViewOthers
+     * @param campaignId|null $
+     * @param null $dateFormat
+     * @param bool $canViewOthers
      *
      * @return array
      */
@@ -232,6 +232,7 @@ class ContactSourceModel extends FormModel
         $unit,
         \DateTime $dateFrom = null,
         \DateTime $dateTo = null,
+        $campaignId = null,
         $dateFormat = null,
         $canViewOthers = true
     ) {
@@ -245,16 +246,6 @@ class ContactSourceModel extends FormModel
         $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
 
         $params     = ['contactsource_id' => $contactSource->getId()];
-        $request    = Request::createFromGlobals();
-
-        if ($request->query->has('campaign')) {
-            $campaignId = $request->query->get('campaign');
-        } else {
-            $chartFilter = $request->request->get('sourcechartfilter', []);
-            if (isset($chartFilter['campaign'])) {
-                $campaignId = $chartFilter['campaign'];
-            }
-        }
 
         if (isset($campaignId)) {
             $params['campaign_id'] = (int) $campaignId;
@@ -379,6 +370,7 @@ class ContactSourceModel extends FormModel
         $type,
         \DateTime $dateFrom = null,
         \DateTime $dateTo = null,
+        $campaignId = null,
         $dateFormat = null,
         $canViewOthers = true
     ) {
@@ -390,24 +382,12 @@ class ContactSourceModel extends FormModel
         }
         $chart     = new LineChart($unit, $dateFrom, $dateToAdjusted, $dateFormat);
         $query     = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
-        $campaigns = $this->getCampaignsBySource($contactSource);
-
-        $request = Request::createFromGlobals();
-
-        if ($request->query->has('campaign')) {
-            $campaignId = $request->query->get('campaign');
-        } else {
-            $chartFilter = $request->request->get('sourcechartfilter', []);
-            if (isset($chartFilter['campaign'])) {
-                $campaignId = $chartFilter['campaign'];
-            }
-        }
 
         if (isset($campaignId)) {
             $campaign    = $this->getEntity($campaignId);
             $campaigns[] = ['campaign_id' => $campaign->getId(), 'name' => $campaign->getName()];
         } else {
-            $campaigns = $this->getCampaignList($contactSource);
+            $campaigns = $this->getCampaignsBySource($contactSource);
         }
 
         if ('cost' != $type) {

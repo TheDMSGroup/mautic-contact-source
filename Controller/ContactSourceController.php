@@ -162,6 +162,9 @@ class ContactSourceController extends FormController
             if ($this->request->query->has('campaign')) {
                 $chartFilterValues['campaign'] = $this->request->query->get('campaign');
             }
+            if (!isset($chartFilterValues['campaign'])) {
+                $chartFilterValues['campaign'] = null;
+            }
 
             $chartFilterForm = $this->get('form.factory')->create(
                 'sourcechartfilter',
@@ -189,7 +192,8 @@ class ContactSourceController extends FormController
                     $item,
                     null,
                     $dateFrom,
-                    $dateTo
+                    $dateTo,
+                    $chartFilterValues['campaign']
                 );
             } else {
                 $stats = $model->getStatsByCampaign(
@@ -197,7 +201,8 @@ class ContactSourceController extends FormController
                     null,
                     $chartFilterForm->get('type')->getData(),
                     $dateFrom,
-                    $dateTo
+                    $dateTo,
+                    $chartFilterValues['campaign']
                 );
             }
             $limits = [];
@@ -206,9 +211,16 @@ class ContactSourceController extends FormController
             } catch (\Exception $e) {
             }
 
+            $engagementFilters = [
+                'dateFrom'   => $chartFilterValues['date_from'],
+                'dateTo'     => $chartFilterValues['date_to'],
+                'campaignId' => $chartFilterValues['campaign'],
+                'type'       => $chartFilterValues['type'],
+            ];
+
             $args['viewParameters']['auditlog']        = $this->getAuditlogs($item);
             $args['viewParameters']['stats']           = $stats;
-            $args['viewParameters']['events']          = $model->getEngagements($item);
+            $args['viewParameters']['events']          = $model->getEngagements($item, $engagementFilters);
             $args['viewParameters']['chartFilterForm'] = $chartFilterForm->createView();
             $args['viewParameters']['limits']          = $limits;
         }
