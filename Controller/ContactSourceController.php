@@ -210,10 +210,17 @@ class ContactSourceController extends FormController
                 $limits = $model->evaluateAllCampaignLimits($item);
             } catch (\Exception $e) {
             }
+            
+            $engagementFilters = [
+                'dateFrom' => $chartFilterValues['date_from'],
+                'dateTo' => $chartFilterValues['date_to'],
+                'campaignId' => $chartFilterValues['campaign'],
+                'type' => $chartFilterValues['type']
+            ];
 
             $args['viewParameters']['auditlog']        = $this->getAuditlogs($item);
             $args['viewParameters']['stats']           = $stats;
-            $args['viewParameters']['events']          = $model->getEngagements($item);
+            $args['viewParameters']['events']          = $model->getEngagements($item, $engagementFilters);
             $args['viewParameters']['chartFilterForm'] = $chartFilterForm->createView();
             $args['viewParameters']['limits']          = $limits;
         }
