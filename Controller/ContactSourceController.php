@@ -162,6 +162,9 @@ class ContactSourceController extends FormController
             if ($this->request->query->has('campaign')) {
                 $chartFilterValues['campaign'] = $this->request->query->get('campaign');
             }
+            if (!isset($chartFilterValues['campaign'])) {
+                $chartFilterValues['campaign'] = null;
+            }
 
             $chartFilterForm = $this->get('form.factory')->create(
                 'sourcechartfilter',
@@ -189,7 +192,8 @@ class ContactSourceController extends FormController
                     $item,
                     null,
                     $dateFrom,
-                    $dateTo
+                    $dateTo,
+                    $chartFilterValues['campaign']
                 );
             } else {
                 $stats = $model->getStatsByCampaign(
@@ -197,7 +201,8 @@ class ContactSourceController extends FormController
                     null,
                     $chartFilterForm->get('type')->getData(),
                     $dateFrom,
-                    $dateTo
+                    $dateTo,
+                    $chartFilterValues['campaign']
                 );
             }
             $limits = [];
