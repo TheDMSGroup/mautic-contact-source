@@ -103,7 +103,7 @@ class CampaignSettings
      *
      * @throws \Exception
      */
-    private function setCampaignSettings(string $campaignSettings = null)
+    private function setCampaignSettings($campaignSettings = null)
     {
         if (!$campaignSettings) {
             throw new \Exception('Campaigns have not been mapped to this source.');
