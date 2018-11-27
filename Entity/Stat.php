@@ -312,7 +312,7 @@ class Stat
      *
      * @return Stat
      */
-    public function setCampaign(int $campaign_id)
+    public function setCampaign($campaign_id)
     {
         $this->campaign_id = $campaign_id;
 
