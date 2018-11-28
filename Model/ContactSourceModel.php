@@ -264,6 +264,8 @@ class ContactSourceModel extends FormModel
                 // For some reason, Mautic only sets UTC in Query Date builder
                 // if its an intra-day date range ¯\_(ツ)_/¯
                 // so we have to do it here.
+                $userTZ        = new \DateTime('now');
+                $userTzName    = $userTZ->getTimezone()->getName();
                 $paramDateTo   = $q->getParameter('dateTo');
                 $paramDateFrom = $q->getParameter('dateFrom');
                 $paramDateTo   = new \DateTime($paramDateTo);
@@ -272,14 +274,20 @@ class ContactSourceModel extends FormModel
                 $paramDateFrom = new \DateTime($paramDateFrom);
                 $paramDateFrom->setTimeZone(new \DateTimeZone('UTC'));
                 $q->setParameter('dateFrom', $paramDateFrom->format('Y-m-d H:i:s'));
+                $select    = $q->getQueryPart('select')[0];
+                $newSelect = str_replace(
+                    't.date_added,',
+                    "CONVERT_TZ(t.date_added, @@global.time_zone, '$userTzName'),",
+                    $select
+                );
+                $q->resetQueryPart('select');
+                $q->select($newSelect);
 
                 // AND adjust the group By, since its using db timezone Date values
-                $userTZ     = new \DateTime('now');
-                $interval   = abs($userTZ->getOffset() / 3600);
                 $groupBy    = $q->getQueryPart('groupBy')[0];
                 $newGroupBy = str_replace(
-                    'DATE_FORMAT(t.date_added,',
-                    "DATE_FORMAT(DATE_SUB(t.date_added, INTERVAL $interval HOUR),",
+                    't.date_added,',
+                    "CONVERT_TZ(t.date_added, @@global.time_zone, '$userTzName'),",
                     $groupBy
                 );
                 $q->resetQueryPart('groupBy');
@@ -376,6 +384,10 @@ class ContactSourceModel extends FormModel
     ) {
         $unit           = (null === $unit) ? $this->getTimeUnitFromDateRange($dateFrom, $dateTo) : $unit;
         $dateToAdjusted = clone $dateTo;
+
+        $userTZ        = new \DateTime('now');
+        $userTzName    = $userTZ->getTimezone()->getName();
+
         if (in_array($unit, ['H', 'i', 's'])) {
             // draw the chart with the correct intervals for intra-day
             $dateToAdjusted->setTime(23, 59, 59);
@@ -383,7 +395,7 @@ class ContactSourceModel extends FormModel
         $chart     = new LineChart($unit, $dateFrom, $dateToAdjusted, $dateFormat);
         $query     = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
 
-        if (isset($campaignId)) {
+        if (isset($campaignId) && !empty($campaignId)) {
             $campaign    = $this->getEntity($campaignId);
             $campaigns[] = ['campaign_id' => $campaign->getId(), 'name' => $campaign->getName()];
         } else {
@@ -414,14 +426,20 @@ class ContactSourceModel extends FormModel
                     $paramDateFrom = new \DateTime($paramDateFrom);
                     $paramDateFrom->setTimeZone(new \DateTimeZone('UTC'));
                     $q->setParameter('dateFrom', $paramDateFrom->format('Y-m-d H:i:s'));
+                    $select    = $q->getQueryPart('select')[0];
+                    $newSelect = str_replace(
+                        't.date_added,',
+                        "CONVERT_TZ(t.date_added, @@global.time_zone, '$userTzName'),",
+                        $select
+                    );
+                    $q->resetQueryPart('select');
+                    $q->select($newSelect);
 
                     // AND adjust the group By, since its using db timezone Date values
-                    $userTZ     = new \DateTime('now');
-                    $interval   = abs($userTZ->getOffset() / 3600);
                     $groupBy    = $q->getQueryPart('groupBy')[0];
                     $newGroupBy = str_replace(
-                        'DATE_FORMAT(t.date_added,',
-                        "DATE_FORMAT(DATE_SUB(t.date_added, INTERVAL $interval HOUR),",
+                        't.date_added,',
+                        "CONVERT_TZ(t.date_added, @@global.time_zone, '$userTzName'),",
                         $groupBy
                     );
                     $q->resetQueryPart('groupBy');
@@ -444,23 +462,24 @@ class ContactSourceModel extends FormModel
             }
         } else {
             // Revenue has a different scale and data source so do it as a one off
-            $q = $query->prepareTimeDataQuery(
-                'contactsource_stats',
-                'date_added',
-                [
-                    'contactsource_id' => $contactSource->getId(),
-                    'type'             => Stat::TYPE_ACCEPTED,
-                ]
-            );
-            if (!$canViewOthers) {
-                $this->limitQueryToCreator($q);
-            }
+
             $dbUnit        = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
             $dbUnit        = $query->translateTimeUnit($dbUnit);
-            $dateConstruct = 'DATE_FORMAT(t.date_added, \''.$dbUnit.'\')';
+            $dateConstruct = "DATE_FORMAT(CONVERT_TZ(t.date_added, @@global.time_zone, '$userTzName'), '$dbUnit.')";
             foreach ($campaigns as $key => $campaign) {
+                $q = $query->prepareTimeDataQuery(
+                    'contactsource_stats',
+                    'date_added',
+                    [
+                        'contactsource_id' => $contactSource->getId(),
+                        'type'             => Stat::TYPE_ACCEPTED,
+                    ]
+                );
+                if (!$canViewOthers) {
+                    $this->limitQueryToCreator($q);
+                }
                 $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution) * -1, 2) AS count')
-                    ->where('campaign_id= :campaign_id'.$key)
+                    ->andWhere('campaign_id= :campaign_id'.$key)
                     ->setParameter('campaign_id'.$key, $campaign['campaign_id'])
                     ->groupBy($dateConstruct);
                 $data = $query->loadAndBuildTimeData($q);
