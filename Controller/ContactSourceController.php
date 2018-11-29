@@ -212,11 +212,14 @@ class ContactSourceController extends FormController
             }
 
             $engagementFilters = [
-                'dateFrom'   => $chartFilterValues['date_from'],
-                'dateTo'     => $chartFilterValues['date_to'],
-                'campaignId' => $chartFilterValues['campaign'],
-                'type'       => $chartFilterValues['type'],
+                'dateFrom' => $chartFilterValues['date_from'],
+                'dateTo'   => $chartFilterValues['date_to'],
+                'type'     => $chartFilterValues['type'],
             ];
+
+            if (!empty($chartFilterValues['campaign'])) {
+                $engagementFilters['campaignId'] = $chartFilterValues['campaign'];
+            }
 
             $args['viewParameters']['auditlog']        = $this->getAuditlogs($item);
             $args['viewParameters']['stats']           = $stats;
