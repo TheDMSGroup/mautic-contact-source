@@ -217,6 +217,7 @@ class ContactSourceController extends FormController
                 'type'     => $chartFilterValues['type'],
             ];
 
+            // make sure its not empty
             if (!empty($chartFilterValues['campaign'])) {
                 $engagementFilters['campaignId'] = $chartFilterValues['campaign'];
             }
