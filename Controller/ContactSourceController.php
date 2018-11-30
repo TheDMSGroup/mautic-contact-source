@@ -211,13 +211,17 @@ class ContactSourceController extends FormController
             } catch (\Exception $e) {
             }
 
-            $engagementFilters = [
-                'dateFrom' => $chartFilterValues['date_from'],
-                'dateTo'   => $chartFilterValues['date_to'],
-                'type'     => $chartFilterValues['type'],
-            ];
-
-            // make sure its not empty
+            // Make sure none of these are empty.
+            $engagementFilters = [];
+            if (!empty($chartFilterValues['date_from'])) {
+                $engagementFilters['dateFrom'] = $chartFilterValues['date_from'];
+            }
+            if (!empty($chartFilterValues['date_to'])) {
+                $engagementFilters['dateTo'] = $chartFilterValues['date_to'];
+            }
+            if (!empty($chartFilterValues['type'])) {
+                $engagementFilters['type'] = $chartFilterValues['type'];
+            }
             if (!empty($chartFilterValues['campaign'])) {
                 $engagementFilters['campaignId'] = $chartFilterValues['campaign'];
             }
