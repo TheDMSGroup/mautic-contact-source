@@ -46,12 +46,14 @@ class PublicController extends CommonController
             ->setVerbose(true)
             ->handleInputPublic();
 
-        $result     = $ApiModel->getResult();
-        $parameters = [];
-
-        // Get list of campaigns.
-        $contactSourceModel         = $this->container->get('mautic.contactsource.model.contactsource');
-        $campaigns                  = $contactSourceModel->getCampaignList($ApiModel->getContactSource());
+        $result        = $ApiModel->getResult();
+        $parameters    = [];
+        $campaigns     = [];
+        $contactSource = $ApiModel->getContactSource();
+        if ($contactSource) {
+            $contactSourceModel = $this->container->get('mautic.contactsource.model.contactsource');
+            $campaigns          = $contactSourceModel->getCampaignList($ApiModel->getContactSource());
+        }
         $parameters['campaignList'] = $campaigns;
         $parameters['campaign']     = null;
 
