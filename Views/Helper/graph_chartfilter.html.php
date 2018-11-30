@@ -55,7 +55,9 @@ if (!isset($class)) {
                     maxDate: dateTo.val() ? new Date(dateTo.val()) : false
                 });
             },
-            timepicker: false
+            timepicker: false,
+            scrollMonth: false,
+            scrollInput: false
         });
 
         dateTo.datetimepicker({
@@ -66,7 +68,9 @@ if (!isset($class)) {
                     minDate: dateFrom.val() ? new Date(dateFrom.val()) : false
                 });
             },
-            timepicker: false
+            timepicker: false,
+            scrollMonth: false,
+            scrollInput: false
         });
     }
 </script>
