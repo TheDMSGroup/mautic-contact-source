@@ -12,7 +12,6 @@
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use Doctrine\DBAL\Query\QueryBuilder;
-use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CoreBundle\Helper\Chart\ChartQuery;
 use Mautic\CoreBundle\Helper\Chart\LineChart;
 use Mautic\CoreBundle\Helper\TemplatingHelper;
@@ -29,6 +28,7 @@ use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceTimelineEvent;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
@@ -51,6 +51,9 @@ class ContactSourceModel extends FormModel
     /** @var ContactModel */
     protected $contactModel;
 
+    /** @var Request */
+    protected $request;
+
     /**
      * ContactSourceModel constructor.
      *
@@ -72,6 +75,7 @@ class ContactSourceModel extends FormModel
         $this->templating     = $templating;
         $this->dispatcher     = $dispatcher;
         $this->contactModel   = $contactModel;
+        $this->request        = $dispatcher->getContainer()->get('request');
     }
 
     /**
@@ -740,8 +744,17 @@ class ContactSourceModel extends FormModel
      */
     public function getEntity($id = null)
     {
+        $contactModel = $this->contactModel;
         if (null === $id) {
             $entity =  new ContactSource();
+            $defaultUtmSource = $this->getRepository()->getDefaultUTMSource();
+            $entity->setUtmSource($defaultUtmSource);
+            return $entity;
+        }
+
+        if($this->request->attributes->get('objectAction') =='clone')
+        {
+            $entity = parent::getEntity($id);
             $defaultUtmSource = $this->getRepository()->getDefaultUTMSource();
             $entity->setUtmSource($defaultUtmSource);
             return $entity;
