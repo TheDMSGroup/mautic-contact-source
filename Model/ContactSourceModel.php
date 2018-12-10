@@ -746,17 +746,18 @@ class ContactSourceModel extends FormModel
     {
         $contactModel = $this->contactModel;
         if (null === $id) {
-            $entity =  new ContactSource();
+            $entity           =  new ContactSource();
             $defaultUtmSource = $this->getRepository()->getDefaultUTMSource();
             $entity->setUtmSource($defaultUtmSource);
+
             return $entity;
         }
 
-        if($this->request->attributes->get('objectAction') =='clone')
-        {
-            $entity = parent::getEntity($id);
+        if ('clone' == $this->request->attributes->get('objectAction')) {
+            $entity           = parent::getEntity($id);
             $defaultUtmSource = $this->getRepository()->getDefaultUTMSource();
             $entity->setUtmSource($defaultUtmSource);
+
             return $entity;
         }
 
