@@ -741,7 +741,10 @@ class ContactSourceModel extends FormModel
     public function getEntity($id = null)
     {
         if (null === $id) {
-            return new ContactSource();
+            $entity =  new ContactSource();
+            $defaultUtmSource = $this->getRepository()->getDefaultUTMSource();
+            $entity->setUtmSource($defaultUtmSource);
+            return $entity;
         }
 
         return parent::getEntity($id);

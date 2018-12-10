@@ -134,4 +134,17 @@ class ContactSourceRepository extends CommonRepository
 
         return $results;
     }
+
+    public function getDefaultUTMSource()
+        {
+            $q = $this->_em->getConnection()->createQueryBuilder()->from(MAUTIC_TABLE_PREFIX.'contactsource', 'cs');
+            $q->select('cs.utm_source');
+            $q->where('cs.utm_source REGEXP :regexp')->setParameter('regexp', '^[0-9]*$');
+            $q->orderBy('cs.utm_source', 'DESC')->setMaxResults(1);
+
+            $result = $q->execute()->fetch();
+            $defaultUtmSource = (int)$result['utm_source'] + 1;
+
+            return $defaultUtmSource;
+        }
 }
