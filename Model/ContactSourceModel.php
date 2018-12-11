@@ -52,9 +52,6 @@ class ContactSourceModel extends FormModel
     /** @var ContactModel */
     protected $contactModel;
 
-    /** @var Request */
-    protected $request;
-
     /**
      * ContactSourceModel constructor.
      *
@@ -76,7 +73,6 @@ class ContactSourceModel extends FormModel
         $this->templating     = $templating;
         $this->dispatcher     = $dispatcher;
         $this->contactModel   = $contactModel;
-        $this->request        = $dispatcher->getContainer()->get('request');
     }
 
     /**
@@ -753,7 +749,7 @@ class ContactSourceModel extends FormModel
             return $entity;
         }
 
-        if ('clone' == $this->request->attributes->get('objectAction')) {
+        if ('clone' == $this->dispatcher->getContainer()->get('request')->attributes->get('objectAction')) {
             $entity           = parent::getEntity($id);
             $defaultUtmSource = $this->getRepository()->getDefaultUTMSource();
             $entity->setUtmSource($defaultUtmSource);
