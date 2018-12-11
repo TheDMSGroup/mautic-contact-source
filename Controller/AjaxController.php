@@ -300,4 +300,18 @@ class AjaxController extends CommonAjaxController
 
         return $this->sendJsonResponse($data);
     }
+
+    /**
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @throws \Exception
+     */
+    public function confirmUtmSourceAction($request)
+    {
+        $utmSource          = $request->request->get('utmSource');
+        $contactSourceModel = $this->get('mautic.contactsource.model.contactsource');
+        $utmSourceExists    = $contactSourceModel->getRepository()->findBy(['utmSource' => $utmSource]);
+
+        return $this->sendJsonResponse(!empty($utmSourceExists) ? true : false);
+    }
 }

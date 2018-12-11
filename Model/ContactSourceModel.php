@@ -29,6 +29,7 @@ use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceTimelineEvent;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
@@ -741,7 +742,19 @@ class ContactSourceModel extends FormModel
     public function getEntity($id = null)
     {
         if (null === $id) {
-            return new ContactSource();
+            $entity           =  new ContactSource();
+            $defaultUtmSource = $this->getRepository()->getDefaultUTMSource();
+            $entity->setUtmSource($defaultUtmSource);
+
+            return $entity;
+        }
+
+        if ('clone' == $this->dispatcher->getContainer()->get('request')->attributes->get('objectAction')) {
+            $entity           = parent::getEntity($id);
+            $defaultUtmSource = $this->getRepository()->getDefaultUTMSource();
+            $entity->setUtmSource($defaultUtmSource);
+
+            return $entity;
         }
 
         return parent::getEntity($id);
