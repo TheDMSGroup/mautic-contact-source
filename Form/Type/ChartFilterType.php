@@ -125,11 +125,11 @@ class ChartFilterType extends AbstractType
                 'choices'     => $campaigns,
                 'attr'        => [
                     'class'   => 'form-control',
-                    'tooltip' => 'mautic.contactclient.transactions.campaign_tooltip',
+                    'tooltip' => 'mautic.contactsource.transactions.campaign_tooltip',
                 ],
                 'expanded'    => false,
                 'multiple'    => false,
-                'label'       => 'mautic.contactclient.transactions.campaign_select',
+                'label'       => 'mautic.contactsource.transactions.campaign_select',
                 'label_attr'  => ['class' => 'control-label'],
                 'empty_data'  => 'All Campaigns',
                 'required'    => false,
