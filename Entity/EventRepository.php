@@ -61,12 +61,11 @@ class EventRepository extends CommonRepository
 
     /**
      * @param       $contactSourceId
-     * @param int   $contactId
      * @param array $options
      *
      * @return array
      */
-    public function getEventsForTimeline($contactSourceId, $contactId = null, array $options = [])
+    public function getEventsForTimeline($contactSourceId, array $options = [])
     {
         $query = $this->getEntityManager()->getConnection()->createQueryBuilder()
             ->from(MAUTIC_TABLE_PREFIX.'contactsource_events', 'c')
@@ -77,13 +76,12 @@ class EventRepository extends CommonRepository
         )
             ->setParameter('contactSourceId', $contactSourceId);
 
-        if ($contactId) {
-            $query->andWhere('c.contact_id = :contact_id');
-            $query->setParameter('contact_id', $contactId);
+        if (null != Request::createFromGlobals()->get('campaign') && !empty(Request::createFromGlobals()->get('campaign'))) {
+            $campaignId = Request::createFromGlobals()->get('campaign');
+        } elseif (isset($options['filters']['campaignId']) && !empty($options['filters']['campaignId'])) {
+            $campaignId = $options['filters']['campaignId'];
         }
-
-        $campaignId = Request::createFromGlobals()->get('campaign');
-        if ($campaignId) {
+        if (isset($campaignId) && !empty($campaignId)) {
             $query->join(
                 'c',
                 'contactsource_stats', 's',
@@ -93,31 +91,37 @@ class EventRepository extends CommonRepository
             ->setParameter('campaignId', $campaignId);
         }
 
-        if (isset($options['search']) && $options['search']) {
-            if (is_numeric($options['search']) && !$contactId) {
-                $expr = $query->expr()->orX(
-                    $query->expr()->eq('c.contact_id', (int) $options['search'])
+        if (isset($options['filters']['message']) && !empty($options['filters']['message'])) {
+            $query->andWhere('c.message LIKE :message')
+                ->setParameter('message', '%'.trim($options['filters']['message']).'%');
+        }
+        if (isset($options['filters']['contact_id']) && !empty($options['filters']['contact_id'])) {
+            $query->andWhere('c.contact_id = :contact')
+                ->setParameter('contact', trim($options['filters']['contact_id']));
+        }
+        if (isset($options['filters']['type']) && !empty($options['filters']['type'])) {
+            $query->andWhere('c.type = :type')
+                ->setParameter('type', trim($options['filters']['type']));
+        }
+
+        if (isset($options['dateFrom'])) {
+            $query->andWhere('c.date_added >= :dateFrom')
+                ->setParameter(
+                    'dateFrom',
+                    $options['dateFrom']->setTimeZone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s')
                 );
-            } else {
-                $expr = $query->expr()->orX(
-                    $query->expr()->eq('c.type', ':search'),
-                    $query->expr()->like('c.message', $query->expr()->literal('%'.$options['search'].'%'))
-                );
-            }
-            $query->andWhere($expr);
-            $query->setParameter('search', $options['search']);
         }
 
         if (!empty($options['fromDate']) && !empty($options['toDate'])) {
-            $query->andWhere('c.date_added BETWEEN :dateFrom AND :dateTo')
-                ->setParameter('dateFrom', $options['fromDate']->format('Y-m-d H:i:s'))
-                ->setParameter('dateTo', $options['toDate']->format('Y-m-d 23:59:59'));
+            $query->andWhere('c.date_added BETWEEN FROM_UNIXTIME(:dateFrom) AND FROM_UNIXTIME(:dateTo)')
+                ->setParameter('dateFrom', $options['fromDate']->getTimestamp())
+                ->setParameter('dateTo', $options['toDate']->getTimestamp());
         } elseif (!empty($options['fromDate'])) {
-            $query->andWhere($query->expr()->gte('c.date_added', ':dateFrom'))
-                ->setParameter('dateFrom', $options['fromDate']->format('Y-m-d H:i:s'));
+            $query->andWhere($query->expr()->gte('c.date_added', 'FROM_UNIXTIME(:dateFrom)'))
+                ->setParameter('dateFrom', $options['fromDate']->getTimestamp());
         } elseif (!empty($options['toDate'])) {
-            $query->andWhere($query->expr()->lte('c.date_added', ':dateTo'))
-                ->setParameter('dateTo', $options['toDate']->format('Y-m-d 23:59:59'));
+            $query->andWhere($query->expr()->lte('c.date_added', 'FROM_UNIXTIME(:dateTo)'))
+                ->setParameter('dateTo', $options['toDate']->getTimestamp());
         }
 
         if (isset($options['order']) && !empty($options['order'])) {

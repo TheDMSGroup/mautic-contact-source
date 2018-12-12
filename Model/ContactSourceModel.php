@@ -229,8 +229,8 @@ class ContactSourceModel extends FormModel
      * @param \DateTime|null $dateFrom
      * @param \DateTime|null $dateTo
      * @param campaignId|null $
-     * @param null           $dateFormat
-     * @param bool           $canViewOthers
+     * @param null $dateFormat
+     * @param bool $canViewOthers
      *
      * @return array
      */
@@ -531,10 +531,10 @@ class ContactSourceModel extends FormModel
             'default_daterange_filter',
             'midnight -1 month'
         );
-        $dateTo   = isset($dateParams['dateTo']) && !empty($dateParams['dateTo']) ? $dateParams['dateTo']->setTime(23,59,59) : new \DateTime(
+        $dateTo   = isset($dateParams['dateTo']) && !empty($dateParams['dateTo']) ? $dateParams['dateTo']->setTime(23, 59, 59) : new \DateTime(
             'midnight -1 second'
         );
-        $dateFrom = isset($dateParams['dateFrom']) && !empty($dateParams['dateFrom']) ? $dateParams['dateFrom']->setTime(00,00,00) : new \DateTime(
+        $dateFrom = isset($dateParams['dateFrom']) && !empty($dateParams['dateFrom']) ? $dateParams['dateFrom']->setTime(00, 00, 00) : new \DateTime(
             $default
         );
 
@@ -546,6 +546,7 @@ class ContactSourceModel extends FormModel
         $q->orderBY('c.name', 'ASC');
 
         $result =  $q->execute()->fetchAll();
+
         return $result;
     }
 
@@ -570,9 +571,25 @@ class ContactSourceModel extends FormModel
         $forTimeline = true
     ) {
         $orderBy = empty($orderBy) ? ['date_added', 'DESC'] : $orderBy;
+        $session = $this->dispatcher->getContainer()->get('session');
 
-        if (!isset($filters['search'])) {
-            $filters['search'] = null;
+        if (null === $filters || empty($filters)) {
+            $sourcechartFilters = $session->get('mautic.contactsource.'.$contactSource->getId().'.sourcechartfilter');
+
+            $dateFrom     = new \DateTime($sourcechartFilters['date_from']);
+            $dateFrom->setTime(00, 00, 00); // set to beginning of day, Timezone should be OK.
+
+            $dateTo       = new \DateTime($sourcechartFilters['date_to']);
+            $dateTo->setTime(23, 59, 59);
+
+            $filters      = [
+                'dateFrom'   => $dateFrom,
+                'dateTo'     => $dateTo,
+                'type'       => $sourcechartFilters['type'],
+            ];
+            if (isset($sourcechartFilters['campaign']) && !empty($sourcechartFilters['campaign'])) {
+                $filters['campaignId'] = $sourcechartFilters['campaign'];
+            }
         }
 
         $event   = $this->dispatcher->dispatch(

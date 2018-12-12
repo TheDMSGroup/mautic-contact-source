@@ -133,7 +133,7 @@ $token = $item->getToken();
                 <li class="active">
                     <a href="#timeline-container" role="tab" data-toggle="tab">
                         <span class="label label-primary mr-sm" id="TimelineCount">
-                            <?php echo $events['total']; ?>
+                          <?php // total inserted here by ajax js?>
                         </span>
                         <?php echo $view['translator']->trans('mautic.contactsource.timeline.events'); ?>
                     </a>
@@ -164,9 +164,8 @@ $token = $item->getToken();
                 <!-- #history-container -->
                 <div class="tab-pane fade in active bdr-w-0" id="timeline-container">
                     <?php echo $view->render(
-                        'MauticContactSourceBundle:Timeline:list.html.php',
+                        'MauticContactSourceBundle:Timeline:index.html.php',
                         [
-                            'events'        => $events,
                             'contactSource' => $item,
                             'tmpl'          => 'index',
                         ]
@@ -242,6 +241,4 @@ $token = $item->getToken();
         buttonContainer.append('<li><a href="' + mauticBasePath + '/s/contacts/import/new?source=<?php echo $item->getId(); ?>"><span><i class="fa fs-fw fa-sign-in text-success"></i><span> Import Contacts</span></span></a></li>');
         buttonContainer.addClass('importAdded');
     }
-
-
 </script>

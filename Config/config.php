@@ -27,7 +27,7 @@ return [
             ],
             'mautic_contactsource_timeline_action' => [
                 'path'         => '/s/contactsource/timeline/{contactSourceId}/{page}',
-                'controller'   => 'MauticContactSourceBundle:Timeline:index',
+                'controller'   => 'MauticContactSourceBundle:Ajax:ajaxTimeline',
                 'requirements' => [
                     'contactSourceId' => '\d+',
                     'objectId'        => '\d+',

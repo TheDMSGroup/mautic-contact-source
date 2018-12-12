@@ -1,9 +1,31 @@
+// load the ContactSource timeline table on initial page load
+Mautic.contactsourceTimelineTable = function (contactsourceId) {
+    var $tableTarget = mQuery('#timeline-table');
+    if ($tableTarget.length && !$tableTarget.hasClass('table-initialized')) {
+        // Make ajax call
+        mQuery.ajax({
+            url: mauticAjaxUrl,
+            type: 'POST',
+            data: {
+                action: 'plugin:mauticContactSource:ajaxTimeline',
+                objectId: contactsourceId
+            },
+            cache: true,
+            dataType: 'json',
+            success: function (response) {
+                if(response.success>0){
+                    mQuery('#sourceTransactions-builder-overlay').hide();
+                    $tableTarget.append(response.html);
+                    mQuery('#timeline-table').addClass('table-initialized');
+                    Mautic.contactsourceTimelineOnLoad();
+                }
+            } // end ajax success
+        }); // end ajax call
+    } // end if tableTarget exists
+};
+
 Mautic.contactsourceTimelineOnLoad = function (container, response) {
-
-    var sortedColumn = mQuery('#contactsource-timeline a[data-sort=' + sortField + '] i');
-    sortedColumn.addClass('fa-sort-amount-' + sortDirection);
-    sortedColumn.removeClass('fa-sort');
-
+    // Function for activating Codemirror in transactions
     var codeMirror = function ($el) {
         if (!$el.hasClass('codemirror-active')) {
             var $textarea = $el.find('textarea.codeMirror-json');
@@ -48,7 +70,7 @@ Mautic.contactsourceTimelineOnLoad = function (container, response) {
             mQuery(this).find('span').first().removeClass('fa-level-up').addClass('fa-level-down');
         }
     });
-    mQuery('#contactsource-timeline a[data-activate-details!=\'all\']').on('click', function () {
+    mQuery('#contactsource-timeline .timeline-icon a[data-activate-details!=\'all\']').on('click', function () {
         var detailsId = mQuery(this).data('activate-details');
         if (detailsId && mQuery('#timeline-details-' + detailsId).length) {
             var activateDetailsState = mQuery(this).hasClass('active'),
@@ -67,30 +89,70 @@ Mautic.contactsourceTimelineOnLoad = function (container, response) {
     });
 
 
-    mQuery('#contactsource-timeline a.timeline-header-sort').on('click', function () {
-        var column = mQuery(this).data('sort');
-        var newDirection;
-        if(column!=sortField){
-            newDirection = 'DESC';
-        } else {
-            newDirection = sortDirection=='desc' ? 'ASC' : 'DESC';
-        }
-        mQuery('#orderBy').val(column + ':' + newDirection);
-        // trigger a form submit
-        mQuery('#timeline-filters').submit();
-
+    // add Transaction Totals to the tab
+    mQuery('span#TimelineCount').html(contactSource.transactionsTotal);
+    mQuery('#transactions-filter-btn').unbind('click').click(function () {
+        mQuery('.transaction-filter').toggle();
     });
 
-    mQuery('#timeline-table:first .pagination:first a').off('click').on('click', function (e) {
-        e.preventDefault();
-        var urlbase = this.href.split('?')[0];
-        var page = urlbase.split('/')[4];
-        mQuery('#page').val(page);
-        // trigger a form submit
-        mQuery('#timeline-filters').submit();
+    // Register Form Submission control events
+    mQuery('#timeline-table .pagination-wrapper .pagination a').not('.disabled a').click(function (event) {
+        event.preventDefault();
+        var arg = this.href.split('?')[0];
+        var page = arg.substr(arg.lastIndexOf("page/")+5);
+        var filterForm = mQuery('#transactions-filters');
+        mQuery('#transactions_page').val(page);
+        Mautic.startPageLoadingBar();
+        filterForm.submit();
     });
 
-    if (response && typeof response.timelineCount !== 'undefined') {
-        mQuery('#TimelineCount').html(response.timelineCount);
-    }
+    mQuery('.timeline-header-sort').click(function (event) {
+        var filterForm = mQuery('#transactions-filters');
+        mQuery('#orderby').val(mQuery(this).data('sort'));
+        mQuery('#orderbydir').val(mQuery(this).data('sort_dir'));
+        Mautic.startPageLoadingBar();
+        filterForm.submit();
+    });
+
+    mQuery('.transaction-filter').change(function (event) {
+        var filterForm = mQuery('#transactions-filters');
+        mQuery('#transactions_page').val(1); // reset page to 1 when filtering
+        Mautic.startPageLoadingBar();
+        filterForm.submit();
+    });
+
+    mQuery('#transactions-filters').submit(function (event) {
+        event.preventDefault(); // Prevent the form from submitting via the browser
+        Mautic.contactSourceTransactionFormSubmit(this);
+
+    });
 };
+
+Mautic.contactSourceTransactionFormSubmit = function(form){
+    //merge the sourcechartfilter form to the transaction filter before re-submiting it
+    mQuery('#transactions_dateFrom').val(mQuery('#sourcechartfilter_date_from').val());
+    mQuery('#transactions_dateTo').val(mQuery('#sourcechartfilter_date_to').val());
+    mQuery('#transactions_campaignId').val(mQuery('#sourcechartfilter_campaign').val());
+    //merge the filter fields to the transaction filter before re-submiting it
+    mQuery('#transaction_message').val(mQuery('#filter-message').val());
+    mQuery('#transaction_contact_id').val(mQuery('#filter-contact_id').val());
+    mQuery('#transaction_type').val(mQuery('#filter-type').val());
+    var form = $(form);
+    mQuery.ajax({
+        type: form.attr('method'),
+        url: mauticAjaxUrl,
+        data: {
+            action: 'plugin:mauticContactSource:ajaxTimeline',
+            filters: form.serializeArray(),
+            objectId: contactSource.id
+        }
+    }).done(function (data) {
+        mQuery('div#timeline-table').html(data.html);
+        mQuery('span#TimelineCount').html(data.total);
+        Mautic.contactsourceTimelineOnLoad();
+        Mautic.stopPageLoadingBar();
+    }).fail(function (data) {
+        // Optionally alert the user of an error here...
+        alert('Ooops! Something went wrong');
+    });
+}

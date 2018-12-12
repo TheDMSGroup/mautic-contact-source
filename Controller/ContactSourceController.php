@@ -145,26 +145,32 @@ class ContactSourceController extends FormController
     public function customizeViewArguments($args, $view)
     {
         if ('view' == $view) {
+            $session = $this->get('session');
+
             /** @var \MauticPlugin\MauticContactSourceBundle\Entity\ContactSource $item */
             $item = $args['viewParameters']['item'];
 
             // For line graphs in the view
-            $chartFilterValues = $this->request->get('sourcechartfilter', []);
-            if (!isset($chartFilterValues['date_from'])) {
-                $from                           = new \DateTime(
-                    $this->factory->getParameter('default_daterange_filter', '-1 month')
-                );
-                $to                             = new \DateTime();
-                $chartFilterValues['date_from'] = $from->format('Y-m-d H:i:s');
-                $chartFilterValues['date_to']   = $to->format('Y-m-d H:i:s');
+            if ('POST' == $this->request->getMethod() && $this->request->request->has('sourcechartfilter')) {
+                $chartFilterValues = $this->request->get('sourcechartfilter');
+            } else {
+                $chartFilterValues = $session->get('mautic.contactsource.'.$item->getId().'.sourcechartfilter')
+                    ? $session->get('mautic.contactsource.'.$item->getId().'.sourcechartfilter')
+                    : [
+                        'date_from' => $this->get('mautic.helper.core_parameters')->getParameter('default_daterange_filter', 'midnight -1 month'),
+                        'date_to'   => 'midnight tomorrow -1 second',
+                        'type'      => '',
+                    ];
             }
 
             if ($this->request->query->has('campaign')) {
                 $chartFilterValues['campaign'] = $this->request->query->get('campaign');
             }
-            if (!isset($chartFilterValues['campaign'])) {
+            if (!isset($chartFilterValues['campaign']) || empty($chartFilterValues['campaign'])) {
                 $chartFilterValues['campaign'] = null;
             }
+
+            $session->set('mautic.contactsource.'.$item->getId().'.sourcechartfilter', $chartFilterValues);
 
             $chartFilterForm = $this->get('form.factory')->create(
                 'sourcechartfilter',
@@ -184,10 +190,10 @@ class ContactSourceController extends FormController
             $model = $this->getModel('contactsource');
 
             // fix dates
-            $dateFrom = new \DateTime($chartFilterForm->get('date_from')->getData());
-            $dateTo   = new \DateTime($chartFilterForm->get('date_to')->getData());
+            $dateFrom = new \DateTime($chartFilterValues['date_from']);
+            $dateTo   = new \DateTime($chartFilterValues['date_to']);
 
-            if (in_array($chartFilterForm->get('type')->getData(), ['All Events', null])) {
+            if (in_array($chartFilterValues['type'], ['All Events', null, ''])) {
                 $stats = $model->getStats(
                     $item,
                     null,
@@ -199,7 +205,7 @@ class ContactSourceController extends FormController
                 $stats = $model->getStatsByCampaign(
                     $item,
                     null,
-                    $chartFilterForm->get('type')->getData(),
+                    $chartFilterValues['type'],
                     $dateFrom,
                     $dateTo,
                     $chartFilterValues['campaign']
@@ -211,24 +217,8 @@ class ContactSourceController extends FormController
             } catch (\Exception $e) {
             }
 
-            // Make sure none of these are empty.
-            $engagementFilters = [];
-            if (!empty($chartFilterValues['date_from'])) {
-                $engagementFilters['dateFrom'] = $chartFilterValues['date_from'];
-            }
-            if (!empty($chartFilterValues['date_to'])) {
-                $engagementFilters['dateTo'] = $chartFilterValues['date_to'];
-            }
-            if (!empty($chartFilterValues['type'])) {
-                $engagementFilters['type'] = $chartFilterValues['type'];
-            }
-            if (!empty($chartFilterValues['campaign'])) {
-                $engagementFilters['campaignId'] = $chartFilterValues['campaign'];
-            }
-
             $args['viewParameters']['auditlog']        = $this->getAuditlogs($item);
             $args['viewParameters']['stats']           = $stats;
-            $args['viewParameters']['events']          = $model->getEngagements($item, $engagementFilters);
             $args['viewParameters']['chartFilterForm'] = $chartFilterForm->createView();
             $args['viewParameters']['limits']          = $limits;
         }

@@ -14,6 +14,7 @@ namespace MauticPlugin\MauticContactSourceBundle\Controller;
 use Mautic\CampaignBundle\Entity\CampaignRepository;
 use Mautic\CoreBundle\Controller\AjaxController as CommonAjaxController;
 use Mautic\CoreBundle\Controller\AjaxLookupControllerTrait;
+use Mautic\CoreBundle\Helper\InputHelper;
 use Mautic\CoreBundle\Helper\UTF8Helper;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -23,48 +24,71 @@ use Symfony\Component\HttpFoundation\Request;
 class AjaxController extends CommonAjaxController
 {
     use AjaxLookupControllerTrait;
+    use ContactSourceAccessTrait;
+    use ContactSourceDetailsTrait;
 
     /**
      * @param Request $request
      *
-     * @return mixed
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     *
+     * @throws \Exception
      */
     public function ajaxTimelineAction(Request $request)
     {
-        $filters = [];
+        $dataArray = [
+            'html'    => '',
+            'success' => 0,
+        ];
+        $filters   = [];
         /** @var \MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel $contactSourceModel */
         $contactSourceModel = $this->get('mautic.contactsource.model.contactsource');
 
-        foreach ($request->request->get('filters') as $key => $filter) {
-            $filter['name']           = str_replace(
-                '[]',
-                '',
-                $filter['name']
-            ); // the serializeArray() js method seems to add [] to the key ???
-            $filters[$filter['name']] = $filter['value'];
-        }
-        if (isset($filters['contactSourceId'])) {
-            if (!$contactSource = $contactSourceModel->getEntity($filters['contactSourceId'])) {
-                throw new \InvalidArgumentException('Contact Source argument is Invalid.');
+        // filters means the transaction table had a column sort, filter submission or pagination, otherwise its a fresh page load
+        if ($request->request->has('filters')) {
+            foreach ($request->request->get('filters') as $filter) {
+                if (in_array($filter['name'], ['dateTo', 'dateFrom']) && !empty($filter['value'])) {
+                    $filter['value']        = new \DateTime($filter['value']);
+                    list($hour, $min, $sec) = 'dateTo' == $filter['name'] ? [23, 59, 59] : [00, 00, 00];
+                    $filter['value']->setTime($hour, $min, $sec);
+                }
+                if (!empty($filter['value'])) {
+                    $filters[$filter['name']] = $filter['value'];
+                }
             }
-        } else {
-            throw new \InvalidArgumentException('Contact Source argument is Missing.');
         }
-        $orderBy = isset($filters['orderBy']) ? explode(':', $filters['orderBy']) : null;
-        $page    = isset($filters['page']) ? $filters['page'] : 1;
-        $limit   = isset($filters['limit']) ? $filters['limit'] : 25;
+        $page     = isset($filters['page']) && !empty($filters['page']) ? $filters['page'] : 1;
+        $objectId = InputHelper::clean($request->request->get('objectId'));
+        if (empty($objectId)) {
+            return $this->sendJsonResponse($dataArray);
+        }
 
-        $events = $contactSourceModel->getEngagements($contactSource, $filters, $orderBy, $page, $limit, true);
-        $view   = $this->render(
+        $contactSource = $contactSourceModel->getEntity($objectId);
+
+        $order = [
+            'date_added',
+            'DESC',
+        ];
+        if (isset($filters['orderby']) && !empty($filters['orderby'])) {
+            $order[0] = $filters['orderby'];
+        }
+        if (isset($filters['orderbydir']) && !empty($filters['orderbydir'])) {
+            $order[1] = $filters['orderbydir'];
+        }
+        $transactions         = $contactSourceModel->getEngagements($contactSource, $filters, $order, $page);
+        $dataArray['html']    = $this->renderView(
             'MauticContactSourceBundle:Timeline:list.html.php',
             [
-                'events'        => $events,
-                'contactSource' => $contactSource,
-                'tmpl'          => '',
+                'page'                => $page,
+                'contactSource'       => $contactSource,
+                'transactions'        => $transactions,
+                'order'               => $order,
             ]
         );
+        $dataArray['success'] = 1;
+        $dataArray['total']   = $transactions['total'];
 
-        return $view;
+        return $this->sendJsonResponse($dataArray);
     }
 
     /**
