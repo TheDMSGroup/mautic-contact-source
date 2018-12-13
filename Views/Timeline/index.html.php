@@ -13,7 +13,7 @@
     <!-- Export button -->
     <div class="btn-group col-xs-2 pb-md">
         <a class="btn btn-default"
-           onclick="Mautic.contactClientTimelineExport(<?php echo $contactSource->getId(); ?>);">
+           onclick="Mautic.contactSourceTimelineExport(<?php echo $contactSource->getId(); ?>);">
              <span>
                 <i class="fa fa-download"></i><span class="hidden-xs hidden-sm">Export</span>
              </span>

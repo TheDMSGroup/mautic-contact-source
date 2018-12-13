@@ -26,11 +26,17 @@ return [
                 'controller' => 'MauticContactSourceBundle:ContactSource:execute',
             ],
             'mautic_contactsource_timeline_action' => [
-                'path'         => '/s/contactsource/timeline/{contactSourceId}/{page}',
+                'path'         => '/contactsource/timeline/{contactSourceId}',
                 'controller'   => 'MauticContactSourceBundle:Ajax:ajaxTimeline',
                 'requirements' => [
                     'contactSourceId' => '\d+',
-                    'objectId'        => '\d+',
+                ],
+            ],
+            'mautic_contactsource_timeline_export' => [
+                'path'         => '/contactsource/transactions/export/{contactSourceId}',
+                'controller'   => 'MauticContactSourceBundle:Timeline:batchExport',
+                'requirements' => [
+                    'contactSourceId' => '\d+',
                 ],
             ],
         ],

@@ -65,7 +65,7 @@ class EventRepository extends CommonRepository
      *
      * @return array
      */
-    public function getEventsForTimeline($contactSourceId, array $options = [])
+    public function getEventsForTimeline($contactSourceId, array $options = [], $count = false)
     {
         $query = $this->getEntityManager()->getConnection()->createQueryBuilder()
             ->from(MAUTIC_TABLE_PREFIX.'contactsource_events', 'c')
@@ -144,6 +144,11 @@ class EventRepository extends CommonRepository
                 ->setFirstResult(null)
                 ->setMaxResults(null)
                 ->select('count(*)');
+            // unjoin if possible for perf reasons
+            if ($count && (!isset($campaignId) || empty($campaignId)))
+            {
+                $query->resetQueryParts(['join']);
+            }
 
             $total = $query->execute()->fetchColumn();
 
@@ -155,6 +160,81 @@ class EventRepository extends CommonRepository
 
         return $results;
     }
+
+    /**
+     * @param       $contactSourceId
+     * @param int   $contactId
+     * @param array $options
+     *
+     * @return array
+     */
+    public function getEventsForTimelineExport($contactSourceId, array $options = [], $count)
+    {
+        $query = $this->getEntityManager()->getConnection()->createQueryBuilder()
+            ->from(MAUTIC_TABLE_PREFIX.'contactsource_events', 'c');
+        if ($count) {
+            $query->select('COUNT(c.id) as count');
+        } else {
+            $query->select('c.type, c.date_added, c.message, c.contact_id, c.logs');
+        }
+
+        $query->where(
+            $query->expr()->eq('c.contactsource_id', ':contactSourceId')
+        )
+            ->setParameter('contactSourceId', $contactSourceId);
+
+        if (!empty($options['dateFrom']) && !empty($options['dateTo'])) {
+            $query->andWhere('c.date_added BETWEEN FROM_UNIXTIME(:dateFrom) AND FROM_UNIXTIME(:dateTo)')
+                ->setParameter('dateFrom', $options['dateFrom']->setTime(00,00,00)->getTimestamp())
+                ->setParameter('dateTo', $options['dateTo']->setTime(23,59,59)->getTimestamp());
+        } elseif (!empty($options['dateFrom'])) {
+            $query->andWhere($query->expr()->gte('c.date_added', 'FROM_UNIXTIME(:dateFrom)'))
+                ->setParameter('dateFrom', $options['dateFrom']->setTime(00,00,00)->getTimestamp());
+        } elseif (!empty($options['dateTo'])) {
+            $query->andWhere($query->expr()->lte('c.date_added', 'FROM_UNIXTIME(:dateTo)'))
+                ->setParameter('dateTo', $options['dateTo']->setTime(23,59,59)->getTimestamp());
+        }
+
+        if (isset($options['message']) && !empty($options['message'])) {
+            $query->andWhere('c.message LIKE :message')
+                ->setParameter('message', '%'.trim($options['message']).'%');
+        }
+
+        if (isset($options['contact_id']) && !empty($options['contact_id'])) {
+            $query->andWhere('c.contact_id = :contact')
+                ->setParameter('contact', trim($options['contact_id']));
+        }
+
+        if (isset($options['type']) && !empty($options['type'])) {
+            $query->andWhere('c.type = :type')
+                ->setParameter('type', trim($options['type']));
+        }
+
+        if (isset($options['campaignId']) && !empty($options['campaignId'])) {
+            $query->join(
+                'c',
+                'contactsource_stats', 's',
+                'c.contactsource_id = s.contactsource_id AND c.contact_id = s.contact_id'
+            )
+                ->andWhere($query->expr()->eq('s.campaign_id', ':campaignId'))
+                ->setParameter('campaignId', $options['campaignId']);
+        }
+
+        $query->orderBy('c.date_added', 'DESC');
+
+        if (!empty($options['limit'])) {
+            $query->setMaxResults($options['limit']);
+            if (!empty($options['start'])) {
+                $query->setFirstResult($options['start']);
+            }
+        }
+
+        $results = $query->execute()->fetchAll();
+
+        return $results;
+    }
+
+
 
     /**
      * Get a list of entities.

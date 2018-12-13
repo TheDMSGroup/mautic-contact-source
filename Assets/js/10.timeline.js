@@ -156,3 +156,21 @@ Mautic.contactSourceTransactionFormSubmit = function(form){
         alert('Ooops! Something went wrong');
     });
 }
+
+// Export
+Mautic.contactSourceTimelineExport = function (contactSourceId) {
+    // grab timeline filter values to send for export params
+    var messageVar = mQuery('#filter-message').val();
+    var typeVar = mQuery('#filter-type').val();
+    var contact_idVar = mQuery('#filter-contact_id').val();
+    var params = jQuery.param({
+        message: messageVar,
+        type: typeVar,
+        contact_id: contact_idVar
+    });
+    var frame = document.createElement('iframe');
+    var src = mauticBaseUrl + 's/contactsource/transactions/export/' + contactSourceId + '?' + params;
+    frame.setAttribute('src', src);
+    frame.setAttribute('style', 'display: none');
+    document.body.appendChild(frame);
+};
