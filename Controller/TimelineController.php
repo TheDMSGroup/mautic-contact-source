@@ -12,7 +12,6 @@
 namespace MauticPlugin\MauticContactSourceBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
-use Mautic\CoreBundle\Helper\InputHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -42,11 +41,18 @@ class TimelineController extends CommonController
         // send a stream csv file of the timeline
         $name        = 'ContactSourceTransactionsExport';
         $headers     = [
+            'id',
             'type',
             'date_added',
             'message',
             'contact_id',
-            'log',
+            'campaign_id',
+            'campaign_name',
+            'realTime',
+            'scrubbed',
+            'utmSource',
+            'event_id',
+            'event_client',
         ];
         $session     = $this->get('session');
         $chartFilter = $session->get('mautic.contactsource.'.$contactSource->getId().'.sourcechartfilter');
@@ -71,16 +77,29 @@ class TimelineController extends CommonController
             function () use ($params, $headers, $contactSource, $count, $eventRepository) {
                 $handle = fopen('php://output', 'w+');
                 fputcsv($handle, $headers);
-                while ($params['start'] < $count[0]['count']) {
+                $iterator = 0;
+                while ($iterator < $count[0]['count']) {
                     $timelineData = $eventRepository->getEventsForTimelineExport(
                         $contactSource->getId(),
                         $params,
                         false
                     );
                     foreach ($timelineData as $data) {
-                        fputcsv($handle, array_values($data));
+                        // depracating use of YAML for event logs, but need to be backward compatible
+                        $csvRows = $data['logs'][0] === '{' ?
+                            $this->parseLogJSONBlob(
+                                $data
+                            ) :
+                            $this->parseLogYAMLBlob(
+                                $data
+                            );
+                        // a single data row can be multiple operations and subsequent rows
+                        foreach ($csvRows as $csvRow) {
+                            fputcsv($handle, array_values($csvRow));
+                        }
                     }
-                    $params['start'] += $params['limit'];
+                    $iterator        = $iterator + $params['limit'];
+                    $params['start'] = $data['id'];
                 }
                 fclose($handle);
             }
@@ -91,5 +110,81 @@ class TimelineController extends CommonController
         $response->headers->set('Content-Disposition', 'attachment; filename="'.$fileName.'"');
 
         return $response;
+    }
+
+    /**
+     * @param $data
+     *
+     * @return array
+     */
+    private function parseLogJSONBlob($data)
+    {
+        $json = json_decode($data['logs'], true);
+        unset($data['logs']);
+        $rows    = [];
+        $columns = [
+            'realTime',
+            'scrubbed',
+            'utmSource',
+        ];
+
+        if (!empty($json)) {
+            $data['campaign_id']   = isset($json['campaign']['id']) ? $json['campaign']['id'] : '';
+            $data['campaign_name'] = isset($json['campaign']['name']) ? $json['campaign']['name'] : '';
+
+            foreach ($columns as $column) {
+                $data[$column] = isset($json[$column]) ? var_export($json[$column], true) : '';
+            }
+
+            foreach ($json['events'] as $id => $event) {
+                $row = $data;
+
+                $row['event_id']        = isset($event['id']) ? $event['id'] : '';
+                $row['event_client']    = isset($event['contactClientName']) ? $event['contactClientName'] : '';
+                $rows[$id]              = $row;
+            }
+        } else {
+            $rows[0] = $data;
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @param $data
+     *
+     * @return array
+     */
+    private function parseLogYAMLBlob($data)
+    {
+        $yaml = Yaml::parse($data['logs']);
+        unset($data['logs']);
+        $rows    = [];
+        $columns = [
+            'realtime',
+            'scrubbed',
+            'utmSource',
+        ];
+
+        if (!empty($yaml)) {
+            $data['campaign_id']   = isset($yaml['campaign']['id']) ? $yaml['campaign']['id'] : '';
+            $data['campaign_name'] = isset($yaml['campaign']['name']) ? $yaml['campaign']['name'] : '';
+
+            foreach ($columns as $column) {
+                $data[$column] = isset($yaml[$column]) ? var_export($yaml[$column], true) : '';
+            }
+
+            foreach ($yaml['events'] as $event) {
+                $row = $data;
+
+                $row['event_id']     = isset($event['id']) ? $event['id'] : '';
+                $row['event_client'] = isset($event['contactClientName']) ? $event['contactClientName'] : '';
+                $rows[]              = $row;
+            }
+        } else {
+            $rows[0] = $data;
+        }
+
+        return $rows;
     }
 }

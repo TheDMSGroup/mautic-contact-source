@@ -145,8 +145,7 @@ class EventRepository extends CommonRepository
                 ->setMaxResults(null)
                 ->select('count(*)');
             // unjoin if possible for perf reasons
-            if ($count && (!isset($campaignId) || empty($campaignId)))
-            {
+            if ($count && (!isset($campaignId) || empty($campaignId))) {
                 $query->resetQueryParts(['join']);
             }
 
@@ -175,7 +174,7 @@ class EventRepository extends CommonRepository
         if ($count) {
             $query->select('COUNT(c.id) as count');
         } else {
-            $query->select('c.type, c.date_added, c.message, c.contact_id, c.logs');
+            $query->select('c.id, c.type, c.date_added, c.message, c.contact_id, c.logs');
         }
 
         $query->where(
@@ -185,14 +184,14 @@ class EventRepository extends CommonRepository
 
         if (!empty($options['dateFrom']) && !empty($options['dateTo'])) {
             $query->andWhere('c.date_added BETWEEN FROM_UNIXTIME(:dateFrom) AND FROM_UNIXTIME(:dateTo)')
-                ->setParameter('dateFrom', $options['dateFrom']->setTime(00,00,00)->getTimestamp())
-                ->setParameter('dateTo', $options['dateTo']->setTime(23,59,59)->getTimestamp());
+                ->setParameter('dateFrom', $options['dateFrom']->setTime(00, 00, 00)->getTimestamp())
+                ->setParameter('dateTo', $options['dateTo']->setTime(23, 59, 59)->getTimestamp());
         } elseif (!empty($options['dateFrom'])) {
             $query->andWhere($query->expr()->gte('c.date_added', 'FROM_UNIXTIME(:dateFrom)'))
-                ->setParameter('dateFrom', $options['dateFrom']->setTime(00,00,00)->getTimestamp());
+                ->setParameter('dateFrom', $options['dateFrom']->setTime(00, 00, 00)->getTimestamp());
         } elseif (!empty($options['dateTo'])) {
             $query->andWhere($query->expr()->lte('c.date_added', 'FROM_UNIXTIME(:dateTo)'))
-                ->setParameter('dateTo', $options['dateTo']->setTime(23,59,59)->getTimestamp());
+                ->setParameter('dateTo', $options['dateTo']->setTime(23, 59, 59)->getTimestamp());
         }
 
         if (isset($options['message']) && !empty($options['message'])) {
@@ -225,7 +224,8 @@ class EventRepository extends CommonRepository
         if (!empty($options['limit'])) {
             $query->setMaxResults($options['limit']);
             if (!empty($options['start'])) {
-                $query->setFirstResult($options['start']);
+                $query->andWhere('c.id > :offset')
+                    ->setParameter('offset', $options['start']);
             }
         }
 
@@ -233,8 +233,6 @@ class EventRepository extends CommonRepository
 
         return $results;
     }
-
-
 
     /**
      * Get a list of entities.
