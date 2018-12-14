@@ -1,14 +1,15 @@
 // load the ContactSource timeline table on initial page load
-Mautic.contactsourceTimelineTable = function (contactsourceId) {
+Mautic.contactsourceTimelineTable = function () {
     var $tableTarget = mQuery('#timeline-table');
     if ($tableTarget.length && !$tableTarget.hasClass('table-initialized')) {
+        $tableTarget.addClass('table-initialized');
         // Make ajax call
         mQuery.ajax({
             url: mauticAjaxUrl,
             type: 'POST',
             data: {
                 action: 'plugin:mauticContactSource:ajaxTimeline',
-                objectId: contactsourceId
+                objectId: window.location.pathname.split('/').pop()
             },
             cache: true,
             dataType: 'json',
@@ -16,7 +17,6 @@ Mautic.contactsourceTimelineTable = function (contactsourceId) {
                 if(response.success>0){
                     mQuery('#sourceTransactions-builder-overlay').hide();
                     $tableTarget.append(response.html);
-                    mQuery('#timeline-table').addClass('table-initialized');
                     Mautic.contactsourceTimelineOnLoad();
                 }
             } // end ajax success
@@ -137,7 +137,7 @@ Mautic.contactSourceTransactionFormSubmit = function(form){
     mQuery('#transaction_message').val(mQuery('#filter-message').val());
     mQuery('#transaction_contact_id').val(mQuery('#filter-contact_id').val());
     mQuery('#transaction_type').val(mQuery('#filter-type').val());
-    var form = $(form);
+    var form = mQuery(form);
     mQuery.ajax({
         type: form.attr('method'),
         url: mauticAjaxUrl,
@@ -158,7 +158,7 @@ Mautic.contactSourceTransactionFormSubmit = function(form){
 }
 
 // Export
-Mautic.contactSourceTimelineExport = function (contactSourceId) {
+Mautic.contactSourceTimelineExport = function () {
     // grab timeline filter values to send for export params
     var messageVar = mQuery('#filter-message').val();
     var typeVar = mQuery('#filter-type').val();
@@ -169,7 +169,7 @@ Mautic.contactSourceTimelineExport = function (contactSourceId) {
         contact_id: contact_idVar
     });
     var frame = document.createElement('iframe');
-    var src = mauticBaseUrl + 's/contactsource/transactions/export/' + contactSourceId + '?' + params;
+    var src = mauticBaseUrl + 's/contactsource/transactions/export/' + window.location.pathname.split('/').pop() + '?' + params;
     frame.setAttribute('src', src);
     frame.setAttribute('style', 'display: none');
     document.body.appendChild(frame);

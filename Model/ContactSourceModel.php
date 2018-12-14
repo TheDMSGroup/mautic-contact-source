@@ -421,7 +421,7 @@ class ContactSourceModel extends FormModel
         $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
 
         if (isset($campaignId) && !empty($campaignId)) {
-            $campaign    = $this->em->getRepository('MauticCampaignBundle:Campaign')->getEntity($campaignId);
+            $campaign                      = $this->em->getRepository('MauticCampaignBundle:Campaign')->getEntity($campaignId);
             $campaigns[$campaign->getId()] = $campaign->getName();
         } else {
             $campaigns = $this->getCampaignList($contactSource);
