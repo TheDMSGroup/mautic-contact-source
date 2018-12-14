@@ -422,23 +422,20 @@ class ContactSourceModel extends FormModel
 
         if (isset($campaignId) && !empty($campaignId)) {
             $campaign    = $this->em->getRepository('MauticCampaignBundle:Campaign')->getEntity($campaignId);
-            $campaigns[] = ['campaign_id' => $campaign->getId(), 'name' => $campaign->getName()];
+            $campaigns[$campaign->getId()] = $campaign->getName();
         } else {
-            $campaigns = $this->getCampaignsBySource(
-                $contactSource,
-                ['dateTo' => $dateToAdjusted, 'dateFrom' => $dateFrom]
-            );
+            $campaigns = $this->getCampaignList($contactSource);
         }
 
         if ('cost' != $type) {
-            foreach ($campaigns as $campaign) {
+            foreach ($campaigns as $campaignId => $campaignName) {
                 $q = $query->prepareTimeDataQuery(
                     'contactsource_stats',
                     'date_added',
                     [
                         'contactsource_id' => $contactSource->getId(),
                         'type'             => $type,
-                        'campaign_id'      => $campaign['campaign_id'],
+                        'campaign_id'      => $campaignId,
                     ]
                 );
 
@@ -480,10 +477,10 @@ class ContactSourceModel extends FormModel
                 $data = $query->loadAndBuildTimeData($q);
                 foreach ($data as $val) {
                     if (0 !== $val) {
-                        if (empty($campaign['name'])) {
-                            $campaign['name'] = 'No Campaign';
+                        if (empty($campaignName)) {
+                            $campaignName = 'No Campaign';
                         }
-                        $chart->setDataset($campaign['name'], $data);
+                        $chart->setDataset($campaignName, $data);
                         break;
                     }
                 }
@@ -494,12 +491,12 @@ class ContactSourceModel extends FormModel
             $dbUnit        = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
             $dbUnit        = $query->translateTimeUnit($dbUnit);
             $dateConstruct = "DATE_FORMAT(CONVERT_TZ(t.date_added, @@global.time_zone, '$userTzName'), '$dbUnit.')";
-            foreach ($campaigns as $key => $campaign) {
+            foreach ($campaigns as $campaignId => $campaignName) {
                 $q = $query->prepareTimeDataQuery(
                     'contactsource_stats',
                     'date_added',
                     [
-                        'contactsource_id' => $contactSource->getId(),
+                        'contactsource_id' => (int) $contactSource->getId(),
                         'type'             => Stat::TYPE_ACCEPTED,
                     ]
                 );
@@ -507,16 +504,16 @@ class ContactSourceModel extends FormModel
                     $this->limitQueryToCreator($q);
                 }
                 $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution) * -1, 2) AS count')
-                    ->andWhere('campaign_id= :campaign_id'.$key)
-                    ->setParameter('campaign_id'.$key, $campaign['campaign_id'])
+                    ->andWhere('campaign_id = :campaign_id'.$campaignId)
+                    ->setParameter('campaign_id'.$campaignId, $campaignId)
                     ->groupBy($dateConstruct);
                 $data = $query->loadAndBuildTimeData($q);
                 foreach ($data as $val) {
                     if (0 !== $val) {
-                        if (empty($campaign['name'])) {
-                            $campaign['name'] = 'No Campaign';
+                        if (empty($campaignName)) {
+                            $campaignName = 'No Campaign';
                         }
-                        $chart->setDataset($campaign['name'], $data);
+                        $chart->setDataset($campaignName, $data);
                         break;
                     }
                 }
