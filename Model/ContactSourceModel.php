@@ -12,7 +12,7 @@
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
 use Doctrine\DBAL\Query\QueryBuilder;
-use Mautic\CampaignBundle\Entity\Campaign;
+use Mautic\CampaignBundle\Entity\CampaignRepository;
 use Mautic\CoreBundle\Helper\Chart\ChartQuery;
 use Mautic\CoreBundle\Helper\Chart\LineChart;
 use Mautic\CoreBundle\Helper\TemplatingHelper;
@@ -29,7 +29,6 @@ use MauticPlugin\MauticContactSourceBundle\Event\ContactSourceTimelineEvent;
 use Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
@@ -85,17 +84,36 @@ class ContactSourceModel extends FormModel
 
     /**
      * @param ContactSource $contactSource
-     * @param array         $dateParams
      *
-     * @return array|null
+     * @return array
      */
-    public function getCampaignList(ContactSource $contactSource, $dateParams = [])
+    public function getCampaignList(ContactSource $contactSource)
     {
-        if (!empty($contactSource)) {
-            return $this->getCampaignsBySource($contactSource, $dateParams);
-        } else {
-            return null;
+        $result           = $campaignIds = [];
+        $campaignSettings = json_decode($contactSource->getCampaignSettings(), true);
+        if (!empty($campaignSettings)) {
+            foreach ($campaignSettings as $campaignSetting) {
+                if (!empty($campaignSetting)) {
+                    foreach ($campaignSetting as $setting) {
+                        if (!empty($setting['campaignId'])) {
+                            $campaignIds[] = (int) $setting['campaignId'];
+                        }
+                    }
+                }
+            }
         }
+        if ($campaignIds) {
+            /** @var CampaignRepository $campaignRepo */
+            $campaignRepo = $this->em->getRepository('MauticCampaignBundle:Campaign');
+            $campaigns    = $campaignRepo->findBy(['id' => $campaignIds], ['name' => 'ASC']);
+            if ($campaigns) {
+                foreach ($campaigns as $campaign) {
+                    $result[$campaign->getId()] = $campaign->getName();
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -403,24 +421,21 @@ class ContactSourceModel extends FormModel
         $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
 
         if (isset($campaignId) && !empty($campaignId)) {
-            $campaign    = $this->em->getRepository('MauticCampaignBundle:Campaign')->getEntity($campaignId);
-            $campaigns[] = ['campaign_id' => $campaign->getId(), 'name' => $campaign->getName()];
+            $campaign                      = $this->em->getRepository('MauticCampaignBundle:Campaign')->getEntity($campaignId);
+            $campaigns[$campaign->getId()] = $campaign->getName();
         } else {
-            $campaigns = $this->getCampaignsBySource(
-                $contactSource,
-                ['dateTo' => $dateToAdjusted, 'dateFrom' => $dateFrom]
-            );
+            $campaigns = $this->getCampaignList($contactSource);
         }
 
         if ('cost' != $type) {
-            foreach ($campaigns as $campaign) {
+            foreach ($campaigns as $campaignId => $campaignName) {
                 $q = $query->prepareTimeDataQuery(
                     'contactsource_stats',
                     'date_added',
                     [
                         'contactsource_id' => $contactSource->getId(),
                         'type'             => $type,
-                        'campaign_id'      => $campaign['campaign_id'],
+                        'campaign_id'      => $campaignId,
                     ]
                 );
 
@@ -462,10 +477,10 @@ class ContactSourceModel extends FormModel
                 $data = $query->loadAndBuildTimeData($q);
                 foreach ($data as $val) {
                     if (0 !== $val) {
-                        if (empty($campaign['name'])) {
-                            $campaign['name'] = 'No Campaign';
+                        if (empty($campaignName)) {
+                            $campaignName = 'No Campaign';
                         }
-                        $chart->setDataset($campaign['name'], $data);
+                        $chart->setDataset($campaignName, $data);
                         break;
                     }
                 }
@@ -476,12 +491,12 @@ class ContactSourceModel extends FormModel
             $dbUnit        = $query->getTimeUnitFromDateRange($dateFrom, $dateTo);
             $dbUnit        = $query->translateTimeUnit($dbUnit);
             $dateConstruct = "DATE_FORMAT(CONVERT_TZ(t.date_added, @@global.time_zone, '$userTzName'), '$dbUnit.')";
-            foreach ($campaigns as $key => $campaign) {
+            foreach ($campaigns as $campaignId => $campaignName) {
                 $q = $query->prepareTimeDataQuery(
                     'contactsource_stats',
                     'date_added',
                     [
-                        'contactsource_id' => $contactSource->getId(),
+                        'contactsource_id' => (int) $contactSource->getId(),
                         'type'             => Stat::TYPE_ACCEPTED,
                     ]
                 );
@@ -489,16 +504,16 @@ class ContactSourceModel extends FormModel
                     $this->limitQueryToCreator($q);
                 }
                 $q->select($dateConstruct.' AS date, ROUND(SUM(t.attribution) * -1, 2) AS count')
-                    ->andWhere('campaign_id= :campaign_id'.$key)
-                    ->setParameter('campaign_id'.$key, $campaign['campaign_id'])
+                    ->andWhere('campaign_id = :campaign_id'.$campaignId)
+                    ->setParameter('campaign_id'.$campaignId, $campaignId)
                     ->groupBy($dateConstruct);
                 $data = $query->loadAndBuildTimeData($q);
                 foreach ($data as $val) {
                     if (0 !== $val) {
-                        if (empty($campaign['name'])) {
-                            $campaign['name'] = 'No Campaign';
+                        if (empty($campaignName)) {
+                            $campaignName = 'No Campaign';
                         }
-                        $chart->setDataset($campaign['name'], $data);
+                        $chart->setDataset($campaignName, $data);
                         break;
                     }
                 }
@@ -506,48 +521,6 @@ class ContactSourceModel extends FormModel
         }
 
         return $chart->render();
-    }
-
-    /**
-     * @param ContactSource $contactSource
-     * @param array         $dateParams
-     *
-     * @return array
-     */
-    private function getCampaignsBySource(ContactSource $contactSource, $dateParams = [])
-    {
-        $id = $contactSource->getId();
-
-        $q = $this->em->getConnection()->createQueryBuilder()
-            ->from(MAUTIC_TABLE_PREFIX.'contactsource_stats', 'cs')
-            ->select('DISTINCT(cs.campaign_id), c.name');
-
-        $q->where(
-            $q->expr()->eq('cs.contactsource_id', ':contactSourceId')
-        )
-            ->setParameter('contactSourceId', $id);
-
-        $default  = $this->dispatcher->getContainer()->get('mautic.helper.core_parameters')->getParameter(
-            'default_daterange_filter',
-            'midnight -1 month'
-        );
-        $dateTo   = isset($dateParams['dateTo']) && !empty($dateParams['dateTo']) ? $dateParams['dateTo']->setTime(23, 59, 59) : new \DateTime(
-            'midnight -1 second'
-        );
-        $dateFrom = isset($dateParams['dateFrom']) && !empty($dateParams['dateFrom']) ? $dateParams['dateFrom']->setTime(00, 00, 00) : new \DateTime(
-            $default
-        );
-
-        $q->andWhere('cs.date_added BETWEEN FROM_UNIXTIME(:dateFrom) AND FROM_UNIXTIME(:dateTo)')
-            ->setParameter('dateFrom', $dateFrom->getTimestamp(), \PDO::PARAM_INT)
-            ->setParameter('dateTo', $dateTo->getTimestamp(), \PDO::PARAM_INT);
-
-        $q->join('cs', MAUTIC_TABLE_PREFIX.'campaigns', 'c', 'cs.campaign_id = c.id');
-        $q->orderBY('c.name', 'ASC');
-
-        $result =  $q->execute()->fetchAll();
-
-        return $result;
     }
 
     /**
@@ -576,16 +549,16 @@ class ContactSourceModel extends FormModel
         if (null === $filters || empty($filters)) {
             $sourcechartFilters = $session->get('mautic.contactsource.'.$contactSource->getId().'.sourcechartfilter');
 
-            $dateFrom     = new \DateTime($sourcechartFilters['date_from']);
+            $dateFrom = new \DateTime($sourcechartFilters['date_from']);
             $dateFrom->setTime(00, 00, 00); // set to beginning of day, Timezone should be OK.
 
-            $dateTo       = new \DateTime($sourcechartFilters['date_to']);
+            $dateTo = new \DateTime($sourcechartFilters['date_to']);
             $dateTo->setTime(23, 59, 59);
 
-            $filters      = [
-                'dateFrom'   => $dateFrom,
-                'dateTo'     => $dateTo,
-                'type'       => $sourcechartFilters['type'],
+            $filters = [
+                'dateFrom' => $dateFrom,
+                'dateTo'   => $dateTo,
+                'type'     => $sourcechartFilters['type'],
             ];
             if (isset($sourcechartFilters['campaign']) && !empty($sourcechartFilters['campaign'])) {
                 $filters['campaignId'] = $sourcechartFilters['campaign'];
@@ -780,6 +753,16 @@ class ContactSourceModel extends FormModel
     /**
      * {@inheritdoc}
      *
+     * @return \MauticPlugin\MauticContactSourceBundle\Entity\ContactSourceRepository
+     */
+    public function getRepository()
+    {
+        return $this->em->getRepository('MauticContactSourceBundle:ContactSource');
+    }
+
+    /**
+     * {@inheritdoc}
+     *
      * @param null $id
      *
      * @return ContactSource
@@ -816,16 +799,6 @@ class ContactSourceModel extends FormModel
         parent::saveEntity($entity, $unlock);
 
         $this->getRepository()->saveEntity($entity);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @return \MauticPlugin\MauticContactSourceBundle\Entity\ContactSourceRepository
-     */
-    public function getRepository()
-    {
-        return $this->em->getRepository('MauticContactSourceBundle:ContactSource');
     }
 
     /**

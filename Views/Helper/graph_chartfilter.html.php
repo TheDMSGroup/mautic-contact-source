@@ -14,12 +14,12 @@ if (!isset($class)) {
 ?>
 
 <?php echo $view['form']->start($chartFilterForm, ['attr' => ['class' => 'form-filter '.$class, 'style' => 'max-width: 380px']]); ?>
-<div class="input-group">
-        <span class="input-group-addon">
-            <?php echo $view['form']->label($chartFilterForm['campaign']); ?>
-        </span>
-    <?php echo $view['form']->widget($chartFilterForm['campaign']); ?>
-</div>
+    <div class="input-group">
+            <span class="input-group-addon">
+                <?php echo $view['form']->label($chartFilterForm['campaign']); ?>
+            </span>
+        <?php echo $view['form']->widget($chartFilterForm['campaign']); ?>
+    </div>
     <div class="input-group">
         <span class="input-group-addon">
             <?php echo $view['form']->label($chartFilterForm['type']); ?>
@@ -44,8 +44,8 @@ if (!isset($class)) {
     /**
      * Initialize graph date range selectors
      */
-    var dateFrom = mQuery('#chartfilter_date_from');
-    var dateTo = mQuery('#chartfilter_date_to');
+    var dateFrom = mQuery('#sourcechartfilter_date_from');
+    var dateTo = mQuery('#sourcechartfilter_date_to');
 
     if (dateFrom.length && dateTo.length) {
         dateFrom.datetimepicker({

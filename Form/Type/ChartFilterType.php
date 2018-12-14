@@ -89,7 +89,7 @@ class ChartFilterType extends AbstractType
             [
                 'label'      => 'mautic.core.date.from',
                 'label_attr' => ['class' => 'control-label'],
-                'attr'       => ['class' => 'form-control'],
+                'attr'       => ['class' => 'form-control', 'autocomplete' => 'off'],
                 'required'   => false,
                 'data'       => $dateFrom->format($humanFormat),
             ]
@@ -107,22 +107,17 @@ class ChartFilterType extends AbstractType
             [
                 'label'      => 'mautic.core.date.to',
                 'label_attr' => ['class' => 'control-label'],
-                'attr'       => ['class' => 'form-control'],
+                'attr'       => ['class' => 'form-control', 'autocomplete' => 'off'],
                 'required'   => false,
                 'data'       => $dateTo->format($humanFormat),
             ]
         );
 
-        $campaigns = [];
-        foreach ($model->getCampaignList($contactSource, ['dateTo' => $dateTo, 'dateFrom' => $dateFrom]) as $index => $campaign) {
-            $campaigns[$campaign['campaign_id']] = $campaign['name'];
-        }
-
         $builder->add(
             'campaign',
             ChoiceType::class,
             [
-                'choices'     => $campaigns,
+                'choices'     => $model->getCampaignList($contactSource),
                 'attr'        => [
                     'class'   => 'form-control',
                     'tooltip' => 'mautic.contactsource.transactions.campaign_tooltip',

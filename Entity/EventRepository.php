@@ -180,7 +180,7 @@ class EventRepository extends CommonRepository
         $query->where(
             $query->expr()->eq('c.contactsource_id', ':contactSourceId')
         )
-            ->setParameter('contactSourceId', $contactSourceId);
+            ->setParameter('contactSourceId', (int) $contactSourceId);
 
         if (!empty($options['dateFrom']) && !empty($options['dateTo'])) {
             $query->andWhere('c.date_added BETWEEN FROM_UNIXTIME(:dateFrom) AND FROM_UNIXTIME(:dateTo)')
