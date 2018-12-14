@@ -152,7 +152,7 @@ class ContactSourceTimelineEvent extends Event
         $siteDomain = null
     ) {
         $this->contactSource = $contactSource;
-        $this->filters       = !empty($filters) ? $filters : ['search' => null];
+        $this->filters       = !empty($filters) ? $filters : [];
         $this->orderBy       = empty($orderBy) ? ['date_added', 'DESC'] : $orderBy;
         $this->page          = $page;
         $this->limit         = $limit;
@@ -459,7 +459,7 @@ class ContactSourceTimelineEvent extends Event
      */
     public function getEventFilters()
     {
-        return $this->filters['search'];
+        return $this->filters;
     }
 
     /**
@@ -479,7 +479,7 @@ class ContactSourceTimelineEvent extends Event
     {
         return array_merge(
             [
-                'search'     => $this->filters['search'],
+                'filters'    => $this->filters,
                 'logs'       => isset($this->filters['logs']) ? $this->filters['logs'] : null,
                 'order'      => $this->orderBy,
                 'paginated'  => !$this->countOnly,

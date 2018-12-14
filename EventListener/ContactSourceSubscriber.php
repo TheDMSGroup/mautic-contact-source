@@ -180,7 +180,7 @@ class ContactSourceSubscriber extends CommonSubscriber
             $event->addEventType($eventTypeKey, $eventTypeName);
         }
 
-        $results = $eventRepository->getEventsForTimeline($event->getContactSource()->getId(), null, $options);
+        $results = $eventRepository->getEventsForTimeline($event->getContactSource()->getId(), $options);
         $rows    = isset($results['results']) ? $results['results'] : $results;
         $total   = isset($results['total']) ? $results['total'] : count($rows);
         foreach ($rows as $row) {

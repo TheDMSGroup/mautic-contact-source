@@ -46,31 +46,6 @@ class ChartFilterType extends AbstractType
         $model         = $this->factory->getModel('contactsource');
         $contactSource = $model->getEntity($contactSourceId);
 
-        $campaigns = [];
-        foreach ($model->getCampaignList($contactSource) as $index => $campaign) {
-            $campaigns[$campaign['campaign_id']] = $campaign['name'];
-        }
-
-        $builder->add(
-            'campaign',
-            ChoiceType::class,
-            [
-                'choices'     => $campaigns,
-                'attr'        => [
-                    'class'   => 'form-control',
-                    'tooltip' => 'mautic.contactclient.transactions.campaign_tooltip',
-                ],
-                'expanded'    => false,
-                'multiple'    => false,
-                'label'       => 'mautic.contactclient.transactions.campaign_select',
-                'label_attr'  => ['class' => 'control-label'],
-                'empty_data'  => 'All Campaigns',
-                'required'    => false,
-                'disabled'    => false,
-                'data'        => $options['data']['campaign'],
-            ]
-        );
-
         $typeChoices = [
             'cost' => 'Cost',
         ];
@@ -135,6 +110,31 @@ class ChartFilterType extends AbstractType
                 'attr'       => ['class' => 'form-control'],
                 'required'   => false,
                 'data'       => $dateTo->format($humanFormat),
+            ]
+        );
+
+        $campaigns = [];
+        foreach ($model->getCampaignList($contactSource, ['dateTo' => $dateTo, 'dateFrom' => $dateFrom]) as $index => $campaign) {
+            $campaigns[$campaign['campaign_id']] = $campaign['name'];
+        }
+
+        $builder->add(
+            'campaign',
+            ChoiceType::class,
+            [
+                'choices'     => $campaigns,
+                'attr'        => [
+                    'class'   => 'form-control',
+                    'tooltip' => 'mautic.contactsource.transactions.campaign_tooltip',
+                ],
+                'expanded'    => false,
+                'multiple'    => false,
+                'label'       => 'mautic.contactsource.transactions.campaign_select',
+                'label_attr'  => ['class' => 'control-label'],
+                'empty_data'  => 'All Campaigns',
+                'required'    => false,
+                'disabled'    => false,
+                'data'        => $options['data']['campaign'],
             ]
         );
 

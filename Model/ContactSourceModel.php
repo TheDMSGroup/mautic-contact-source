@@ -85,13 +85,14 @@ class ContactSourceModel extends FormModel
 
     /**
      * @param ContactSource $contactSource
+     * @param array         $dateParams
      *
      * @return array|null
      */
-    public function getCampaignList(ContactSource $contactSource)
+    public function getCampaignList(ContactSource $contactSource, $dateParams = [])
     {
         if (!empty($contactSource)) {
-            return $this->getCampaignsBySource($contactSource);
+            return $this->getCampaignsBySource($contactSource, $dateParams);
         } else {
             return null;
         }
@@ -140,8 +141,13 @@ class ContactSourceModel extends FormModel
      * @param int                $attribution
      * @param int                $campaign
      */
-    public function addStat(ContactSource $contactSource = null, $type = null, $contact = 0, $attribution = 0, $campaign = 0)
-    {
+    public function addStat(
+        ContactSource $contactSource = null,
+        $type = null,
+        $contact = 0,
+        $attribution = 0,
+        $campaign = 0
+    ) {
         $stat = new Stat();
         if ($contactSource) {
             $stat->setContactSource($contactSource);
@@ -196,7 +202,7 @@ class ContactSourceModel extends FormModel
         }
         if (!$logs) {
             // [ENG-418] Exception report - logs can not be null.
-            $logs='';
+            $logs = '';
         }
         $event->setLogs($logs);
 
@@ -218,8 +224,8 @@ class ContactSourceModel extends FormModel
     }
 
     /**
-     * @param ContactSource $contactSource
-     * @param $unit
+     * @param ContactSource  $contactSource
+     * @param                $unit
      * @param \DateTime|null $dateFrom
      * @param \DateTime|null $dateTo
      * @param campaignId|null $
@@ -246,9 +252,9 @@ class ContactSourceModel extends FormModel
         $chart = new LineChart($unit, $dateFrom, $dateToAdjusted, $dateFormat);
         $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
 
-        $params     = ['contactsource_id' => $contactSource->getId()];
+        $params = ['contactsource_id' => $contactSource->getId()];
 
-        if (isset($campaignId)) {
+        if (isset($campaignId) && !empty($campaignId)) {
             $params['campaign_id'] = (int) $campaignId;
         }
 
@@ -386,21 +392,24 @@ class ContactSourceModel extends FormModel
         $unit           = (null === $unit) ? $this->getTimeUnitFromDateRange($dateFrom, $dateTo) : $unit;
         $dateToAdjusted = clone $dateTo;
 
-        $userTZ        = new \DateTime('now');
-        $userTzName    = $userTZ->getTimezone()->getName();
+        $userTZ     = new \DateTime('now');
+        $userTzName = $userTZ->getTimezone()->getName();
 
         if (in_array($unit, ['H', 'i', 's'])) {
             // draw the chart with the correct intervals for intra-day
             $dateToAdjusted->setTime(23, 59, 59);
         }
-        $chart     = new LineChart($unit, $dateFrom, $dateToAdjusted, $dateFormat);
-        $query     = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
+        $chart = new LineChart($unit, $dateFrom, $dateToAdjusted, $dateFormat);
+        $query = new ChartQuery($this->em->getConnection(), $dateFrom, $dateToAdjusted, $unit);
 
         if (isset($campaignId) && !empty($campaignId)) {
-            $campaign    = $this->getEntity($campaignId);
+            $campaign    = $this->em->getRepository('MauticCampaignBundle:Campaign')->getEntity($campaignId);
             $campaigns[] = ['campaign_id' => $campaign->getId(), 'name' => $campaign->getName()];
         } else {
-            $campaigns = $this->getCampaignsBySource($contactSource);
+            $campaigns = $this->getCampaignsBySource(
+                $contactSource,
+                ['dateTo' => $dateToAdjusted, 'dateFrom' => $dateFrom]
+            );
         }
 
         if ('cost' != $type) {
@@ -501,24 +510,44 @@ class ContactSourceModel extends FormModel
 
     /**
      * @param ContactSource $contactSource
+     * @param array         $dateParams
      *
      * @return array
      */
-    private function getCampaignsBySource(ContactSource $contactSource)
+    private function getCampaignsBySource(ContactSource $contactSource, $dateParams = [])
     {
         $id = $contactSource->getId();
 
-        $q = $this->em->createQueryBuilder()
-            ->from('MauticContactSourceBundle:Stat', 'cs')
-            ->select('DISTINCT cs.campaign_id, c.name');
+        $q = $this->em->getConnection()->createQueryBuilder()
+            ->from(MAUTIC_TABLE_PREFIX.'contactsource_stats', 'cs')
+            ->select('DISTINCT(cs.campaign_id), c.name');
 
         $q->where(
-            $q->expr()->eq('cs.contactSource', ':contactSourceId')
+            $q->expr()->eq('cs.contactsource_id', ':contactSourceId')
         )
             ->setParameter('contactSourceId', $id);
-        $q->join('MauticCampaignBundle:Campaign', 'c', 'WITH', 'cs.campaign_id = c.id');
 
-        return $q->getQuery()->getArrayResult();
+        $default  = $this->dispatcher->getContainer()->get('mautic.helper.core_parameters')->getParameter(
+            'default_daterange_filter',
+            'midnight -1 month'
+        );
+        $dateTo   = isset($dateParams['dateTo']) && !empty($dateParams['dateTo']) ? $dateParams['dateTo']->setTime(23, 59, 59) : new \DateTime(
+            'midnight -1 second'
+        );
+        $dateFrom = isset($dateParams['dateFrom']) && !empty($dateParams['dateFrom']) ? $dateParams['dateFrom']->setTime(00, 00, 00) : new \DateTime(
+            $default
+        );
+
+        $q->andWhere('cs.date_added BETWEEN FROM_UNIXTIME(:dateFrom) AND FROM_UNIXTIME(:dateTo)')
+            ->setParameter('dateFrom', $dateFrom->getTimestamp(), \PDO::PARAM_INT)
+            ->setParameter('dateTo', $dateTo->getTimestamp(), \PDO::PARAM_INT);
+
+        $q->join('cs', MAUTIC_TABLE_PREFIX.'campaigns', 'c', 'cs.campaign_id = c.id');
+        $q->orderBY('c.name', 'ASC');
+
+        $result =  $q->execute()->fetchAll();
+
+        return $result;
     }
 
     /**
@@ -542,9 +571,25 @@ class ContactSourceModel extends FormModel
         $forTimeline = true
     ) {
         $orderBy = empty($orderBy) ? ['date_added', 'DESC'] : $orderBy;
+        $session = $this->dispatcher->getContainer()->get('session');
 
-        if (!isset($filters['search'])) {
-            $filters['search'] = null;
+        if (null === $filters || empty($filters)) {
+            $sourcechartFilters = $session->get('mautic.contactsource.'.$contactSource->getId().'.sourcechartfilter');
+
+            $dateFrom     = new \DateTime($sourcechartFilters['date_from']);
+            $dateFrom->setTime(00, 00, 00); // set to beginning of day, Timezone should be OK.
+
+            $dateTo       = new \DateTime($sourcechartFilters['date_to']);
+            $dateTo->setTime(23, 59, 59);
+
+            $filters      = [
+                'dateFrom'   => $dateFrom,
+                'dateTo'     => $dateTo,
+                'type'       => $sourcechartFilters['type'],
+            ];
+            if (isset($sourcechartFilters['campaign']) && !empty($sourcechartFilters['campaign'])) {
+                $filters['campaignId'] = $sourcechartFilters['campaign'];
+            }
         }
 
         $event   = $this->dispatcher->dispatch(
@@ -712,11 +757,11 @@ class ContactSourceModel extends FormModel
                     }
                 } else {
                     $limitsPlaceholder = [
-                        0=> [
-                            'name'=> 'Unlimited',
+                        0 => [
+                            'name' => 'Unlimited',
                         ],
                     ];
-                    $campaignLimits[] = [
+                    $campaignLimits[]  = [
                         'sourceId' => $source['id'],
                         'limits'   => $limitsPlaceholder,
                         'name'     => $source['name'],
@@ -742,7 +787,7 @@ class ContactSourceModel extends FormModel
     public function getEntity($id = null)
     {
         if (null === $id) {
-            $entity           =  new ContactSource();
+            $entity           = new ContactSource();
             $defaultUtmSource = $this->getRepository()->getDefaultUTMSource();
             $entity->setUtmSource($defaultUtmSource);
 
