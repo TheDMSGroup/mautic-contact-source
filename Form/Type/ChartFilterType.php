@@ -113,16 +113,11 @@ class ChartFilterType extends AbstractType
             ]
         );
 
-        $campaigns = [];
-        foreach ($model->getCampaignList($contactSource, ['dateTo' => $dateTo, 'dateFrom' => $dateFrom]) as $index => $campaign) {
-            $campaigns[$campaign['campaign_id']] = $campaign['name'];
-        }
-
         $builder->add(
             'campaign',
             ChoiceType::class,
             [
-                'choices'     => $campaigns,
+                'choices'     => $model->getCampaignList($contactSource),
                 'attr'        => [
                     'class'   => 'form-control',
                     'tooltip' => 'mautic.contactsource.transactions.campaign_tooltip',
