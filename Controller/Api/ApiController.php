@@ -37,6 +37,9 @@ class ApiController extends CommonApiController
             'publishDetails',
         ];
 
+        // Prevent excessive writes to the users table.
+        define('MAUTIC_ACTIVITY_CHECKED', 1);
+
         parent::initialize($event);
     }
 
