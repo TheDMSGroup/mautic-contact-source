@@ -37,7 +37,9 @@
                               data-container="body"
                               data-placement="top"
                               title=""
-                              data-original-title="<?php echo $view['translator']->trans('mautic.campaign.source.limit.cap_count_tooltip'); ?>"
+                              data-original-title="<?php echo $view['translator']->trans(
+                                  'mautic.campaign.source.limit.cap_count_tooltip'
+                              ); ?>"
                         >
                             <?php echo $view['translator']->trans('mautic.campaign.source.limit.cap_count'); ?>
                             <i class="fa fa-question-circle"></i>
@@ -54,7 +56,9 @@
                               data-container="body"
                               data-placement="top"
                               title=""
-                              data-original-title="<?php echo $view['translator']->trans('mautic.campaign.source.limit.projection_tooltip'); ?>"
+                              data-original-title="<?php echo $view['translator']->trans(
+                                  'mautic.campaign.source.limit.projection_tooltip'
+                              ); ?>"
                         >
                             <?php echo $view['translator']->trans('mautic.campaign.source.limit.projection'); ?>
                             <i class="fa fa-question-circle"></i>
@@ -76,6 +80,13 @@
 
             <?php foreach ($limits as $limitKey => $limitData) : ?>
                 <?php foreach ($limitData['limits'] as $limit) : ?>
+                    <?php
+                    // put placeholders in empty values to prevent log warnings
+                    $Limit['percent']          = isset($limit['percent']) && !empty($limit['percent']) ? $limit['percent'] : 0;
+                    $Limit['noPercent']        = isset($limit['noPercent']) && !empty($limit['noPercent']) ? $limit['noPercent'] : 0;
+                    $Limit['yesPercent']       = isset($limit['yesPercent']) && !empty($limit['yesPercent']) ? $limit['yesPercent'] : 0;
+                    $Limit['rule']['duration'] = isset($limit['rule']['duration']) && !empty($limit['rule']['duration']) ? $limit['rule']['duration'] : null;
+                    ?>
                     <li class="list-group-item bg-auto bg-light-xs">
                         <?php $yesClass = (90 <= $limit['percent']) ? 'danger' : 'success'; ?>
                         <div class="progress-bar progress-bar-<?php echo $yesClass; ?>"
@@ -99,20 +110,20 @@
                                 <h6 class="text-white dark-sm"><?php echo $limit['name']; ?></h6>
                             </div>
                             <?php if (isset($limit['logCount'])): ?>
-                            <div class="col-md-1 va-m">
-                                <span class="label label-warning"><?php echo $limit['logCount']; ?></span>
-                            </div>
-                            <div class="col-md-1 va-m">
+                                <div class="col-md-1 va-m">
+                                    <span class="label label-warning"><?php echo $limit['logCount']; ?></span>
+                                </div>
+                                <div class="col-md-1 va-m">
                                 <span class="label label-<?php echo $yesClass; ?>"><?php echo round(
                                             $limit['percent']
                                         ).'%'; ?></span>
-                            </div>
+                                </div>
                             <?php else: // Unlimited so show no numbers?>
                                 <div class="col-md-1 va-m">
                                     <span class="label label-info">N/A</span>
                                 </div>
                                 <div class="col-md-1 va-m">
-                                <span class="label label-info">N/A</span>
+                                    <span class="label label-info">N/A</span>
                                 </div>
                             <?php endif; ?>
                             <div class="col-md-2 va-m text-right">
@@ -168,7 +179,7 @@
     </ul>
 </div>
 <script>
-    mQuery(document).ready(function(){
+    mQuery(document).ready(function () {
         mQuery('[data-toggle="tooltip"]').tooltip();
     });
 </script>
