@@ -9,7 +9,7 @@ Mautic.contactsourceTimelineTable = function () {
             type: 'POST',
             data: {
                 action: 'plugin:mauticContactSource:ajaxTimeline',
-                objectId: window.location.pathname.split('/').pop()
+                objectId: Mautic.getEntityId()
             },
             cache: true,
             dataType: 'json',
@@ -169,7 +169,7 @@ Mautic.contactSourceTimelineExport = function () {
         contact_id: contact_idVar
     });
     var frame = document.createElement('iframe');
-    var src = mauticBaseUrl + 's/contactsource/transactions/export/' + window.location.pathname.split('/').pop() + '?' + params;
+    var src = mauticBaseUrl + 's/contactsource/transactions/export/' + Mautic.getEntityId() + '?' + params;
     frame.setAttribute('src', src);
     frame.setAttribute('style', 'display: none');
     document.body.appendChild(frame);
