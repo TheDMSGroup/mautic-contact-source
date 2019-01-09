@@ -143,7 +143,7 @@ class AjaxController extends CommonAjaxController
                 'category'  => $category,
                 'published' => $published,
                 'name'      => $name,
-                'title'     => $name.($category ? '  ('.$category.')' : '').(!$published ? '  (unpublished)' : ''),
+                'title'     => htmlspecialchars_decode($name.($category ? '  ('.$category.')' : '').(!$published ? '  (unpublished)' : '')),
                 'value'     => $id,
             ];
         }
