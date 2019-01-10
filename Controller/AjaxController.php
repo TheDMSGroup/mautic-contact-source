@@ -171,7 +171,7 @@ class AjaxController extends CommonAjaxController
     protected function campaignBudgetsAction(Request $request)
     {
         // Get the API payload to test.
-        $params['campaignId'] = $this->request->request->get('data')['campaignId'];
+        $params['campaignId'] = $this->request->request->get('campaignId');
         $params['dateFrom']   = new \DateTime('now');
         $em                   = $this->container->get('doctrine.orm.entity_manager');
         $statRepo             = $em->getRepository(\MauticPlugin\MauticContactSourceBundle\Entity\Stat::class);
@@ -199,7 +199,7 @@ class AjaxController extends CommonAjaxController
     protected function campaignBudgetsTabAction(Request $request)
     {
         //calculate time since values for generating forecasts
-        $campaignId                         = $request->request->get('data')['campaignId'];
+        $campaignId                         = $request->request->get('campaignId');
         $container                          = $this->dispatcher->getContainer();
         $timezone                           = $container->get('mautic.helper.core_parameters')->getParameter(
             'default_timezone'
