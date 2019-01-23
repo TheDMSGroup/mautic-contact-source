@@ -130,6 +130,14 @@ return [
                     'mautic.lead.model.import',
                 ],
             ],
+            'mautic.contactsource.reportbundle.subscriber' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\ReportSubscriber',
+                'arguments' => [
+                    'mautic.lead.model.lead',
+                    'mautic.campaign.model.campaign',
+                    'mautic.lead.reportbundle.fields_builder',
+                ],
+            ],
         ],
         'forms'  => [
             'mautic.contactsource.form.type.contactsourceshow_list' => [
