@@ -9,23 +9,22 @@
  * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-namespace MauticPlugin\MauticContactsourceBundle\EventListener;
+namespace MauticPlugin\MauticContactSourceBundle\EventListener;
 
+use Mautic\CampaignBundle\Model\CampaignModel;
 use Mautic\CoreBundle\EventListener\CommonSubscriber;
+use Mautic\LeadBundle\Model\LeadModel;
+use Mautic\LeadBundle\Report\FieldsBuilder;
 use Mautic\ReportBundle\Event\ReportBuilderEvent;
 use Mautic\ReportBundle\Event\ReportGeneratorEvent;
 use Mautic\ReportBundle\ReportEvents;
-use Mautic\LeadBundle\Model\LeadModel;
-use Mautic\CampaignBundle\Model\CampaignModel;
-use Mautic\LeadBundle\Report\FieldsBuilder;
 
 /**
  * Class ReportSubscriber.
  */
 class ReportSubscriber extends CommonSubscriber
 {
-
-    const CONTEXT_CONTACT_SOURCE_LEADCAMPAIGN_STATS = "contactsource_leadcampaign_stats";
+    const CONTEXT_CONTACT_SOURCE_LEADCAMPAIGN_STATS = 'contactsource_leadcampaign_stats';
 
     /**
      * @var LeadModel
@@ -43,9 +42,9 @@ class ReportSubscriber extends CommonSubscriber
     private $fieldsBuilder;
 
     /**
-     * @param LeadModel         $leadModel
-     * @param CampaignModel     $campaignModel
-     * @param FieldsBuilder     $fieldsBuilder
+     * @param LeadModel     $leadModel
+     * @param CampaignModel $campaignModel
+     * @param FieldsBuilder $fieldsBuilder
      */
     public function __construct(
         LeadModel $leadModel,
@@ -75,11 +74,10 @@ class ReportSubscriber extends CommonSubscriber
      */
     public function onReportBuilder(ReportBuilderEvent $event)
     {
-        $campaignPrefix      = 'c.';
-        $campaignAliasPrefix = 'c_';
+        $campaignPrefix            = 'c.';
+        $campaignAliasPrefix       = 'c_';
         $campaignLeadPrefix        = 'cl.';
         $campaignLeadAliasPrefix   = 'cl_';
-
 
         $columns = [
             $campaignPrefix.'name' => [
@@ -134,14 +132,12 @@ class ReportSubscriber extends CommonSubscriber
             'columns'      => $mergedColumns,
         ];
         $event->addTable(self::CONTEXT_CONTACT_SOURCE_LEADCAMPAIGN_STATS, $data, 'contacts');
-
     }
 
     /**
      * @param ReportGeneratorEvent $event
      *
      * @throws \Exception
-     *
      */
     public function onReportGenerate(ReportGeneratorEvent $event)
     {
