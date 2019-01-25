@@ -51,9 +51,9 @@ class ReportSubscriber extends CommonSubscriber
         CampaignModel $campaignModel,
         FieldsBuilder $fieldsBuilder
     ) {
-        $this->leadModel         = $leadModel;
-        $this->campaignModel     = $campaignModel;
-        $this->fieldsBuilder     = $fieldsBuilder;
+        $this->leadModel     = $leadModel;
+        $this->campaignModel = $campaignModel;
+        $this->fieldsBuilder = $fieldsBuilder;
     }
 
     /**
@@ -74,10 +74,13 @@ class ReportSubscriber extends CommonSubscriber
      */
     public function onReportBuilder(ReportBuilderEvent $event)
     {
-        $campaignPrefix            = 'c.';
-        $campaignAliasPrefix       = 'c_';
-        $campaignLeadPrefix        = 'cl.';
-        $campaignLeadAliasPrefix   = 'cl_';
+        $campaignPrefix          = 'c.';
+        $campaignAliasPrefix     = 'c_';
+        $campaignLeadPrefix      = 'cl.';
+        $campaignLeadAliasPrefix = 'cl_';
+
+        $utmPrefix      = 'u.';
+        $utmAliasPrefix = 'u_';
 
         $columns = [
             $campaignPrefix.'name' => [
@@ -121,10 +124,41 @@ class ReportSubscriber extends CommonSubscriber
                 'type'  => 'string',
                 'alias' => $campaignLeadAliasPrefix.'date_added',
             ],
+
+            $utmPrefix.'utm_campaign' => [
+                'label' => 'mautic.contactsource.leadcampaign.header.utm_campaign',
+                'type'  => 'string',
+                'alias' => $utmAliasPrefix.'utm_campaign',
+            ],
+
+            $utmPrefix.'utm_source' => [
+                'label' => 'mautic.contactsource.leadcampaign.header.utm_source',
+                'type'  => 'string',
+                'alias' => $utmAliasPrefix.'utm_source',
+            ],
+
+            $utmPrefix.'utm_term' => [
+                'label' => 'mautic.contactsource.leadcampaign.header.utm_term',
+                'type'  => 'string',
+                'alias' => $utmAliasPrefix.'utm_term',
+            ],
+
+            $utmPrefix.'utm_medium' => [
+                'label' => 'mautic.contactsource.leadcampaign.header.utm_medium',
+                'type'  => 'string',
+                'alias' => $utmAliasPrefix.'utm_medium',
+            ],
+
+            $utmPrefix.'utm_content' => [
+                'label' => 'mautic.contactsource.leadcampaign.header.utm_content',
+                'type'  => 'string',
+                'alias' => $utmAliasPrefix.'utm_content',
+            ],
         ];
 
         $mergedColumns = array_merge(
-            $this->fieldsBuilder->getLeadFieldsColumns('l.'), $columns
+            $this->fieldsBuilder->getLeadFieldsColumns('l.'),
+            $columns
         );
 
         $data = [
@@ -158,7 +192,8 @@ class ReportSubscriber extends CommonSubscriber
 
         if ($event->checkContext(self::CONTEXT_CONTACT_SOURCE_LEADCAMPAIGN_STATS)) {
             $qb->leftJoin('l', MAUTIC_TABLE_PREFIX.'campaign_leads', 'cl', 'cl.lead_id = l.id')
-                ->leftJoin('cl', MAUTIC_TABLE_PREFIX.'campaigns', 'c', 'c.id = cl.campaign_id');
+                ->leftJoin('cl', MAUTIC_TABLE_PREFIX.'campaigns', 'c', 'c.id = cl.campaign_id')
+                ->leftjoin('l', MAUTIC_TABLE_PREFIX.'lead_utmtags', 'u', 'l.id = u.lead_id');
         } else {
             return;
         }
