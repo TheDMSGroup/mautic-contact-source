@@ -63,7 +63,7 @@ class LeadImportExtension extends AbstractTypeExtension
             $campaignEntity      = $this->em->getRepository('MauticCampaignBundle:Campaign')->find($_GET['campaign']);
             $campaignEntityLabel = $campaignEntity->getName();
         } else {
-            $campaignEntityLabel = 'Select A Source';
+            $campaignEntityLabel = 'Select A Campaign';
             $campaignEntity      = [];
         }
 

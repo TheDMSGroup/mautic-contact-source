@@ -223,6 +223,16 @@ return [
                     'extended_type' => 'Mautic\LeadBundle\Form\Type\LeadImportType',
                 ],
             ],
+            'mautic.contactsource.extension.lead_field_import' => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\Form\Extension\LeadImportFieldExtension',
+                'arguments' => [
+                    'doctrine.orm.entity_manager',
+                ],
+                'tag'          => 'form.type_extension',
+                'tagArguments' => [
+                    'extended_type' => 'Mautic\LeadBundle\Form\Type\LeadImportFieldType',
+                ],
+            ],
         ],
     ],
 

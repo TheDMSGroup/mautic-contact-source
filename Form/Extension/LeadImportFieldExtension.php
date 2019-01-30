@@ -12,15 +12,11 @@
 namespace MauticPlugin\MauticContactSourceBundle\Form\Extension;
 
 use Doctrine\ORM\EntityManager;
-use Mautic\CampaignBundle\Entity\Campaign;
-use Mautic\LeadBundle\Form\Type\LeadImportType;
-use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Mautic\LeadBundle\Form\Type\LeadImportFieldType;
 use Symfony\Component\Form\AbstractTypeExtension;
-use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
 
-class LeadImportExtension extends AbstractTypeExtension
+class LeadImportFieldExtension extends AbstractTypeExtension
 {
     /** @var EntityManager */
     protected $em;
@@ -38,7 +34,7 @@ class LeadImportExtension extends AbstractTypeExtension
      */
     public function getExtendedType()
     {
-        return LeadImportType::class;
+        return LeadImportFieldType::class;
     }
 
     /**
@@ -49,80 +45,66 @@ class LeadImportExtension extends AbstractTypeExtension
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        if (isset($_GET['source'])) {
-            $sourceEntity      = $this->em->getRepository('MauticContactSourceBundle:ContactSource')->find(
-                $_GET['source']
-            );
-            $sourceEntityLabel = $sourceEntity->getName();
-        } else {
-            $sourceEntityLabel = 'Select A Source';
-            $sourceEntity      = [];
+        $specialFields = [
+            'dateAdded'      => 'mautic.lead.import.label.dateAdded',
+            'createdByUser'  => 'mautic.lead.import.label.createdByUser',
+            'dateModified'   => 'mautic.lead.import.label.dateModified',
+            'modifiedByUser' => 'mautic.lead.import.label.modifiedByUser',
+            'lastActive'     => 'mautic.lead.import.label.lastActive',
+            'dateIdentified' => 'mautic.lead.import.label.dateIdentified',
+            'ip'             => 'mautic.lead.import.label.ip',
+            'points'         => 'mautic.lead.import.label.points',
+            'stage'          => 'mautic.lead.import.label.stage',
+            'doNotEmail'     => 'mautic.lead.import.label.doNotEmail',
+            'ownerusername'  => 'mautic.lead.import.label.ownerusername',
+        ];
+
+        $utmFields = [
+            'utm_campaign' => 'mautic.lead.field.utmcampaign',
+            'utm_content'  => 'mautic.lead.field.utmcontent',
+            'utm_medium'   => 'mautic.lead.field.utmmedium',
+            'utm_term'     => 'mautic.lead.field.utmterm',
+        ];
+
+        $importChoiceFields = [
+            'mautic.contactsource.choice.utmtags' => $utmFields,
+            'mautic.lead.contact'                 => $options['lead_fields'],
+            'mautic.lead.company'                 => $options['company_fields'],
+            'mautic.lead.special_fields'          => $specialFields,
+        ];
+
+        if ('lead' !== $options['object']) {
+            unset($importChoiceFields['mautic.lead.contact']);
         }
 
-        if (isset($_GET['campaign'])) {
-            $campaignEntity      = $this->em->getRepository('MauticCampaignBundle:Campaign')->find($_GET['campaign']);
-            $campaignEntityLabel = $campaignEntity->getName();
-        } else {
-            $campaignEntityLabel = 'Select A Source';
-            $campaignEntity      = [];
+        foreach ($options['import_fields'] as $field => $label) {
+            $builder->add(
+                $field,
+                'choice',
+                [
+                    'choices'    => $importChoiceFields,
+                    'label'      => $label,
+                    'required'   => false,
+                    'label_attr' => ['class' => 'control-label'],
+                    'attr'       => ['class' => 'form-control'],
+                    'data'       => $this->getDefaultValue($field, $options['import_fields']),
+                ]
+            );
+        }
+    }
+
+    /**
+     * @param string $fieldName
+     * @param array  $importFields
+     *
+     * @return string
+     */
+    public function getDefaultValue($fieldName, array $importFields)
+    {
+        if (isset($importFields[$fieldName])) {
+            return $importFields[$fieldName];
         }
 
-        $builder->add(
-            'source',
-            EntityType::class,
-            [
-                'class'        => 'MauticContactSourceBundle:ContactSource',
-                'data'         => $sourceEntity,
-                'placeholder'  => $sourceEntityLabel,
-                'choice_label' => function ($sourceEntity) {
-                    return $sourceEntity->getName();
-                },
-            ]
-        );
-
-        $builder->get('source')
-            ->addModelTransformer(
-                new CallbackTransformer(
-                    function ($source) {
-                        // transform the ID back to an Object
-                        return $source ? $this->em->getRepository('MauticContactSourceBundle:ContactSource')->find(
-                            $source
-                        ) : null;
-                    },
-                    function ($source) {
-                        // transform the object to a ID
-                        return $source ? $source->getID() : null;
-                    }
-                )
-            );
-
-        $builder->add(
-            'campaign',
-            EntityType::class,
-            [
-                'class'        => 'MauticCampaignBundle:Campaign',
-                'data'         => $campaignEntity,
-                'empty_value'  => $campaignEntityLabel,
-                'choice_label' => function ($campaignEntity) {
-                    return $campaignEntity->getName();
-                },
-            ]
-        );
-
-        $builder->get('campaign')
-            ->addModelTransformer(
-                new CallbackTransformer(
-                    function ($campaign) {
-                        // transform the ID back to an Object
-                        return $campaign ? $this->em->getRepository('MauticCampaignBundle:Campaign')->find(
-                            $campaign
-                        ) : null;
-                    },
-                    function ($campaign) {
-                        // transform the object to a ID
-                        return $campaign ? $campaign->getID() : null;
-                    }
-                )
-            );
+        return null;
     }
 }
