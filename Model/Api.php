@@ -1693,8 +1693,7 @@ class Api
             $utmTags->setUtmSource($this->utmSource);
             $utmTags->setDateAdded(new \DateTime());
             $this->em->persist($utmTags);
-            if($originalUtmTags)
-            {
+            if ($originalUtmTags) {
                 $this->em->flush($utmTags);
             }
             $contact->setUtmTags($utmTags);
