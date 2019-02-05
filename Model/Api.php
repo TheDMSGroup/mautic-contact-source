@@ -1687,12 +1687,15 @@ class Api
             $utmTags = $this->getUtmTag();
             if ($originalUtmTags = $contact->getUtmTags()) {
                 $utmTags = $originalUtmTags[0];
+            } else {
+                $utmTags->setLead($contact);
             }
-            $utmTags->setLead($contact);
             $utmTags->setUtmSource($this->utmSource);
             $utmTags->setDateAdded(new \DateTime());
             $this->em->persist($utmTags);
-            $this->em->flush($utmTags);
+            if ($originalUtmTags) {
+                $this->em->flush($utmTags);
+            }
             $contact->setUtmTags($utmTags);
         }
     }
