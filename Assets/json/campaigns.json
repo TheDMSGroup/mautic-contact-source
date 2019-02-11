@@ -70,7 +70,7 @@
           "type": "boolean",
           "format": "checkbox",
           "propertyOrder": 40,
-          "default": false,
+          "default": true,
           "options": {
             "grid_columns": 1,
             "infoText": "We will synchronously process contacts through the campaign workflow at the time of posting, stopping only when a delay is met. If any client in the campaign accepts the lead, we will consider the contact accepted and the Source will be notified."
