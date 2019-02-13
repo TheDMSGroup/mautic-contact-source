@@ -26,6 +26,7 @@ use Mautic\LeadBundle\Model\FieldModel;
 use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use Mautic\PluginBundle\Entity\IntegrationEntity;
 use Mautic\PluginBundle\Helper\IntegrationHelper;
+use MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Event\ContactLedgerContextEvent;
@@ -45,7 +46,7 @@ class Api
     protected $status;
 
     /** @var int */
-    protected $limits;
+    protected $limits = [];
 
     /** @var int */
     protected $statusCode;
@@ -72,16 +73,16 @@ class Api
     protected $eventErrors = [];
 
     /** @var bool */
-    protected $realTime;
+    protected $realTime = true;
 
     /** @var int */
-    protected $scrubRate;
+    protected $scrubRate = 0;
 
     /** @var int */
     protected $cost = 0;
 
     /** @var string */
-    protected $utmSource;
+    protected $utmSource = '';
 
     /** @var EventDispatcherInterface */
     protected $dispatcher;
@@ -421,7 +422,7 @@ class Api
             $this->scrubRate = isset($campaignSettings->scrubRate) ? intval($campaignSettings->scrubRate) : 0;
         }
         $this->cost      = isset($campaignSettings->cost) ? (abs(floatval($campaignSettings->cost))) : 0;
-        $this->utmSource = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : null;
+        $this->utmSource = !empty($this->contactSource->getUtmSource()) ? $this->contactSource->getUtmSource() : '';
 
         // Apply field overrides.
         if ($this->utmSource) {
@@ -1138,10 +1139,47 @@ class Api
      */
     private function evaluateLimits()
     {
-        $limitRules        = new \stdClass();
-        $limitRules->rules = $this->limits;
+        $limits        = new \stdClass();
+        $limits->rules = $this->limits;
 
-        $this->getCacheModel()->evaluateLimits($limitRules, $this->campaignId);
+        $this->excludeIrrelevantRules($limits);
+
+        $this->getCacheModel()->evaluateLimits($limits, $this->campaignId);
+    }
+
+    /**
+     * Exclude limits that are not currently applicable, because of a tighter scope.
+     *
+     * @param $rules
+     *
+     * @throws \Exception
+     */
+    private function excludeIrrelevantRules(&$rules)
+    {
+        if (!empty($rules->rules)) {
+            foreach ($rules->rules as $key => $limit) {
+                if (
+                    isset($limit->scope)
+                    && CacheRepository::SCOPE_UTM_SOURCE === intval($limit->scope)
+                    && strlen(trim($limit->value))
+                    && trim($limit->value) !== $this->utmSource
+                ) {
+                    // This is a UTM Source limit, and we do not match it, so it is currently irrelevant to us.
+                    unset($rules->rules[$key]);
+                    continue;
+                }
+                if (
+                    isset($limit->scope)
+                    && CacheRepository::SCOPE_CATEGORY === intval($limit->scope)
+                    && $limit->value
+                    && $limit->value != $this->contactSource->getCategory()
+                ) {
+                    // This is a Category limit, and we do not match it, so it is currently irrelevant to us.
+                    unset($rules->rules[$key]);
+                    continue;
+                }
+            }
+        }
     }
 
     /**
