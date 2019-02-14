@@ -163,6 +163,9 @@ class Api
     /** @var CampaignSettings */
     protected $campaignSettingsModel;
 
+    /** @var array */
+    protected $campaignSettingsParsed = [];
+
     /** @var CampaignExecutioner */
     protected $campaignExecutioner;
 
@@ -253,6 +256,14 @@ class Api
     }
 
     /**
+     * @return int
+     */
+    public function getSourceId()
+    {
+        return $this->sourceId;
+    }
+
+    /**
      * @param ContactSource $contactSource
      *
      * @return $this
@@ -286,6 +297,14 @@ class Api
         $this->campaignId = $campaignId;
 
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCampaignId()
+    {
+        return $this->campaignId;
     }
 
     /**
@@ -396,6 +415,11 @@ class Api
      */
     public function parseSourceCampaignSettings()
     {
+        if (isset($this->campaignSettingsParsed[$this->campaignId])) {
+            // Campaign settings have already been parsed for this campaign/session, likely due to a batch import.
+            return;
+        }
+
         // Check that the campaign is in the whitelist for this source.
         $campaignSettings = $this->campaignSettingsModel->setContactSource($this->contactSource)
                 ->getCampaignSettingsById($this->campaignId);
@@ -432,6 +456,8 @@ class Api
         $this->addTrace('contactSourceRealTime', $this->realTime);
         $this->addTrace('contactSourceCost', $this->cost);
         $this->addTrace('contactSourceUtmSource', $this->utmSource);
+
+        $this->campaignSettingsParsed[$this->campaignId] = true;
     }
 
     /**
@@ -1238,7 +1264,7 @@ class Api
      *
      * @throws \Exception
      */
-    private function addContactToCampaign()
+    public function addContactToCampaign()
     {
         if ($this->contact->getId()) {
             // Add the contact directly to the campaign without duplicate checking.
@@ -1258,7 +1284,7 @@ class Api
      *
      * @throws \Exception
      */
-    public function addContactsToCampaign(
+    private function addContactsToCampaign(
         Campaign $campaign,
         $contacts = [],
         $manuallyAdded = false
@@ -1714,9 +1740,18 @@ class Api
     public function setImported($imported)
     {
         $this->imported = $imported;
-        if ($this->imported) {
-            $this->realTime = false;
-        }
+
+        return $this;
+    }
+
+    /**
+     * @param $realtime
+     *
+     * @return $this
+     */
+    public function setRealtime($realtime)
+    {
+        $this->realTime = $realtime;
 
         return $this;
     }
@@ -1724,16 +1759,16 @@ class Api
     /**
      * Allow imports to set Utm Tags.
      *
-     * @param Contact $contact
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function setUtmSourceTag(Contact $contact)
+    public function setUtmSourceTag()
     {
         if ($this->utmSource) {
             $utmTags = $this->getUtmTag();
-            if ($originalUtmTags = $contact->getUtmTags()) {
+            if ($originalUtmTags = $this->contact->getUtmTags()) {
                 $utmTags = $originalUtmTags[0];
             } else {
-                $utmTags->setLead($contact);
+                $utmTags->setLead($this->contact);
             }
             $utmTags->setUtmSource($this->utmSource);
             $utmTags->setDateAdded(new \DateTime());
@@ -1741,7 +1776,7 @@ class Api
             if ($originalUtmTags) {
                 $this->em->flush($utmTags);
             }
-            $contact->setUtmTags($utmTags);
+            $this->contact->setUtmTags($utmTags);
         }
     }
 }
