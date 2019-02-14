@@ -28,6 +28,7 @@ use Mautic\PluginBundle\Entity\IntegrationEntity;
 use Mautic\PluginBundle\Helper\IntegrationHelper;
 use MauticPlugin\MauticContactSourceBundle\Entity\CacheRepository;
 use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
+use MauticPlugin\MauticContactSourceBundle\Entity\Event;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Event\ContactLedgerContextEvent;
 use MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException;
@@ -881,7 +882,7 @@ class Api
                                 ],
                                 [
                                     'column' => 'f.object',
-                                    'expr'   => 'notLike',
+                                    'expr'   => 'neq',
                                     'value'  => 'company',
                                 ],
                             ],
@@ -1457,6 +1458,8 @@ class Api
             $this->attribution,
             intval($this->campaignId)
         );
+        $this->em->clear(Stat::class);
+
         $this->logs = array_merge(
             $this->logs,
             [
@@ -1485,6 +1488,7 @@ class Api
             $this->getLogsJSON(),
             $message
         );
+        $this->em->clear(Event::class);
 
         // Integration entity creation (shows up under Integrations in a Contact).
         if ($this->contact && $this->contact->getId()) {
@@ -1710,6 +1714,9 @@ class Api
     public function setImported($imported)
     {
         $this->imported = $imported;
+        if ($this->imported) {
+            $this->realTime = false;
+        }
 
         return $this;
     }
