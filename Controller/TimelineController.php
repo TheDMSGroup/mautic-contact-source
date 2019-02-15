@@ -35,6 +35,11 @@ class TimelineController extends CommonController
         if (empty($contactSourceId)) {
             return $this->accessDenied();
         }
+
+        if (!$this->get('mautic.security')->isAdmin() && $this->get('mautic.security')->isGranted('contactsource:export:disable')) {
+            return $this->accessDenied();
+        }
+
         $contactSource = $this->checkContactSourceAccess($contactSourceId, 'view');
         if ($contactSource instanceof Response) {
             return $contactSource;
