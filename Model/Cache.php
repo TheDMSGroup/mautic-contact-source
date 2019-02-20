@@ -73,10 +73,9 @@ class Cache extends AbstractCommonModel
      */
     public function create($campaignId = 0)
     {
-        $entities   = [];
-        $entities[] = $this->createEntity($campaignId);
-        if (count($entities)) {
-            $this->getRepository()->saveEntities($entities);
+        $entity = $this->createEntity($campaignId);
+        if ($entity) {
+            $this->getRepository()->saveEntity($entity);
         }
     }
 
