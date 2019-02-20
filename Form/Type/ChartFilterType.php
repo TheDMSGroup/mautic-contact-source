@@ -11,7 +11,6 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Form\Type;
 
-use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CoreBundle\Factory\MauticFactory;
 use MauticPlugin\MauticContactSourceBundle\Entity\Stat;
 use MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel;

@@ -12,9 +12,7 @@
 namespace MauticPlugin\MauticContactSourceBundle\Form\Extension;
 
 use Doctrine\ORM\EntityManager;
-use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\LeadBundle\Form\Type\LeadImportType;
-use MauticPlugin\MauticContactSourceBundle\Entity\ContactSource;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\CallbackTransformer;

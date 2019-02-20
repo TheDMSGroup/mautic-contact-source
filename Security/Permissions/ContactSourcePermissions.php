@@ -27,6 +27,11 @@ class ContactSourcePermissions extends AbstractPermissions
         parent::__construct($params);
         $this->addStandardPermissions('categories');
         $this->addExtendedPermissions('items');
+        //This is in anticipation of PR 5995 getting merged ~2.16
+        if (method_exists($this, 'addCustomPermission')) {
+            $addCustomPermission = 'addCustomPermission';
+            $this->$addCustomPermission('export', ['disable' => 1024]);
+        }
     }
 
     /**
@@ -49,5 +54,10 @@ class ContactSourcePermissions extends AbstractPermissions
     {
         $this->addStandardFormFields('contactsource', 'categories', $builder, $data);
         $this->addExtendedFormFields('contactsource', 'items', $builder, $data);
+        //This is in anticipation of PR 5995 getting merged ~2.16
+        if (method_exists($this, 'addCustomFormFields')) {
+            $addCustomFormFields = 'addCustomFormFields';
+            $this->$addCustomFormFields($this->getName(), 'export', $builder, 'mautic.core.permissions.export', ['disable' => 'mautic.core.permissions.disable'], $data);
+        }
     }
 }
