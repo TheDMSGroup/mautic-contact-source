@@ -77,51 +77,30 @@ class BatchSubscriber extends CommonSubscriber
 
     /**
      * @param LeadEvent $leadEvent
-     *
-     * @throws \MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException
      */
     public function onLeadPreSave(LeadEvent $leadEvent)
     {
-        $contact = $leadEvent->getLead();
-        if (
-            true === $contact->imported
-            && ($identityMap = $this->em->getUnitOfWork()->getIdentityMap())
-            && isset($identityMap['Mautic\LeadBundle\Entity\Import'])
-            && ($identityArray = $identityMap['Mautic\LeadBundle\Entity\Import'])
-        ) {
-            $this->apiModel->setImported(true);
-
-            $import           = array_shift($identityArray);
-            $importProperties = $import->getProperties();
-
-            $campaignId = $importProperties['parser']['campaign'];
-            $sourceId   = $importProperties['parser']['source'];
-
-            $this->apiModel->setContact($contact);
-            $this->apiModel->setCampaignId($campaignId);
-            $this->apiModel->setCampaign($this->campaignModel->getEntity($campaignId));
-            $this->apiModel->setSourceId($sourceId);
-            $this->apiModel->setContactSource($this->apiModel->getContactSourceModel()->getEntity($sourceId));
-
-            $this->apiModel->parseSourceCampaignSettings();
-            $this->apiModel->setUtmSourceTag($contact);
-            $this->apiModel->processOffline();
-
-            try {
+        try {
+            if ($this->prepForContactImport($leadEvent)) {
+                $this->apiModel->setUtmSourceTag();
+                $this->apiModel->processOffline();
                 $this->apiModel->applyAttribution();
-            } catch (\Exception $e) {
             }
+        } catch (\Exception $e) {
         }
     }
 
     /**
-     * @param LeadEvent $leadEvent
+     * @param $leadEvent
+     *
+     * @return bool
      *
      * @throws \MauticPlugin\MauticContactSourceBundle\Exception\ContactSourceException
      */
-    public function onLeadPostSave(LeadEvent $leadEvent)
+    private function prepForContactImport($leadEvent)
     {
-        $contact = $leadEvent->getLead();
+        $importing = false;
+        $contact   = $leadEvent->getLead();
         if (
             true === $contact->imported
             && ($identityMap = $this->em->getUnitOfWork()->getIdentityMap())
@@ -129,6 +108,7 @@ class BatchSubscriber extends CommonSubscriber
             && ($identityArray = $identityMap['Mautic\LeadBundle\Entity\Import'])
         ) {
             $this->apiModel->setImported(true);
+            $this->apiModel->setRealtime(false);
 
             $import           = array_shift($identityArray);
             $importProperties = $import->getProperties();
@@ -137,17 +117,32 @@ class BatchSubscriber extends CommonSubscriber
             $sourceId   = $importProperties['parser']['source'];
 
             $this->apiModel->setContact($contact);
-            $this->apiModel->setCampaignId($campaignId);
-            $this->apiModel->setCampaign($this->campaignModel->getEntity($campaignId));
-            $this->apiModel->setSourceId($sourceId);
-            $this->apiModel->setContactSource($this->apiModel->getContactSourceModel()->getEntity($sourceId));
-            $this->apiModel->parseSourceCampaignSettings();
-
-            try {
-                $this->apiModel->addContactsToCampaign($this->apiModel->getCampaign(), [$contact], true);
-            } catch (\Exception $e) {
+            if ($sourceId !== $this->apiModel->getSourceId()) {
+                $this->apiModel->setSourceId($sourceId);
+                $this->apiModel->setContactSource($this->apiModel->getContactSourceModel()->getEntity($sourceId));
+                if ($campaignId !== $this->apiModel->getCampaignId()) {
+                    $this->apiModel->setCampaignId($campaignId);
+                    $this->apiModel->setCampaign($this->campaignModel->getEntity($campaignId));
+                }
             }
-            $this->apiModel->logResults();
+            $this->apiModel->parseSourceCampaignSettings();
+            $importing = true;
+        }
+
+        return $importing;
+    }
+
+    /**
+     * @param LeadEvent $leadEvent
+     */
+    public function onLeadPostSave(LeadEvent $leadEvent)
+    {
+        try {
+            if ($this->prepForContactImport($leadEvent)) {
+                $this->apiModel->addContactToCampaign();
+                $this->apiModel->logResults();
+            }
+        } catch (\Exception $e) {
         }
     }
 }
