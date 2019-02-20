@@ -1312,11 +1312,8 @@ class Api
             //         $this->dispatcher->dispatch(CampaignEvents::CAMPAIGN_ON_LEADCHANGE, $event);
             //         unset($event);
             //     }
-            //
-            //     // Detach to save memory
-            //     $this->em->detach($campaignContact);
-            //     unset($campaignContact);
             // }
+            $this->em->detach($campaignContact);
         }
         unset($campaign, $campaignContact, $contacts);
     }
