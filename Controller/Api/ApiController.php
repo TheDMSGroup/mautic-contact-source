@@ -53,7 +53,9 @@ class ApiController extends CommonApiController
      * @param         $object
      * @param         $action
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
+     *
+     * @throws \Exception
      */
     public function handlerAction(
         Request $request,
