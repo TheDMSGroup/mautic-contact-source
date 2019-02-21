@@ -12,15 +12,15 @@
 <div class="bg-white panel pt-md pb-md">
     <!-- Export button -->
     <div class="btn-group col-xs-2 pb-md">
-        <?php if ($view['security']->isAdmin() || !$view['security']->isGranted('contactsource:export:disable', 'MATCH_ONE')): ?>
+        <?php // Currently causes exception without patch: if ($view['security']->isAdmin() || !$view['security']->isGranted('contactsource:export:disable', 'MATCH_ONE')): ?>
         <a class="btn btn-default"
            onclick="Mautic.contactSourceTimelineExport();">
              <span>
                 <i class="fa fa-download"></i><span class="hidden-xs hidden-sm">Export</span>
              </span>
         </a>
-        <?php endif; ?>
-        <a id = "transactions-filter-btn"
+        <?php // endif; ?>
+        <a id="transactions-filter-btn"
            class="btn btn-default">
             <span>
                 <i class="fa fa-filter"></i>
