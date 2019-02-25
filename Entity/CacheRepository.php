@@ -496,18 +496,18 @@ class CacheRepository extends CommonRepository
     /**
      * Delete all Cache entities that are no longer needed for duplication/exclusivity/limit checks.
      *
-     * @return mixed
+     * @throws \Exception
      */
     public function deleteExpired()
     {
-        // 32 days old, since the maximum limiter is 1m/30d.
-        $oldest = date('Y-m-d H:i:s', time() - (32 * 24 * 60 * 60));
+        // General expirations. Maximum limiter is 1m.
+        $oldest = new \DateTime('-1 month -1 day');
         $q      = $this->getEntityManager()->getConnection()->createQueryBuilder();
         $q->delete(MAUTIC_TABLE_PREFIX.$this->getTableName());
         $q->where(
-            $q->expr()->lt('date_added', ':oldest')
+            $q->expr()->lt('date_added', 'FROM_UNIXTIME(:oldest)')
         );
-        $q->setParameter('oldest', $oldest);
+        $q->setParameter('oldest', $oldest->getTimestamp());
         $q->execute();
     }
 }
