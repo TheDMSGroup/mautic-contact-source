@@ -37,6 +37,13 @@ class PublicController extends CommonController
         $object,
         $action
     ) {
+        if (!$this->get('mautic.security')->isAnonymous()) {
+            $contactSource = $this->checkContactSourceAccess($sourceId, 'view');
+            if ($contactSource instanceof ContactSource) {
+                $request->request->set('token', $contactSource->getToken());
+            }
+        }
+
         /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
         $ApiModel = $this->get('mautic.contactsource.model.api');
         $ApiModel
@@ -100,17 +107,6 @@ class PublicController extends CommonController
         } else {
             // Completely invalid source.
             $this->notFound('mautic.contactsource.api.docs.not_found');
-        }
-
-        // Attempt auth by permissions (assuming logged in user).
-        if (!$parameters['authenticated']) {
-            $anonymous = $this->get('mautic.security')->isAnonymous();
-            if (!$anonymous) {
-                $contactSource = $this->checkContactSourceAccess($sourceId, 'view');
-                if ($contactSource instanceof ContactSource) {
-                    $parameters['authenticated'] = true;
-                }
-            }
         }
 
         if (!$parameters['authenticated']) {

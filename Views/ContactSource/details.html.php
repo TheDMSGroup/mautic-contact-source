@@ -43,6 +43,9 @@ $view['slots']->set(
 );
 
 $token = $item->getToken();
+$uri = $view->escape(
+    $view['router']->generate('mautic_contactsource_documentation', ['sourceId' => $item->getId()], 0)
+);
 
 ?>
 <!-- start: box layout -->
@@ -203,20 +206,24 @@ $token = $item->getToken();
     <!-- right section -->
     <div class="col-md-3 bg-white bdr-l height-auto">
         <!-- form HTML -->
-        <?php if ($token): ?>
-            <div class="pa-md">
-                <div class="panel bg-info bg-light-lg bdr-w-0 mb-0">
-                    <div class="panel-body">
-                        <h5 class="fw-sb mb-sm"><?php echo $view['translator']->trans(
-                                'mautic.contactsource.form.token'
-                            ); ?></h5>
-                        <p class="mb-sm contactsource_token"><?php echo $token; ?></p>
-                    </div>
+        <div class="pa-md">
+            <div class="panel bg-info bg-light-lg bdr-w-0 mb-0">
+                <div class="panel-body">
+                    <h5 class="fw-sb mb-sm"><?php echo $view['translator']->trans(
+                            'mautic.contactsource.form.documentation'
+                        ); ?></h5>
+                    <p class="mb-sm contactsource_documentation">
+                        <a href="<?php echo $uri; ?>" target="_blank"><?php echo $uri; ?></a>
+                    </p>
+                    <h5 class="fw-sb mb-sm"><?php echo $view['translator']->trans(
+                            'mautic.contactsource.form.token'
+                        ); ?></h5>
+                    <p class="mb-sm contactsource_token"><?php echo $token; ?></p>
                 </div>
             </div>
+        </div>
 
-            <hr class="hr-w-2" style="width:50%">
-        <?php endif; ?>
+        <hr class="hr-w-2" style="width:50%">
         <!--/ form HTML -->
 
         <div class="panel bg-transparent shd-none bdr-rds-0 bdr-w-0 mb-0">
