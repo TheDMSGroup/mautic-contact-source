@@ -16,6 +16,7 @@ Choose a release that matches your version of Mautic.
 | -------------- | ------------------------------------------------------------------- |
 | 2.12.x         | `composer require thedmsgroup/mautic-contact-source-bundle "^2.12"` |
 | 2.14.x         | `composer require thedmsgroup/mautic-contact-source-bundle "^2.14"` |
+| 2.15.x         | `composer require thedmsgroup/mautic-contact-source-bundle "^2.15"` |
 
 1. Install by running the command above or by downloading the appropriate version and unpacking the contents into a folder named `/plugins/MauticContactSourceBundle`
 2. Go to `/s/plugins/reload`
@@ -46,9 +47,3 @@ By default your third parties can POST contacts to urls matching this pattern:
 - [ ] Campaign Required Fields: The fields being used within a campaign should percolate upward to the Source, updating required fields.
 - [ ] Notifications: Third parties should be notified when their API changes (such as an added campaign or required field change).
 - [ ] Batch Support: Import multiple contacts at once for improved performance.
-
-# Review and refactor for 2.14.x
-
-Overrides to refactor:
-- processRealTime - Refactor to use executioner instead of modified event model.
--- Also use event dispatching from client plugin instead of session storage.
