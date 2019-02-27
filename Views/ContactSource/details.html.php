@@ -43,7 +43,7 @@ $view['slots']->set(
 );
 
 $token = $item->getToken();
-$uri = $view->escape(
+$uri   = $view->escape(
     $view['router']->generate('mautic_contactsource_documentation', ['sourceId' => $item->getId()], 0)
 );
 

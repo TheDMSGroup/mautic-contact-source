@@ -144,7 +144,9 @@
                 </tr>
                 </thead>
                 <tbody>
-                <?php if (empty($campaignFields)) $campaignFields = $FieldList; ?>
+                <?php if (empty($campaignFields)) {
+                            $campaignFields = $FieldList;
+                        } ?>
                 <?php foreach ($campaignFields as $campaignFieldName => $campaignFieldDescription): ?>
                     <tr>
                         <td>
