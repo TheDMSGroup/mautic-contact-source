@@ -119,9 +119,9 @@
             <aside class="notice">Managing the Source Configuration requires portal login credentials.</aside>
         <?php else: ?>
             <ul>
-                <?php foreach ($campaignList as $campaignItem): ?>
+                <?php foreach ($campaignList as $campaignId => $campaignName): ?>
                     <li>
-                        <a href="<?php echo $global['domain']; ?>/source/<?php echo $source['id']; ?>/campaign/<?php echo $campaignItem['campaign_id']; ?>"><?php echo $campaignItem['name']; ?></a>
+                        <a href="<?php echo $global['domain']; ?>/source/<?php echo $source['id']; ?>/campaign/<?php echo $campaignId; ?>"><?php echo $campaignName; ?></a>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -134,16 +134,19 @@
             <!-- Light Block ------------------------------------->
             <p><?php echo $campaign['description']; ?></p>
             <h3 id='http-request'>Field List</h3>
-            <p>Required Field settings for <?php echo $campaign['description']; ?></p>
+            <p>Fields available for <?php echo $campaign['description']; ?></p>
             <table>
                 <thead>
                 <tr>
                     <th>Field Name</th>
                     <th>Field Description</th>
-                    <th>Required?</th>
+<!--                    <th>Required?</th>-->
                 </tr>
                 </thead>
                 <tbody>
+                <?php if (empty($campaignFields)) {
+                            $campaignFields = $FieldList;
+                        } ?>
                 <?php foreach ($campaignFields as $campaignFieldName => $campaignFieldDescription): ?>
                     <tr>
                         <td>
@@ -152,11 +155,10 @@
                         <td>
                             <?php echo $campaignFieldDescription; ?>
                         </td>
-                        <td>
-                            &nbsp;
-                        </td>
+<!--                        <td></td>-->
                     </tr>
                 <?php endforeach; ?>
+
                 </tbody>
             </table>
         <?php endif; ?>
@@ -282,7 +284,6 @@
                 <a id="toggleFieldList" onClick="toggleFieldListEvent(this)" style="cursor: pointer;"><< show more >></a>
             </span>
         </p>
-        <aside class="success"> Remember — a happy contact is an authenticated contact!</aside>
 
         <!-- # Errors ------------------------------>
         <h1 id='errors'>Errors</h1>
