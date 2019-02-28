@@ -1108,9 +1108,9 @@ class Api
                 } else {
                     // An invalid IP address is a soft error.
                     if (!isset($this->errors['ip'])) {
-                        $this->errors['ip'] = [];
+                        $this->errors['ip'] = '';
                     }
-                    $this->errors['ip'][$ipAddressString] = 'This IP address is invalid.';
+                    $this->errors['ip'] .= 'The IP address "'.$ipAddressString.'" is invalid.';
                 }
             }
         }
