@@ -104,7 +104,7 @@ class CacheRepository extends CommonRepository
             // Match duration (always, including campaign scope)
             $filters[] = [
                 'andx'       => $andx,
-                'date_added' => $this->oldestDateAdded($duration, $timezone),
+                'date_added' => $this->oldestDateAdded($duration, $timezone)->getTimestamp(),
             ];
 
             // Run the query to get the count.
@@ -148,8 +148,12 @@ class CacheRepository extends CommonRepository
         if (!$timezone) {
             $timezone = date_default_timezone_get();
         }
+        if (is_string($timezone)) {
+            $timezone = new \DateTimeZone($timezone);
+        }
         if ($dateSend) {
-            $oldest = new \DateTime($dateSend->getTimestamp(), $timezone);
+            $oldest = clone $dateSend;
+            $oldest->setTimezone($timezone);
         } else {
             $oldest = new \DateTime('now', $timezone);
         }
@@ -244,7 +248,7 @@ class CacheRepository extends CommonRepository
                             (isset($expr) ? $expr : null)
                         )
                     );
-                    $query->setParameter('dateAdded'.$k, $set['date_added']);
+                    $query->setParameter('dateAdded'.$k, (int) $set['date_added']);
                 }
                 $result = $query->execute()->fetch();
                 if ($returnCount) {
@@ -458,7 +462,7 @@ class CacheRepository extends CommonRepository
                 // Match duration (always), once all other aspects of the query are ready.
                 $filters[] = [
                     'orx'              => $orx,
-                    'date_added'       => $this->oldestDateAdded($duration, $timezone),
+                    'date_added'       => $this->oldestDateAdded($duration, $timezone)->getTimestamp(),
                     'contactsource_id' => $contactSource->getId(),
                 ];
             }
@@ -508,7 +512,7 @@ class CacheRepository extends CommonRepository
         $q->where(
             $q->expr()->lt('date_added', 'FROM_UNIXTIME(:oldest)')
         );
-        $q->setParameter('oldest', $oldest->getTimestamp());
+        $q->setParameter('oldest', (int) $oldest->getTimestamp());
         $q->execute();
     }
 }
