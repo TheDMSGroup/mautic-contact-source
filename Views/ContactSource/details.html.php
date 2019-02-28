@@ -13,8 +13,8 @@ $view->extend('MauticCoreBundle:Default:content.html.php');
 $view['slots']->set('mauticContent', 'contactsource');
 $view['slots']->set('headerTitle', $item->getName());
 
-echo $view['assets']->includeScript('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.js', 'Mautic.contactsourceOnLoad', 'Mautic.contactsourceOnLoad');
-echo $view['assets']->includeStylesheet('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.css');
+echo $view['assets']->includeScript('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.js?v=2', 'Mautic.contactsourceOnLoad', 'Mautic.contactsourceOnLoad');
+echo $view['assets']->includeStylesheet('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.css?v=2');
 
 $view['slots']->set(
     'actions',
