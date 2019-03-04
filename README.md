@@ -2,7 +2,7 @@
 
 ![](./Assets/img/source.png)
 
-Creates API endpoints for receiving contacts from external sources.
+Creates easy-to-use API endpoints for receiving contacts from external sources.
 
 Designed for use by performance marketers who enhance/exchange contacts in mass quantities.
 Can optionally be used in tandem with it's sibling [Mautic Contact Client](https://github.com/TheDMSGroup/mautic-contact-client)
@@ -42,6 +42,7 @@ By default your third parties can POST contacts to urls matching this pattern:
 - [x] Caps: Rules to limit the quantity of successful contacts can be received.
 - [x] Logging: Log statistics on contact ingestion, provide charts when viewing a source in the UI.
 - [x] Self-Documentation: Each source (API) generates a public documentation page for a third party (optional). 
+- [x] Imports: Allows you to assign an import to a Source and Campaign destination.
 
 ## Todo
 - [ ] Campaign Required Fields: The fields being used within a campaign should percolate upward to the Source, updating required fields.

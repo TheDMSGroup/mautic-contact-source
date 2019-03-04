@@ -1421,10 +1421,37 @@ class Api
     public function isScrubbed()
     {
         if (null === $this->scrubbed) {
+            $this->resetRandomGeneratorByContact();
             $this->scrubbed = $this->scrubRate > rand(0, 99);
         }
 
         return $this->scrubbed;
+    }
+
+    /**
+     * Reset random generator based on the current contact.
+     *
+     * This is to help avoid gaming the Source API scrub rate by re-posting the same lead.
+     *
+     * @return bool|string
+     */
+    private function resetRandomGeneratorByContact()
+    {
+        if ($this->contact) {
+            $string = trim(strtolower(implode(
+                '|', [
+                $this->contact->getEmail(),
+                $this->contact->getPhone(),
+                $this->contact->getMobile(),
+            ])));
+            if (strlen($string) > 3) {
+                $binHash = md5($string, true);
+                $numHash = unpack('N2', $binHash);
+                $hash    = $numHash[1].$numHash[2];
+                $hashInt = (int) substr($hash, 0, 10);
+                mt_srand($hashInt);
+            }
+        }
     }
 
     /**
