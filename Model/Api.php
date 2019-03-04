@@ -1536,10 +1536,10 @@ class Api
      * @throws \Mautic\CampaignBundle\Executioner\Exception\CannotProcessEventException
      * @throws \Mautic\CampaignBundle\Executioner\Scheduler\Exception\NotSchedulableException
      */
-    private function processParallel()
+    public function processParallel()
     {
         if (
-            !$this->campaignId
+            !$this->campaign
             || !$this->contact
             || !$this->contact->getId()
         ) {
