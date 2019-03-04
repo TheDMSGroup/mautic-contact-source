@@ -113,6 +113,51 @@ class SourceIntegration extends AbstractIntegration
                     'required'   => false,
                 ]
             );
+            $builder->add(
+                'parallel_realtime',
+                'yesno_button_group',
+                [
+                    'label'             => 'mautic.contactsource.form.parallel_realtime',
+                    'label_attr'        => ['class' => 'control-label'],
+                    'choices_as_values' => true,
+                    'required'          => false,
+                    'data'              => !isset($data['parallel_realtime']) ? false : (bool) $data['parallel_realtime'],
+                    'attr'              => [
+                        'class'   => 'form-control',
+                        'tooltip' => 'mautic.contactsource.form.parallel_realtime.tooltip',
+                    ],
+                ]
+            );
+            $builder->add(
+                'parallel_offline',
+                'yesno_button_group',
+                [
+                    'label'             => 'mautic.contactsource.form.parallel_offline',
+                    'label_attr'        => ['class' => 'control-label'],
+                    'choices_as_values' => true,
+                    'required'          => false,
+                    'data'              => !isset($data['parallel_offline']) ? false : (bool) $data['parallel_offline'],
+                    'attr'              => [
+                        'class'   => 'form-control',
+                        'tooltip' => 'mautic.contactsource.form.parallel_offline.tooltip',
+                    ],
+                ]
+            );
+            $builder->add(
+                'parallel_import',
+                'yesno_button_group',
+                [
+                    'label'             => 'mautic.contactsource.form.parallel_import',
+                    'label_attr'        => ['class' => 'control-label'],
+                    'choices_as_values' => true,
+                    'required'          => false,
+                    'data'              => !isset($data['parallel_import']) ? false : (bool) $data['parallel_import'],
+                    'attr'              => [
+                        'class'   => 'form-control',
+                        'tooltip' => 'mautic.contactsource.form.parallel_import.tooltip',
+                    ],
+                ]
+            );
         }
     }
 }
