@@ -2,7 +2,7 @@
 
 ![](./Assets/img/source.png)
 
-Creates API endpoints for receiving contacts from external sources.
+Creates easy-to-use API endpoints for receiving contacts from external sources.
 
 Designed for use by performance marketers who enhance/exchange contacts in mass quantities.
 Can optionally be used in tandem with it's sibling [Mautic Contact Client](https://github.com/TheDMSGroup/mautic-contact-client)
