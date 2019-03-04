@@ -19,6 +19,7 @@ use Mautic\CampaignBundle\Model\CampaignModel;
 use Mautic\CoreBundle\Entity\IpAddress;
 use Mautic\CoreBundle\Helper\DateTimeHelper;
 use Mautic\CoreBundle\Helper\IpLookupHelper;
+use Mautic\CoreBundle\Helper\PhoneNumberHelper;
 use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\LeadDevice as ContactDevice;
@@ -184,6 +185,9 @@ class Api
 
     /** @var ContactDevice */
     protected $device;
+
+    /** @var PhoneNumberHelper */
+    protected $phoneHelper;
 
     /**
      * Api constructor.
@@ -1148,6 +1152,9 @@ class Api
                     $this->contactModel->cleanFields($fieldData, $contactField);
                     if ('email' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
                         $this->emailValidator->validate($fieldData[$contactField['alias']], false);
+                    } elseif ('tel' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
+                        // Soft normalize the phone numbers before saving so that DNC can be correlated later.
+                        $this->phoneNormalize($fieldData[$contactField['alias']]);
                     }
                 } catch (\Exception $exception) {
                     throw new ContactSourceException(
@@ -1174,6 +1181,28 @@ class Api
         // Alteration to core: Skip imported/merged event triggers, manipulator, and the persist/save.
 
         return $contact;
+    }
+
+    /**
+     * @param $phone
+     *
+     * @return string
+     */
+    private function phoneNormalize(&$phone)
+    {
+        $phone = trim($phone);
+        if (!empty($phone)) {
+            if (!$this->phoneHelper) {
+                $this->phoneHelper = new PhoneNumberHelper();
+            }
+            try {
+                $normalized = $this->phoneHelper->format($phone);
+                if (!empty($normalized)) {
+                    $phone = $normalized;
+                }
+            } catch (\Exception $e) {
+            }
+        }
     }
 
     /**
