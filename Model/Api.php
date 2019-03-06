@@ -17,8 +17,12 @@ use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CampaignBundle\Entity\Lead as CampaignContact;
 use Mautic\CampaignBundle\Model\CampaignModel;
 use Mautic\CoreBundle\Entity\IpAddress;
+use Mautic\CoreBundle\Helper\CacheStorageHelper;
+use Mautic\CoreBundle\Helper\CoreParametersHelper;
 use Mautic\CoreBundle\Helper\DateTimeHelper;
 use Mautic\CoreBundle\Helper\IpLookupHelper;
+use Mautic\CoreBundle\Helper\PathsHelper;
+use Mautic\CoreBundle\Helper\PhoneNumberHelper;
 use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\LeadDevice as ContactDevice;
@@ -44,6 +48,8 @@ use Symfony\Component\HttpFoundation\Session\Session;
  */
 class Api
 {
+    const CACHE_TTL = 300;
+
     /** @var string */
     protected $status;
 
@@ -138,7 +144,7 @@ class Api
     protected $emailValidator;
 
     /** @var array */
-    protected $allowedFieldEntities;
+    protected $allowedFieldLabels;
 
     /** @var array */
     protected $logs = [];
@@ -185,6 +191,18 @@ class Api
     /** @var ContactDevice */
     protected $device;
 
+    /** @var PhoneNumberHelper */
+    protected $phoneHelper;
+
+    /** @var CacheStorageHelper */
+    protected $cacheStorageHelper;
+
+    /** @var CoreParametersHelper */
+    protected $coreParametersHelper;
+
+    /** @var PathsHelper */
+    protected $pathsHelper;
+
     /**
      * Api constructor.
      *
@@ -202,6 +220,8 @@ class Api
      * @param EmailValidator           $emailValidator
      * @param Cache                    $cacheModel
      * @param Session                  $session
+     * @param CoreParametersHelper     $coreParametersHelper
+     * @param PathsHelper              $pathsHelper
      */
     public function __construct(
         EventDispatcherInterface $dispatcher,
@@ -217,7 +237,9 @@ class Api
         ContactModel $contactModel,
         EmailValidator $emailValidator,
         Cache $cacheModel,
-        Session $session
+        Session $session,
+        CoreParametersHelper $coreParametersHelper,
+        PathsHelper $pathsHelper
     ) {
         $this->dispatcher            = $dispatcher;
         $this->em                    = $em;
@@ -233,6 +255,8 @@ class Api
         $this->emailValidator        = $emailValidator;
         $this->cacheModel            = $cacheModel;
         $this->session               = $session;
+        $this->coreParametersHelper  = $coreParametersHelper;
+        $this->pathsHelper           = $pathsHelper;
     }
 
     /**
@@ -881,65 +905,126 @@ class Api
     /**
      * Retrieve a complete list of supported custom fields for import, including IP and UTM data.
      *
-     * @param bool $asEntities
+     * Returns an array containing type, alias, defaultValue
      *
-     * @return array|null
+     * @param bool $details
+     *
+     * @return array|bool|mixed
      */
-    public function getAllowedFields($asEntities = false)
+    public function getAllowedFields($details = false)
     {
         if (null === $this->allowedFields) {
-            try {
-                // Exclude company fields as they cannot be created/related on insert due to performance implications.
-                $this->allowedFieldEntities = $this->fieldModel->getEntities(
-                    [
-                        'filter'         => [
-                            'force' => [
-                                [
-                                    'column' => 'f.isPublished',
-                                    'expr'   => 'eq',
-                                    'value'  => true,
-                                ],
-                                [
-                                    'column' => 'f.object',
-                                    'expr'   => 'neq',
-                                    'value'  => 'company',
+            $cache = $this->cacheStorageHelper();
+            if ($cachedAllowedFields = $cache->get('allowedFields', self::CACHE_TTL)) {
+                $this->allowedFields = $cachedAllowedFields;
+            }
+            if (!$this->allowedFields) {
+                try {
+                    // Exclude company fields as they cannot be created/related on insert due to performance implications.
+                    $entities = $this->fieldModel->getEntities(
+                        [
+                            'filter'         => [
+                                'force' => [
+                                    [
+                                        'column' => 'f.isPublished',
+                                        'expr'   => 'eq',
+                                        'value'  => true,
+                                    ],
+                                    [
+                                        'column' => 'f.object',
+                                        'expr'   => 'neq',
+                                        'value'  => 'company',
+                                    ],
                                 ],
                             ],
-                        ],
-                        'hydration_mode' => 'HYDRATE_ARRAY',
-                    ]
-                );
+                            'hydration_mode' => 'HYDRATE_ARRAY',
+                        ]
+                    );
 
-                // Also build an inclusive array for API and output.
-                $allowedFields = [];
-                foreach ($this->allowedFieldEntities as $field) {
-                    $allowedFields[$field['alias']] = $field['label'];
+                    // Also build an inclusive array for API and output.
+                    $allowedFields = [];
+                    foreach ($entities as $field) {
+                        $allowedFields[$field['alias']] = [
+                            'alias'        => $field['alias'],
+                            'type'         => $field['type'],
+                            'defaultValue' => $field['defaultValue'],
+                            'label'        => $field['label'],
+                        ];
+                    }
+                    // Add IP as an allowed import field.
+                    $allowedFields['ip'] = [
+                        'alias'        => 'ip',
+                        'type'         => 'text',
+                        'defaultValue' => '',
+                        'label'        => 'IP Addresses (comma delimited)',
+                    ];
+
+                    // Get available UTM fields and their setters.
+                    foreach ($this->getUtmSetters() as $q => $v) {
+                        $allowedFields[$q] = [
+                            'alias'        => $q,
+                            'type'         => 'text',
+                            'defaultValue' => '',
+                            'label'        => str_replace(
+                                ['Utm', 'Set'],
+                                ['UTM', ''],
+                                ucwords(str_replace('_', ' ', $q))
+                            ),
+                        ];
+                    }
+
+                    // Get available Device fields and their setters.
+                    foreach ($this->getDeviceSetters() as $q => $v) {
+                        $allowedFields[$q] = [
+                            'alias'        => $q,
+                            'type'         => 'text',
+                            'defaultValue' => '',
+                            'label'        => ucwords(str_replace('_', ' ', $q)),
+                        ];
+                    }
+
+                    unset($allowedFields['attribution'], $allowedFields['attribution_date']);
+
+                    uksort($allowedFields, 'strnatcmp');
+
+                    $this->allowedFields = $allowedFields;
+
+                    $cache->set('allowedFields', $this->allowedFields, self::CACHE_TTL);
+                } catch (\Exception $exception) {
+                    $this->handleException($exception);
                 }
-                // Add IP as an allowed import field.
-                $allowedFields['ip'] = 'IP Addresses (comma delimited)';
-
-                // Get available UTM fields and their setters.
-                foreach ($this->getUtmSetters() as $q => $v) {
-                    $allowedFields[$q] = str_replace(['Utm', 'Set'], ['UTM', ''], ucwords(str_replace('_', ' ', $q)));
+            }
+            if ($this->allowedFields && !$this->allowedFieldLabels) {
+                $allowedFieldLabels = [];
+                foreach ($this->allowedFields as $key => $value) {
+                    $allowedFieldLabels[$key] = $value['label'];
                 }
-
-                // Get available Device fields and their setters.
-                foreach ($this->getDeviceSetters() as $q => $v) {
-                    $allowedFields[$q] = ucwords(str_replace('_', ' ', $q));
-                }
-
-                unset($allowedFields['attribution']);
-                unset($allowedFields['attribution_date']);
-
-                uksort($allowedFields, 'strnatcmp');
-
-                $this->allowedFields = $allowedFields;
-            } catch (\Exception $exception) {
-                $this->handleException($exception);
+                $this->allowedFieldLabels = $allowedFieldLabels;
             }
         }
 
-        return $asEntities ? $this->allowedFieldEntities : $this->allowedFields;
+        return $details ? $this->allowedFields : $this->allowedFieldLabels;
+    }
+
+    /**
+     * @return CacheStorageHelper
+     */
+    private function cacheStorageHelper()
+    {
+        if (!$this->cacheStorageHelper) {
+            $this->cacheStorageHelper = new CacheStorageHelper(
+                CacheStorageHelper::ADAPTOR_FILESYSTEM,
+                'ContactSource',
+                null,
+                $this->coreParametersHelper->getParameter(
+                    'cached_data_dir',
+                    $this->pathsHelper->getSystemPath('cache', true)
+                ),
+                self::CACHE_TTL
+            );
+        }
+
+        return $this->cacheStorageHelper;
     }
 
     /**
@@ -1019,10 +1104,7 @@ class Api
         // Alteration to core start.
         // Get an array of allowed field aliases.
         $allowedFields        = $this->getAllowedFields(true);
-        $allowedFieldsAliases = [];
-        foreach ($allowedFields as $contactField) {
-            $allowedFieldsAliases[$contactField['alias']] = true;
-        }
+        $allowedFieldsAliases = $this->getAllowedFields();
         // Alteration to core stop.
 
         // Alteration to core: Skip company import section.
@@ -1148,6 +1230,9 @@ class Api
                     $this->contactModel->cleanFields($fieldData, $contactField);
                     if ('email' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
                         $this->emailValidator->validate($fieldData[$contactField['alias']], false);
+                    } elseif ('tel' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
+                        // Soft normalize the phone numbers before saving so that DNC can be correlated later.
+                        $this->phoneNormalize($fieldData[$contactField['alias']]);
                     }
                 } catch (\Exception $exception) {
                     throw new ContactSourceException(
@@ -1174,6 +1259,28 @@ class Api
         // Alteration to core: Skip imported/merged event triggers, manipulator, and the persist/save.
 
         return $contact;
+    }
+
+    /**
+     * @param $phone
+     *
+     * @return string
+     */
+    private function phoneNormalize(&$phone)
+    {
+        $phone = trim($phone);
+        if (!empty($phone)) {
+            if (!$this->phoneHelper) {
+                $this->phoneHelper = new PhoneNumberHelper();
+            }
+            try {
+                $normalized = $this->phoneHelper->format($phone);
+                if (!empty($normalized)) {
+                    $phone = $normalized;
+                }
+            } catch (\Exception $e) {
+            }
+        }
     }
 
     /**
@@ -1413,12 +1520,18 @@ class Api
     private function resetRandomGeneratorByContact()
     {
         if ($this->contact) {
-            $string = trim(strtolower(implode(
-                '|', [
-                $this->contact->getEmail(),
-                $this->contact->getPhone(),
-                $this->contact->getMobile(),
-            ])));
+            $string = trim(
+                strtolower(
+                    implode(
+                        '|',
+                        [
+                            $this->contact->getEmail(),
+                            $this->contact->getPhone(),
+                            $this->contact->getMobile(),
+                        ]
+                    )
+                )
+            );
             if (strlen($string) > 3) {
                 $binHash = md5($string, true);
                 $numHash = unpack('N2', $binHash);
