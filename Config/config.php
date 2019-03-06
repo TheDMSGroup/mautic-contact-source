@@ -181,6 +181,8 @@ return [
                     'mautic.validator.email',
                     'mautic.contactsource.model.cache',
                     'session',
+                    'mautic.helper.core_parameters',
+                    'mautic.helper.paths',
                 ],
             ],
             'mautic.contactsource.model.campaign_settings' => [

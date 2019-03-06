@@ -108,11 +108,11 @@ class Cache extends AbstractCommonModel
         $entity->setCountry(trim(ucwords($this->contact->getCountry())));
         $entity->setZipcode(trim($this->contact->getZipcode()));
         $entity->setEmail(trim($this->contact->getEmail()));
-        $phone = $this->phoneValidate($this->contact->getPhone());
+        $phone = $this->contact->getPhone();
         if (!empty($phone)) {
             $entity->setPhone($phone);
         }
-        $mobile = $this->phoneValidate($this->contact->getMobile());
+        $mobile = $this->contact->getMobile();
         if (!empty($mobile)) {
             $entity->setMobile($mobile);
         }
@@ -123,31 +123,6 @@ class Cache extends AbstractCommonModel
         }
 
         return $entity;
-    }
-
-    /**
-     * @param $phone
-     *
-     * @return string
-     */
-    private function phoneValidate($phone)
-    {
-        $result = null;
-        $phone  = trim($phone);
-        if (!empty($phone)) {
-            if (!$this->phoneHelper) {
-                $this->phoneHelper = new PhoneNumberHelper();
-            }
-            try {
-                $phone = $this->phoneHelper->format($phone);
-                if (!empty($phone)) {
-                    $result = $phone;
-                }
-            } catch (\Exception $e) {
-            }
-        }
-
-        return $result;
     }
 
     /**
