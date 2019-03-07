@@ -196,7 +196,7 @@ class Api
 
     /** @var array */
     private $contactCampaigns = [];
-  
+
     /** @var PhoneNumberHelper */
     protected $phoneHelper;
 
