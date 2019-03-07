@@ -191,6 +191,12 @@ class Api
     /** @var ContactDevice */
     protected $device;
 
+    /** @var array */
+    private $integrationSettings;
+
+    /** @var array */
+    private $contactCampaigns = [];
+
     /** @var PhoneNumberHelper */
     protected $phoneHelper;
 
@@ -643,6 +649,7 @@ class Api
             $this->processRealTime();
             $this->applyAttribution();
             $this->createCache();
+            $this->processParallel();
         } catch (\Exception $exception) {
             $this->handleException($exception);
         }
@@ -683,21 +690,8 @@ class Api
     {
         $verboseHeader = $this->request->headers->get('verbose');
         if (null !== $verboseHeader) {
-            // The default key is 1, for BC.
-            $verboseKey = '1';
-            /** @var \Mautic\PluginBundle\Integration\AbstractIntegration $object */
-            $object = $this->integrationHelper->getIntegrationObject('Source');
-            if ($object) {
-                $objectSettings = $object->getIntegrationSettings();
-                if ($objectSettings) {
-                    $featureSettings = $objectSettings->getFeatureSettings();
-                    if (!empty($featureSettings['verbose'])) {
-                        $verboseKey = $featureSettings['verbose'];
-                    }
-                }
-            }
-            $verbose = $verboseHeader == $verboseKey;
-            if ($verbose) {
+            $verboseKey = $this->getIntegrationSetting('verbose', '1');
+            if ($verboseHeader == $verboseKey) {
                 $this->setVerbose(true);
             } else {
                 throw new ContactSourceException(
@@ -708,6 +702,37 @@ class Api
                     'verbose'
                 );
             }
+        }
+    }
+
+    /**
+     * Get all global Source integration settings, or a single feature setting.
+     *
+     * @param string $key
+     * @param string $default
+     *
+     * @return array|mixed|string
+     */
+    private function getIntegrationSetting($key = '', $default = '')
+    {
+        if (null === $this->integrationSettings) {
+            $this->integrationSettings = [];
+            $object                    = $this->integrationHelper->getIntegrationObject('Source');
+            if ($object) {
+                $objectSettings = $object->getIntegrationSettings();
+                if ($objectSettings) {
+                    $this->integrationSettings = $objectSettings->getFeatureSettings();
+                }
+            }
+        }
+        if ($key) {
+            if (isset($this->integrationSettings[$key])) {
+                return $this->integrationSettings[$key];
+            } else {
+                return $default;
+            }
+        } else {
+            return $this->integrationSettings;
         }
     }
 
@@ -1551,48 +1576,51 @@ class Api
      */
     private function processRealTime()
     {
-        if ($this->realTime) {
-            $this->campaignExecutioner->execute($this->campaign, [$this->contact->getId()]);
+        if (!$this->realTime || !$this->campaign || !$this->contact) {
+            return;
+        }
 
-            // Retrieve events fired by MauticContactClientBundle (if any)
-            $events = $this->session->get('mautic.contactClient.events', []);
-            if (!empty($events)) {
-                $this->eventErrors = [];
-                foreach ($events as $event) {
-                    if (isset($event['contactId']) && $event['contactId'] !== $this->contact->getId()) {
-                        // For not ignore/exclude all events not relating to the current contact.
-                        continue;
+        $this->campaignExecutioner->execute($this->campaign, [$this->contact->getId()]);
+        $this->contactCampaigns[$this->campaign->getId()] = true;
+
+        // Retrieve events fired by MauticContactClientBundle (if any)
+        $events = $this->session->get('mautic.contactClient.events', []);
+        if (!empty($events)) {
+            $this->eventErrors = [];
+            foreach ($events as $event) {
+                if (isset($event['contactId']) && $event['contactId'] !== $this->contact->getId()) {
+                    // For not ignore/exclude all events not relating to the current contact.
+                    continue;
+                }
+                $this->events[] = $event;
+                if (!empty($event['error'])) {
+                    $eventName = !empty($event['name']) ? $event['name'] : '';
+                    if (!is_array($event['errors'])) {
+                        $event['errors'] = [$event['errors']];
                     }
-                    $this->events[] = $event;
-                    if (!empty($event['error'])) {
-                        $eventName = !empty($event['name']) ? $event['name'] : '';
-                        if (!is_array($event['errors'])) {
-                            $event['errors'] = [$event['errors']];
-                        }
-                        $this->eventErrors[] = $eventName.' ('.$event['id'].'): '.implode(', ', $event['errors']);
-                    }
-                    if (isset($event['valid']) && $event['valid']) {
-                        // One valid Contact Client was found to accept the lead.
-                        $this->status = Stat::TYPE_ACCEPTED;
-                        $this->valid  = true;
-                        break;
-                    }
+                    $this->eventErrors[] = $eventName.' ('.$event['id'].'): '.implode(', ', $event['errors']);
+                }
+                if (isset($event['valid']) && $event['valid']) {
+                    // One valid Contact Client was found to accept the lead.
+                    $this->status = Stat::TYPE_ACCEPTED;
+                    $this->valid  = true;
+                    break;
                 }
             }
+        }
 
-            // There was no accepted client hit, consider this a rejection.
-            // @todo - This is highly dependent on the contact client plugin, thus should be made configurable, or we can make the realTime mode only available to those with both plugins.
-            if (!$this->valid) {
-                // If one or more clients were found, but none accepted.
-                // This should be considered a rejected contact.
-                $this->status = Stat::TYPE_REJECT;
-            }
+        // There was no accepted client hit, consider this a rejection.
+        // @todo - This is highly dependent on the contact client plugin, thus should be made configurable, or we can make the realTime mode only available to those with both plugins.
+        if (!$this->valid) {
+            // If one or more clients were found, but none accepted.
+            // This should be considered a rejected contact.
+            $this->status = Stat::TYPE_REJECT;
+        }
 
-            // Apply scrub only to accepted contacts in real-time mode after evaluation.
-            if ($this->valid && $this->isScrubbed()) {
-                $this->status = Stat::TYPE_SCRUBBED;
-                $this->valid  = false;
-            }
+        // Apply scrub only to accepted contacts in real-time mode after evaluation.
+        if ($this->valid && $this->isScrubbed()) {
+            $this->status = Stat::TYPE_SCRUBBED;
+            $this->valid  = false;
         }
     }
 
@@ -1640,6 +1668,118 @@ class Api
     }
 
     /**
+     * Attempt to run kickoff events for a single contact in a parallel process if possible, otherwise synchronously.
+     *
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Mautic\CampaignBundle\Executioner\Dispatcher\Exception\LogNotProcessedException
+     * @throws \Mautic\CampaignBundle\Executioner\Dispatcher\Exception\LogPassedAndFailedException
+     * @throws \Mautic\CampaignBundle\Executioner\Exception\CannotProcessEventException
+     * @throws \Mautic\CampaignBundle\Executioner\Scheduler\Exception\NotSchedulableException
+     */
+    public function processParallel()
+    {
+        if (
+            !$this->campaign
+            || !$this->contact
+            || !$this->contact->getId()
+        ) {
+            $this->logger->debug('Parallel processing disabled globally.');
+
+            return;
+        }
+
+        if (
+            $this->realTime
+            && !boolval($this->getIntegrationSetting('parallel_realtime', false))
+        ) {
+            $this->logger->debug('Parallel processing disabled for realtime.');
+
+            return;
+        }
+
+        if (
+            !$this->realTime
+            && !boolval($this->getIntegrationSetting('parallel_offline', false))
+        ) {
+            $this->logger->debug('Parallel processing disabled for non-realtime.');
+
+            return;
+        }
+
+        if (
+            $this->imported
+            && !boolval($this->getIntegrationSetting('parallel_import', false))
+        ) {
+            $this->logger->debug('Parallel processing disabled for imports.');
+
+            return;
+        }
+
+        if (!function_exists('pcntl_fork')) {
+            $this->logger->debug('Parallel processing not possible because PCNTL module is not installed.');
+
+            return;
+        }
+
+        // Update the list of campaigns for this contact, and get a list of those that need to be processed.
+        $campaignsFound = false;
+        foreach (array_keys($this->campaignModel->getLeadCampaigns($this->contact, true)) as $campaignId) {
+            if (!isset($this->contactCampaigns[$campaignId])) {
+                $this->contactCampaigns[$campaignId] = false;
+                $campaignsFound                      = true;
+            }
+        }
+        if (!$campaignsFound) {
+            $this->logger->debug('No campaigns to process in parallel');
+
+            return;
+        }
+
+        // Commit any MySQL changes and close the connection/s to prepare for a process fork.
+        $connection = $this->em->getConnection();
+        if ($connection->isConnected()) {
+            // Complete any active transactions.
+            if ($connection->isTransactionActive()) {
+                $connection->commit();
+            }
+            // Close the connection.
+            $connection->close();
+        }
+
+        // Calling this way since this is a soft dependency, it's also faster in 7+
+        $pid = call_user_func('pcntl_fork');
+        if (-1 === $pid) {
+            $this->logger->error(
+                'Contact Source '.
+                ($this->contactSource ? $this->contactSource->getId() : 'NA').
+                ': Could not fork the process'
+            );
+
+            return;
+        } elseif ($pid) {
+            $this->logger->debug('Parent continues process.');
+
+            // Parent process can continue.
+            return;
+        } else {
+            // Child process has work to do.
+            foreach ($this->contactCampaigns as $campaignId => &$isProcessed) {
+                if (!$isProcessed) {
+                    $campaign = $this->campaignModel->getEntity($campaignId);
+                    if ($campaign && $campaign->getIsPublished()) {
+                        $this->logger->info('Child kicking off campaign: '.$campaignId);
+
+                        $this->campaignExecutioner->execute($campaign, [$this->contact->getId()]);
+                    }
+                    $isProcessed = true;
+                }
+            }
+            $this->logger->debug('Parallel process complete.');
+            exit;
+        }
+    }
+
+    /**
      * Use LeadTimelineEvent.
      */
     public function logResults()
@@ -1670,7 +1810,7 @@ class Api
             $this->status,
             $this->contact,
             $this->attribution,
-            intval($this->campaignId)
+            ($this->campaign ? $this->campaign->getId() : intval($this->campaignId))
         );
         $this->em->clear(Stat::class);
 
@@ -1856,6 +1996,13 @@ class Api
                 $result['campaign']['description'] = $this->campaign->getDescription();
                 $result['campaign']['category']    = $this->campaign->getCategory();
             }
+        }
+
+        if ($this->verbose) {
+            // These are campaigns that the contact was added to during kickoff events.
+            // It is not a given that all children will be here, only those that we know about during this request.
+            // I am including this to aid in debugging of the new parallel functionality.
+            $result['campaigns'] = $this->contactCampaigns;
         }
 
         // Contact.

@@ -140,6 +140,7 @@ class BatchSubscriber extends CommonSubscriber
         try {
             if ($this->prepForContactImport($leadEvent)) {
                 $this->apiModel->addContactToCampaign();
+                $this->apiModel->processParallel();
                 $this->apiModel->logResults();
             }
         } catch (\Exception $e) {
