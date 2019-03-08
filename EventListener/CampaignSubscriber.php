@@ -68,6 +68,7 @@ class CampaignSubscriber implements EventSubscriberInterface
         if (
             !$campaign->isPublished()
             || !$contact->getId()
+            || defined('MAUTIC_SOURCE_FORKED_CHILD')
             || !boolval($this->apiModel->getIntegrationSetting('parallel_schedule', false))
         ) {
             return;
@@ -102,6 +103,7 @@ class CampaignSubscriber implements EventSubscriberInterface
         }
         if (
             !$campaign->isPublished()
+            || defined('MAUTIC_SOURCE_FORKED_CHILD')
             || !boolval($this->apiModel->getIntegrationSetting('parallel_batch', false))
         ) {
             return;
