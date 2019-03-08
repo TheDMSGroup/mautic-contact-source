@@ -620,6 +620,8 @@ class Api
      */
     public function validateAndImportContact()
     {
+        define('MAUTIC_SOURCE_INGESTION', 1);
+
         $this->valid  = false;
         $this->status = Stat::TYPE_ERROR;
 
