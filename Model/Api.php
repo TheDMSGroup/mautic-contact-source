@@ -191,12 +191,6 @@ class Api
     /** @var ContactDevice */
     protected $device;
 
-    /** @var array */
-    private $integrationSettings;
-
-    /** @var array */
-    private $contactCampaigns = [];
-
     /** @var PhoneNumberHelper */
     protected $phoneHelper;
 
@@ -208,6 +202,12 @@ class Api
 
     /** @var PathsHelper */
     protected $pathsHelper;
+
+    /** @var array */
+    private $integrationSettings;
+
+    /** @var array */
+    private $contactCampaigns = [];
 
     /**
      * Api constructor.
@@ -713,7 +713,7 @@ class Api
      *
      * @return array|mixed|string
      */
-    private function getIntegrationSetting($key = '', $default = '')
+    public function getIntegrationSetting($key = '', $default = '')
     {
         if (null === $this->integrationSettings) {
             $this->integrationSettings = [];
@@ -1670,6 +1670,8 @@ class Api
     /**
      * Attempt to run kickoff events for a single contact in a parallel process if possible, otherwise synchronously.
      *
+     * @return $this|Api
+     *
      * @throws \Doctrine\DBAL\ConnectionException
      * @throws \Mautic\CampaignBundle\Executioner\Dispatcher\Exception\LogNotProcessedException
      * @throws \Mautic\CampaignBundle\Executioner\Dispatcher\Exception\LogPassedAndFailedException
@@ -1683,9 +1685,7 @@ class Api
             || !$this->contact
             || !$this->contact->getId()
         ) {
-            $this->logger->debug('Parallel processing disabled globally.');
-
-            return;
+            return $this;
         }
 
         if (
@@ -1694,7 +1694,7 @@ class Api
         ) {
             $this->logger->debug('Parallel processing disabled for realtime.');
 
-            return;
+            return $this;
         }
 
         if (
@@ -1703,7 +1703,7 @@ class Api
         ) {
             $this->logger->debug('Parallel processing disabled for non-realtime.');
 
-            return;
+            return $this;
         }
 
         if (
@@ -1712,13 +1712,7 @@ class Api
         ) {
             $this->logger->debug('Parallel processing disabled for imports.');
 
-            return;
-        }
-
-        if (!function_exists('pcntl_fork')) {
-            $this->logger->debug('Parallel processing not possible because PCNTL module is not installed.');
-
-            return;
+            return $this;
         }
 
         // Update the list of campaigns for this contact, and get a list of those that need to be processed.
@@ -1732,17 +1726,43 @@ class Api
         if (!$campaignsFound) {
             $this->logger->debug('No campaigns to process in parallel');
 
-            return;
+            return $this;
+        }
+
+        return $this->kickoffParallelCampaigns($this->contact, $this->contactCampaigns);
+    }
+
+    /**
+     * @param Contact $contact
+     * @param array   $campaignIds
+     *
+     * @return $this
+     *
+     * @throws \Doctrine\DBAL\ConnectionException
+     * @throws \Mautic\CampaignBundle\Executioner\Dispatcher\Exception\LogNotProcessedException
+     * @throws \Mautic\CampaignBundle\Executioner\Dispatcher\Exception\LogPassedAndFailedException
+     * @throws \Mautic\CampaignBundle\Executioner\Exception\CannotProcessEventException
+     * @throws \Mautic\CampaignBundle\Executioner\Scheduler\Exception\NotSchedulableException
+     */
+    public function kickoffParallelCampaigns(Contact $contact, &$campaignIds = [])
+    {
+        if (defined('MAUTIC_SOURCE_FORKED_CHILD')) {
+            // Do not allow recursive forks.
+            return $this;
+        }
+
+        if (!function_exists('pcntl_fork')) {
+            $this->logger->warning('Parallel processing not possible because PCNTL module is not installed.');
+
+            return $this;
         }
 
         // Commit any MySQL changes and close the connection/s to prepare for a process fork.
         $connection = $this->em->getConnection();
         if ($connection->isConnected()) {
-            // Complete any active transactions.
             if ($connection->isTransactionActive()) {
                 $connection->commit();
             }
-            // Close the connection.
             $connection->close();
         }
 
@@ -1755,21 +1775,23 @@ class Api
                 ': Could not fork the process'
             );
 
-            return;
+            return $this;
         } elseif ($pid) {
             $this->logger->debug('Parent continues process.');
 
             // Parent process can continue.
-            return;
+            return $this;
         } else {
+            define('MAUTIC_SOURCE_FORKED_CHILD', 1);
+
             // Child process has work to do.
-            foreach ($this->contactCampaigns as $campaignId => &$isProcessed) {
+            foreach ($campaignIds as $campaignId => &$isProcessed) {
                 if (!$isProcessed) {
                     $campaign = $this->campaignModel->getEntity($campaignId);
                     if ($campaign && $campaign->getIsPublished()) {
                         $this->logger->info('Child kicking off campaign: '.$campaignId);
 
-                        $this->campaignExecutioner->execute($campaign, [$this->contact->getId()]);
+                        $this->campaignExecutioner->execute($campaign, [$contact->getId()]);
                     }
                     $isProcessed = true;
                 }
