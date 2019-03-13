@@ -183,6 +183,7 @@ class EventRepository extends CommonRepository
             ->setParameter('contactSourceId', (int) $contactSourceId);
 
         if (!empty($options['dateFrom']) && !empty($options['dateTo'])) {
+            $options['dateTo']->modify('+1 day - 1 second');
             $query->andWhere('c.date_added BETWEEN FROM_UNIXTIME(:dateFrom) AND FROM_UNIXTIME(:dateTo)')
                 ->setParameter('dateFrom', $options['dateFrom']->setTime(00, 00, 00)->getTimestamp())
                 ->setParameter('dateTo', $options['dateTo']->setTime(23, 59, 59)->getTimestamp());
@@ -190,6 +191,7 @@ class EventRepository extends CommonRepository
             $query->andWhere($query->expr()->gte('c.date_added', 'FROM_UNIXTIME(:dateFrom)'))
                 ->setParameter('dateFrom', $options['dateFrom']->setTime(00, 00, 00)->getTimestamp());
         } elseif (!empty($options['dateTo'])) {
+            $options['dateTo']->modify('+1 day - 1 second');
             $query->andWhere($query->expr()->lte('c.date_added', 'FROM_UNIXTIME(:dateTo)'))
                 ->setParameter('dateTo', $options['dateTo']->setTime(23, 59, 59)->getTimestamp());
         }
