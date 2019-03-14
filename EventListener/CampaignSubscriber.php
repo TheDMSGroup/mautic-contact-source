@@ -106,7 +106,8 @@ class CampaignSubscriber implements EventSubscriberInterface
             !$campaign->isPublished()
             || defined('MAUTIC_SOURCE_INGESTION')
             || defined('MAUTIC_SOURCE_FORKED_CHILD')
-            || !boolval($this->apiModel->getIntegrationSetting('parallel_batch', false))
+            || (1 === count($contacts) && !boolval($this->apiModel->getIntegrationSetting('parallel_schedule', false)))
+            || (count($contacts) > 1 && !boolval($this->apiModel->getIntegrationSetting('parallel_batch', false)))
         ) {
             return;
         }
