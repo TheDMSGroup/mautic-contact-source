@@ -158,6 +158,36 @@ class SourceIntegration extends AbstractIntegration
                     ],
                 ]
             );
+            $builder->add(
+                'parallel_schedule',
+                'yesno_button_group',
+                [
+                    'label'             => 'mautic.contactsource.form.parallel_schedule',
+                    'label_attr'        => ['class' => 'control-label'],
+                    'choices_as_values' => true,
+                    'required'          => false,
+                    'data'              => !isset($data['parallel_schedule']) ? false : (bool) $data['parallel_schedule'],
+                    'attr'              => [
+                        'class'   => 'form-control',
+                        'tooltip' => 'mautic.contactsource.form.parallel_schedule.tooltip',
+                    ],
+                ]
+            );
+            $builder->add(
+                'parallel_batch',
+                'yesno_button_group',
+                [
+                    'label'             => 'mautic.contactsource.form.parallel_batch',
+                    'label_attr'        => ['class' => 'control-label'],
+                    'choices_as_values' => true,
+                    'required'          => false,
+                    'data'              => !isset($data['parallel_batch']) ? false : (bool) $data['parallel_batch'],
+                    'attr'              => [
+                        'class'   => 'form-control',
+                        'tooltip' => 'mautic.contactsource.form.parallel_batch.tooltip',
+                    ],
+                ]
+            );
         }
     }
 }
