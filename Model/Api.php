@@ -1785,6 +1785,8 @@ class Api
                             getcwd().'/app/console mautic:campaign:trigger '.
                             // Use quiet mode to reduce operation time.
                             '--quiet '.
+                            // Skip pid checks as irrelevant given the context.
+                            '--force '.
                             // Only run kickoff events (top of campaign).
                             '--kickoff-only '.
                             // Feed it the campaign and contact to operate with.
