@@ -1774,8 +1774,61 @@ class Api
             return $this;
         }
 
-        if (!function_exists('pcntl_fork')) {
-            $this->logger->warning('Parallel processing not possible because PCNTL module is not installed.');
+        if ('WIN' === strtoupper(substr(PHP_OS, 0, 3))) {
+            $this->logger->error('Parallel processing not available in Windows.');
+
+            return $this;
+        }
+
+        if (!function_exists('pcntl_fork') || PHP_SAPI !== 'cli') {
+            // This appears to be a web request or PCNTL is not enabled.
+            if (!function_exists('exec') && !function_exists('popen')) {
+                $this->logger->error('Parallel processing not available due to exec/popen methods being disabled.');
+
+                return $this;
+            }
+            // Instead of forking the process run a CLI thread, this is less efficient but will not cause problems with apache.
+            foreach ($campaignIds as $campaignId => &$isProcessed) {
+                if (!$isProcessed) {
+                    $campaign = $this->campaignModel->getEntity($campaignId);
+                    if ($campaign && $campaign->getIsPublished()) {
+                        $this->logger->info('Thread kicking off campaign: '.$campaignId);
+                        // Explanation:
+                        //  Start a new thread defaulting as a child of the current user (typically www-data or webapp).
+                        //  Run a new bash shell, to allow us to continue without waiting for a result.
+                        //  During the bash shell execute nohup to prevent the child process dying when we terminate.
+                        //  Use nice level 19 to prioritize this thread as low as possible (-20 is highest).
+                        $execString = 'bash -c "nohup nice -19 '.
+                            // Execute the same PHP binary that is currently running if possible.
+                            (PHP_BINDIR ? PHP_BINDIR.'/php' : 'php').' '.
+                            // Execute the symfony console that is in the current Mautic.
+                            // Run mautic:campaign:trigger which is normally ran via cron.
+                            getcwd().'/app/console mautic:campaign:trigger '.
+                            // Use quiet mode to reduce operation time.
+                            '--quiet '.
+                            // Skip pid checks as irrelevant given the context.
+                            '--force '.
+                            // Only run kickoff events (top of campaign).
+                            '--kickoff-only '.
+                            // Feed it the campaign and contact to operate with.
+                            '--campaign-id='.$campaign->getId().' '.
+                            '--contact-id='.$contact->getId().
+                            // Discard all stdout/stderr output.
+                            ' > /dev/null 2>&1 &"';
+                        $this->logger->debug('Running parallel CLI thread: '.$execString);
+                        if (function_exists('exec')) {
+                            @exec($execString);
+                        } else {
+                            $handle = @popen($execString, 'r');
+                            if ($handle) {
+                                pclose($handle);
+                            }
+                        }
+                    }
+                    $isProcessed = true;
+                }
+            }
+            $this->logger->debug('Parallel process complete.');
 
             return $this;
         }
