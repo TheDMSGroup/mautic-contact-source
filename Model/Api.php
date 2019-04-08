@@ -1761,8 +1761,8 @@ class Api
 
         if (!function_exists('pcntl_fork') || PHP_SAPI !== 'cli') {
             // This appears to be a web request or PCNTL is not enabled.
-            if (!function_exists('exec')) {
-                $this->logger->error('Parallel processing not available due to exec() method being disabled.');
+            if (!function_exists('exec') && !function_exists('popen')) {
+                $this->logger->error('Parallel processing not available due to exec/popen methods being disabled.');
 
                 return $this;
             }
@@ -1795,7 +1795,14 @@ class Api
                             // Discard all stdout/stderr output.
                             ' > /dev/null 2>&1 &"';
                         $this->logger->debug('Running parallel CLI thread: '.$execString);
-                        @exec($execString);
+                        if (function_exists('exec')) {
+                            @exec($execString);
+                        } else {
+                            $handle = @popen($execString, 'r');
+                            if ($handle) {
+                                pclose($handle);
+                            }
+                        }
                     }
                     $isProcessed = true;
                 }
