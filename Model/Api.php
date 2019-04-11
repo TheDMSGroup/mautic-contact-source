@@ -341,27 +341,48 @@ class Api
 
     /**
      * Ensure the required parameters were provided and not empty while parsing.
+     * There are many ways to send a simple token... Let's support them all to be friendly to our Sources.
      *
      * @throws ContactSourceException
      */
     private function parseToken()
     {
-        // There are many ways to send a simple token... Let's support them all to be friendly to our Sources.
+        // Provided as a token param.
         $this->token = trim($this->request->get('token'));
         if (!$this->token) {
+            // Provided as a token header.
             $this->token = trim($this->request->headers->get('token'));
             if (!$this->token) {
+                // Provided as a X-Auth-Token header.
                 $this->token = trim($this->request->headers->get('X-Auth-Token'));
                 if (!$this->token) {
-                    $bearer = $this->request->headers->get('authorization');
-                    if ($bearer) {
-                        $this->token = trim(str_ireplace('Bearer ', '', $bearer));
-                    }
-                    // Re-use the last token provided for this user for this source.
-                    if (!$this->token && $this->sourceId) {
-                        $tokens = $this->session->get('mautic.contactSource.tokens');
-                        if ($tokens && isset($tokens[$this->sourceId])) {
-                            $this->token = $tokens[$this->sourceId];
+                    // Provided as a password header.
+                    $this->token = trim($this->request->headers->get('password'));
+                    if (!$this->token) {
+                        // Various ways a token may come in via authorization headers.
+                        $auth = $this->request->headers->get('authorization');
+                        if ($auth) {
+                            if (false !== strpos($auth, 'Bearer ')) {
+                                // Provided as a bearer token.
+                                $this->token = trim(str_ireplace('Bearer ', '', $auth));
+                            } elseif (false !== strpos($auth, 'Basic ')) {
+                                // Provided as a password.
+                                $userPass = base64_decode(trim(str_ireplace('Basic ', '', $auth)));
+                                if (strpos($userPass, ':') > 0) {
+                                    $userPassParts = explode(':', $userPass);
+                                    if (!empty($userPassParts[1])) {
+                                        $this->token = $userPassParts[1];
+                                    }
+                                }
+                            }
+                        }
+                        // Re-use the last token provided for this user for this source.
+                        if (!$this->token && $this->sourceId) {
+                            $tokens = $this->session->get('mautic.contactSource.tokens');
+                            if ($tokens && !empty($tokens[$this->sourceId])) {
+                                $this->token           = $tokens[$this->sourceId];
+                                $this->errors['token'] = 'Token was supplied earlier in your session, but missing in this request. Please provide your authentication "token" parameter with every request.';
+                            }
                         }
                     }
                 }
@@ -369,7 +390,7 @@ class Api
         }
         if (!$this->token) {
             throw new ContactSourceException(
-                'The token was not supplied. Please provide your authentication token.',
+                'The token was not supplied for this request or session. Please provide your authentication "token" parameter with every request.',
                 Codes::HTTP_UNAUTHORIZED,
                 null,
                 Stat::TYPE_INVALID,
