@@ -11,6 +11,7 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use FOS\RestBundle\Util\Codes;
 use Mautic\CampaignBundle\Entity\Campaign;
@@ -1834,10 +1835,19 @@ class Api
         }
 
         // Commit any MySQL changes and close the connection/s to prepare for a process fork.
+        /** @var Connection $connection */
         $connection = $this->em->getConnection();
-        if ($connection->isConnected()) {
-            if ($connection->isTransactionActive()) {
-                $connection->commit();
+        if ($connection) {
+            while (0 !== $connection->getTransactionNestingLevel()) {
+                // Check for RollBackOnly to avoid exceptions.
+                if (!$connection->isRollbackOnly()) {
+                    // Follow behavior of the private commitAll method, in case there are nested transactions.
+                    if (false === $connection->isAutoCommit() && 1 === $connection->getTransactionNestingLevel()) {
+                        $connection->commit();
+                        break;
+                    }
+                    $connection->commit();
+                }
             }
             $connection->close();
         }
