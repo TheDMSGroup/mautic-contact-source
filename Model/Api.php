@@ -1753,12 +1753,13 @@ class Api
             return $this;
         }
 
-        return $this->kickoffParallelCampaigns($this->contact, $this->contactCampaigns);
+        return $this->kickoffParallelCampaigns($this->contact, $this->contactCampaigns, !$this->imported);
     }
 
     /**
      * @param Contact $contact
      * @param array   $campaignIds
+     * @param bool    $allowFork   disable PCNTL forking by setting to false, useful during batches
      *
      * @return $this
      *
@@ -1768,7 +1769,7 @@ class Api
      * @throws \Mautic\CampaignBundle\Executioner\Exception\CannotProcessEventException
      * @throws \Mautic\CampaignBundle\Executioner\Scheduler\Exception\NotSchedulableException
      */
-    public function kickoffParallelCampaigns(Contact $contact, &$campaignIds = [])
+    public function kickoffParallelCampaigns(Contact $contact, &$campaignIds = [], $allowFork = true)
     {
         if (defined('MAUTIC_SOURCE_FORKED_CHILD')) {
             // Do not allow recursive forks.
@@ -1781,7 +1782,7 @@ class Api
             return $this;
         }
 
-        if (!function_exists('pcntl_fork') || PHP_SAPI !== 'cli') {
+        if (!$allowFork || !function_exists('pcntl_fork') || PHP_SAPI !== 'cli') {
             // This appears to be a web request or PCNTL is not enabled.
             if (!function_exists('exec') && !function_exists('popen')) {
                 $this->logger->error('Parallel processing not available due to exec/popen methods being disabled.');
@@ -1831,6 +1832,10 @@ class Api
             }
             $this->logger->debug('Parallel process complete.');
 
+            return $this;
+        }
+
+        if (!$allowFork) {
             return $this;
         }
 
