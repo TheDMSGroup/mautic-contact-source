@@ -136,6 +136,13 @@ return [
                     'mautic.contactsource.model.api',
                 ],
             ],
+            'mautic.contactsource.search.subscriber'         => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\SearchSubscriber',
+                'arguments' => [
+                    'mautic.contactsource.model.contactsource',
+                    'doctrine.orm.entity_manager',
+                ],
+            ],
         ],
         'forms'  => [
             'mautic.contactsource.form.type.contactsourceshow_list' => [
