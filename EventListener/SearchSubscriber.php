@@ -77,7 +77,6 @@ class SearchSubscriber extends CommonSubscriber
                     $sourceResults[] = $this->templating->renderResponse(
                         'MauticContactSourceBundle:SubscribedEvents\Search:global.html.php',
                         [
-                            'source'       => $source,
                             'showMore'     => true,
                             'searchString' => $str,
                             'remaining'    => ($count - 5),
