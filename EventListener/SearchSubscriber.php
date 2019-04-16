@@ -1,18 +1,14 @@
 <?php
 
-
 namespace MauticPlugin\MauticContactSourceBundle\EventListener;
 
-
 use Mautic\CoreBundle\CoreEvents;
-use Mautic\CoreBundle\EventListener\CommonSubscriber;
 use Mautic\CoreBundle\Event\GlobalSearchEvent;
-use Doctrine\ORM\EntityManager;
+use Mautic\CoreBundle\EventListener\CommonSubscriber;
 use MauticPlugin\MauticContactSourceBundle\Model\ContactSourceModel;
 
 class SearchSubscriber extends CommonSubscriber
 {
-
     /**
      * @var ContactSourceModel
      */
@@ -24,7 +20,7 @@ class SearchSubscriber extends CommonSubscriber
     public static function getSubscribedEvents()
     {
         return [
-            CoreEvents::GLOBAL_SEARCH              => ['onGlobalSearch', 0],
+            CoreEvents::GLOBAL_SEARCH => ['onGlobalSearch', 0],
         ];
     }
 
@@ -35,7 +31,7 @@ class SearchSubscriber extends CommonSubscriber
      */
     public function __construct(ContactSourceModel $sourceModel)
     {
-        $this->sourceModel       = $sourceModel;
+        $this->sourceModel = $sourceModel;
     }
 
     /**
@@ -48,7 +44,7 @@ class SearchSubscriber extends CommonSubscriber
             return;
         }
 
-        $filter    = ['string' => $str, 'force' => ''];
+        $filter = ['string' => $str, 'force' => ''];
 
         $permissions = $this->security->isGranted(
             ['plugin:contactsource:items:view'],
@@ -56,13 +52,13 @@ class SearchSubscriber extends CommonSubscriber
         );
 
         if ($permissions) {
-
             $results = $this->sourceModel->getEntities(
                 [
                     'limit'          => 5,
                     'filter'         => $filter,
                     'withTotalCount' => true,
-                ]);
+                ]
+            );
 
             $count = $results->count();
 
@@ -93,5 +89,4 @@ class SearchSubscriber extends CommonSubscriber
             }
         }
     }
-
 }
