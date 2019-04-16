@@ -140,7 +140,6 @@ return [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\SearchSubscriber',
                 'arguments' => [
                     'mautic.contactsource.model.contactsource',
-                    'doctrine.orm.entity_manager',
                 ],
             ],
         ],

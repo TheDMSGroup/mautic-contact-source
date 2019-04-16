@@ -32,9 +32,8 @@ class SearchSubscriber extends CommonSubscriber
      * SearchSubscriber constructor.
      *
      * @param ContactSourceModel $sourceModel
-     * @param EntityManager $entityManager
      */
-    public function __construct(ContactSourceModel $sourceModel, EntityManager $entityManager)
+    public function __construct(ContactSourceModel $sourceModel)
     {
         $this->sourceModel       = $sourceModel;
     }
