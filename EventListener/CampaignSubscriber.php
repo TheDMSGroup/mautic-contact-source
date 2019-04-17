@@ -77,7 +77,7 @@ class CampaignSubscriber implements EventSubscriberInterface
         $campaignIds = [
             $campaign->getId() => false,
         ];
-        $this->apiModel->kickoffParallelCampaigns($contact, $campaignIds);
+        $this->apiModel->kickoffParallelCampaigns($contact, $campaignIds, false);
 
         return;
     }
@@ -118,7 +118,7 @@ class CampaignSubscriber implements EventSubscriberInterface
             $campaignIds = [
                 $campaign->getId() => false,
             ];
-            $this->apiModel->kickoffParallelCampaigns($contact, $campaignIds);
+            $this->apiModel->kickoffParallelCampaigns($contact, $campaignIds, false);
         }
 
         return;
