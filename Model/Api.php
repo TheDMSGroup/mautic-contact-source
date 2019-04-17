@@ -1840,9 +1840,18 @@ class Api
         }
 
         // Commit any MySQL changes and close the connection/s to prepare for a process fork.
+        if ($this->em->isOpen()) {
+            // There may be entitys ready to save.
+            try {
+                $this->em->flush();
+            } catch (\Exception $e) {
+                $this->logger->error('Attempting to flush '.$e->getMessage());
+            }
+        }
         /** @var Connection $connection */
         $connection = $this->em->getConnection();
         if ($connection) {
+            // There may be manual transactions ready to save.
             while (0 !== $connection->getTransactionNestingLevel()) {
                 // Check for RollBackOnly to avoid exceptions.
                 if (!$connection->isRollbackOnly()) {
