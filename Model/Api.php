@@ -11,6 +11,7 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Model;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 use FOS\RestBundle\Util\Codes;
 use Mautic\CampaignBundle\Entity\Campaign;
@@ -1752,12 +1753,13 @@ class Api
             return $this;
         }
 
-        return $this->kickoffParallelCampaigns($this->contact, $this->contactCampaigns);
+        return $this->kickoffParallelCampaigns($this->contact, $this->contactCampaigns, !$this->imported);
     }
 
     /**
      * @param Contact $contact
      * @param array   $campaignIds
+     * @param bool    $allowFork   disable PCNTL forking by setting to false, useful during batches
      *
      * @return $this
      *
@@ -1767,7 +1769,7 @@ class Api
      * @throws \Mautic\CampaignBundle\Executioner\Exception\CannotProcessEventException
      * @throws \Mautic\CampaignBundle\Executioner\Scheduler\Exception\NotSchedulableException
      */
-    public function kickoffParallelCampaigns(Contact $contact, &$campaignIds = [])
+    public function kickoffParallelCampaigns(Contact $contact, &$campaignIds = [], $allowFork = true)
     {
         if (defined('MAUTIC_SOURCE_FORKED_CHILD')) {
             // Do not allow recursive forks.
@@ -1780,7 +1782,7 @@ class Api
             return $this;
         }
 
-        if (!function_exists('pcntl_fork') || PHP_SAPI !== 'cli') {
+        if (!$allowFork || !function_exists('pcntl_fork') || PHP_SAPI !== 'cli') {
             // This appears to be a web request or PCNTL is not enabled.
             if (!function_exists('exec') && !function_exists('popen')) {
                 $this->logger->error('Parallel processing not available due to exec/popen methods being disabled.');
@@ -1833,11 +1835,33 @@ class Api
             return $this;
         }
 
+        if (!$allowFork) {
+            return $this;
+        }
+
         // Commit any MySQL changes and close the connection/s to prepare for a process fork.
+        if ($this->em->isOpen()) {
+            // There may be entitys ready to save.
+            try {
+                $this->em->flush();
+            } catch (\Exception $e) {
+                $this->logger->error('Attempting to flush '.$e->getMessage());
+            }
+        }
+        /** @var Connection $connection */
         $connection = $this->em->getConnection();
-        if ($connection->isConnected()) {
-            if ($connection->isTransactionActive()) {
-                $connection->commit();
+        if ($connection) {
+            // There may be manual transactions ready to save.
+            while (0 !== $connection->getTransactionNestingLevel()) {
+                // Check for RollBackOnly to avoid exceptions.
+                if (!$connection->isRollbackOnly()) {
+                    // Follow behavior of the private commitAll method, in case there are nested transactions.
+                    if (false === $connection->isAutoCommit() && 1 === $connection->getTransactionNestingLevel()) {
+                        $connection->commit();
+                        break;
+                    }
+                    $connection->commit();
+                }
             }
             $connection->close();
         }
