@@ -1494,22 +1494,11 @@ class Api
     ) {
         foreach ($contacts as $contact) {
             $campaignContact = new CampaignContact();
-            $alreadyExists   = false;
-            if (!null == $contact->getDateModified(
-                )) { // see if New Contact b/c isNew() is unreliable on PostSave Event
-                $leadRepository = $this->em->getRepository('MauticCampaignBundle:Lead');
-                $alreadyExists  = $leadRepository->checkLeadInCampaigns(
-                    $contact,
-                    ['campaigns' => [$campaign->getId()]]
-                );
-            }
-            if (!$alreadyExists) {
-                $campaignContact->setCampaign($campaign);
-                $campaignContact->setDateAdded(new \DateTime());
-                $campaignContact->setLead($contact);
-                $campaignContact->setManuallyAdded($manuallyAdded);
-                $saved = $this->campaignModel->saveCampaignLead($campaignContact);
-            }
+            $campaignContact->setCampaign($campaign);
+            $campaignContact->setDateAdded(new \DateTime());
+            $campaignContact->setLead($contact);
+            $campaignContact->setManuallyAdded($manuallyAdded);
+            $this->campaignModel->saveCampaignLead($campaignContact);
 
             // @todo - Support non realtime event firing.
             // if (!$realTime) {
@@ -1520,7 +1509,9 @@ class Api
             //         unset($event);
             //     }
             // }
-            $this->em->detach($campaignContact);
+            if (false == $this->realTime) {
+                $this->em->detach($campaignContact);
+            }
         }
         unset($campaign, $campaignContact, $contacts);
     }
