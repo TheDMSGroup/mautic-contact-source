@@ -15,7 +15,6 @@ use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CampaignBundle\Executioner\ContactFinder\Limiter\ContactLimiter;
 use Mautic\CampaignBundle\Executioner\KickoffExecutioner;
 use Mautic\CampaignBundle\Executioner\Result\Counter;
-use MauticPlugin\MauticContactSourceBundle\Executioner\ContactFinder\Limiter\RealTimeContactLimiter;
 
 /**
  * Class CampaignExecutioner.
@@ -41,7 +40,6 @@ class CampaignExecutioner
      *
      * @param Campaign $campaign
      * @param array    $contactIdList
-     * @param bool     $realTime
      * @param int      $batchLimit
      *
      * @return Counter
@@ -51,13 +49,9 @@ class CampaignExecutioner
      * @throws \Mautic\CampaignBundle\Executioner\Exception\CannotProcessEventException
      * @throws \Mautic\CampaignBundle\Executioner\Scheduler\Exception\NotSchedulableException
      */
-    public function execute(Campaign $campaign, $contactIdList, $realTime = false, $batchLimit = 100)
+    public function execute(Campaign $campaign, array $contactIdList, $batchLimit = 100)
     {
-        if (true == $realTime) {
-            $limiter =  new RealTimeContactLimiter($batchLimit, null, null, null, $contactIdList);
-        } else {
-            $limiter = new ContactLimiter($batchLimit, null, null, null, $contactIdList);
-        }
+        $limiter = new ContactLimiter($batchLimit, null, null, null, $contactIdList);
 
         // Make sure these events show up as system triggered for summary counts to be accurate.
         defined('MAUTIC_CAMPAIGN_SYSTEM_TRIGGERED') or define('MAUTIC_CAMPAIGN_SYSTEM_TRIGGERED', 1);
