@@ -43,6 +43,7 @@ use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use MauticPlugin\MauticContactSourceBundle\Executioner\ContactFinder\Limiter\RealTimeContactLimiter;
 
 /**
  * Class Api.
@@ -1604,7 +1605,7 @@ class Api
             return;
         }
 
-        $this->campaignExecutioner->execute($this->campaign, [$this->contact->getId()]);
+        $this->campaignExecutioner->execute($this->campaign, [$this->contact->getId()], true);
         $this->contactCampaigns[$this->campaign->getId()] = true;
 
         // Retrieve events fired by MauticContactClientBundle (if any)
