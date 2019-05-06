@@ -1604,6 +1604,10 @@ class Api
             return;
         }
 
+        if (false == defined('MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME')) {
+            define('MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME', true);
+        }
+
         $this->campaignExecutioner->execute($this->campaign, [$this->contact->getId()]);
         $this->contactCampaigns[$this->campaign->getId()] = true;
 
