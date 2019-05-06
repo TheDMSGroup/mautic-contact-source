@@ -10,9 +10,7 @@ use Mautic\CampaignBundle\Executioner\ContactFinder\Limiter\ContactLimiter;
 
 class RealTimeCampaignRepository extends CampaignRepository
 {
-
     /**
-     * 
      * @param EntityManager $em
      * @param ClassMetadata $class
      */
@@ -22,7 +20,7 @@ class RealTimeCampaignRepository extends CampaignRepository
             $class = new ClassMetadata(Campaign::class);
         }
         parent::__construct($em, $class);
-    } 
+    }
 
     /**
      * Get pending contact IDs for a campaign through ContactLimiter, skipping
@@ -49,8 +47,10 @@ class RealTimeCampaignRepository extends CampaignRepository
         if ($limiter->hasCampaignLimit() && $limiter->getCampaignLimitRemaining() < $limiter->getBatchLimit()) {
             $pulled = [];
             for ($i = $limiter->getCampaignLimitRemaining();
-                 $i >= ($limiter->getCampaignLimitRemaining() - $limiter->getBatchLimit()); $i--) {
-                $pulled[] = $contacts[$i];
+                $i > ($limiter->getCampaignLimitRemaining() - $limiter->getBatchLimit()); --$i) {
+                if (isset($contacts[$i])) {
+                    $pulled[] = $contacts[$i];
+                }
             }
             $pulled = $contacts;
         }
