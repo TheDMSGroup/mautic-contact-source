@@ -10,7 +10,7 @@ use Symfony\Component\DependencyInjection\Reference;
 class RealTimeCampaignRepositoryPass implements CompilerPassInterface
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function process(ContainerBuilder $container)
     {
