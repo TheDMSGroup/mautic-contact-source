@@ -2,6 +2,7 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Entity;
 
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Mautic\CampaignBundle\Entity\Campaign;
 use Mautic\CampaignBundle\Entity\CampaignRepository;
@@ -10,10 +11,19 @@ use Mautic\CampaignBundle\Executioner\ContactFinder\Limiter\ContactLimiter;
 class RealTimeCampaignRepository extends CampaignRepository
 {
 
-    public function __construct($em)
+    /**
+     * 
+     * @param EntityManager $em
+     * @param ClassMetadata $class
+     */
+    public function __construct(EntityManager $em, ClassMetadata $class = null)
     {
-        parent::__construct($em, new ClassMetadata(Campaign::class));
+        if (!$class) {
+            $class = new ClassMetadata(Campaign::class);
+        }
+        parent::__construct($em, $class);
     } 
+
     /**
      * Get pending contact IDs for a campaign through ContactLimiter, skipping
      * an unnecesarry query when doing real time lead processing.
@@ -39,7 +49,7 @@ class RealTimeCampaignRepository extends CampaignRepository
         if ($limiter->hasCampaignLimit() && $limiter->getCampaignLimitRemaining() < $limiter->getBatchLimit()) {
             $pulled = [];
             for ($i = $limiter->getCampaignLimitRemaining();
-                 $i >= ($limiter->getCampaignLimitRemaining() - $limiter->getBatchLimit()); --$i) {
+                 $i >= ($limiter->getCampaignLimitRemaining() - $limiter->getBatchLimit()); $i--) {
                 $pulled[] = $contacts[$i];
             }
             $pulled = $contacts;
