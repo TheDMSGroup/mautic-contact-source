@@ -23,6 +23,52 @@ class EventRepository extends CommonRepository
 {
     use TimelineTrait;
 
+
+    /**
+     * Fetch the base event data from the database.
+     *
+     * @param                $contactSourceId
+     * @param                $eventType
+     * @param \DateTime|null $dateAdded
+     *
+     * @return array
+     */
+    public function getEventsByContactId($contactId, $eventType = null, \DateTime $dateAdded = null)
+    {
+        $q = $this->getEntityManager()->getConnection()->createQueryBuilder()
+            ->select([
+                'c.*',
+                'c.contact_id AS contactId',
+                'c.message',
+                'c.date_added AS timestamp',
+                'cs.name sourceName'
+            ])
+            ->from(MAUTIC_TABLE_PREFIX.'contactsource_events', 'c')
+        ->join('c', 'contactsource', 'cs','cs.id = c.contactsource_id');
+
+        $expr = $q->expr()->eq('c.contact_id', ':contactId');
+        $q->where($expr)
+            ->setParameter('contactId', (int) $contactId);
+
+        if ($dateAdded) {
+            $expr->add(
+                $q->expr()->gte('c.date_added', ':dateAdded')
+            );
+            $q->setParameter('dateAdded', $dateAdded);
+        }
+
+        if ($eventType) {
+            $expr->add(
+                $q->expr()->eq('c.type', ':type')
+            );
+            $q->setParameter('type', $eventType);
+        }
+
+        $results = $q->execute()->fetchAll();
+
+        return $results;
+    }
+
     /**
      * Fetch the base event data from the database.
      *

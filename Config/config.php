@@ -90,8 +90,11 @@ return [
             'mautic.contactsource.subscriber.stat'          => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\StatSubscriber',
                 'arguments' => [
-                    'mautic.contactsource.model.contactsource',
+                    'mautic.contactsource.model.contactsource', ],
                 ],
+            'mautic.contactsource.subscriber.lead_timeline'          => [
+                'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\LeadTimelineSubscriber',
+                'arguments' => [],
             ],
             'mautic.contactsource.subscriber.contactsource' => [
                 'class'     => 'MauticPlugin\MauticContactSourceBundle\EventListener\ContactSourceSubscriber',
