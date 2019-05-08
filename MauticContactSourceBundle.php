@@ -12,14 +12,14 @@
 namespace MauticPlugin\MauticContactSourceBundle;
 
 use Mautic\PluginBundle\Bundle\PluginBundleBase;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use MauticPlugin\MauticContactSourceBundle\DependencyInjection\Compiler\RealTimeCampaignRepositoryPass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class MauticContactSourceBundle extends PluginBundleBase
 {
     public function build(ContainerBuilder $container)
     {
-        parent::build($container); 
+        parent::build($container);
         $container->addCompilerPass(new RealTimeCampaignRepositoryPass());
-    } 
+    }
 }
