@@ -18,17 +18,28 @@ $logs = $event['extra']['logs'];
 <dl class="dl-horizontal small">
     <dt>Message:</dt>
     <dd><?=$message?></dd>
-    <div>
-        <strong>Events</strong>
-        <table>
-            <thead>
-                <td></td>
-            </thead>
-        </table>
-    </div>
     <div class="small" style="max-width: 100%;">
         <strong><?php echo $view['translator']->trans('mautic.contactsource.timeline.logs.heading'); ?></strong>
         <br/>
         <textarea class="codeMirror-json"><?php echo $logs; ?></textarea>
     </div>
 </dl>
+
+<script defer>
+$el = mQuery('div');
+            var $textarea = $el.find('textarea.codeMirror-json');
+            if ($textarea.length) {
+                CodeMirror.fromTextArea($textarea[0], {
+                    mode: {
+                        name: 'javascript',
+                        json: true
+                    },
+                    theme: 'cc',
+                    gutters: [],
+                    lineNumbers: false,
+                    lineWrapping: true,
+                    readOnly: true
+                });
+            }
+            $el.addClass('codemirror-active');
+</script>
