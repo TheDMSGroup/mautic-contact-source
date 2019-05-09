@@ -23,7 +23,6 @@ class LeadTimelineSubscriber extends CommonSubscriber
      */
     public function onTimelineGenerate(LeadTimelineEvent $event)
     {
-        dump($event->getEvents());
         $repo         = $this->em->getRepository('MauticContactSourceBundle:Event');
         $sourceEvents = $repo->getEventsByContactId($event->getLeadId());
         foreach ($sourceEvents as $srcEvent) {
@@ -38,8 +37,7 @@ class LeadTimelineSubscriber extends CommonSubscriber
                 'message' => $srcEvent['message'],
             ];
             $srcEvent['contentTemplate'] = 'MauticContactSourceBundle:Timeline:sourceevent.html.php';
-            $srcEvent['icon'] = 'fa-plus-square-o';
-            dump($srcEvent);
+            $srcEvent['icon'] = 'fa-plus-square-o contact-source-button';
             $event->addEvent($srcEvent);
         }
     }
