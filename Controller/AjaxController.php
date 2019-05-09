@@ -260,13 +260,13 @@ class AjaxController extends CommonAjaxController
                         $row           = [];
                         $pending       = 0;
                         $forecastValue = $leadForecast = '';
-                        if ($limit['rule']['duration'] == 'P1D' && $limit['logCount'] > 0) {
+                        if ('P1D' == $limit['rule']['duration'] && $limit['logCount'] > 0) {
                             $pending = floatval(
                                 ($limit['logCount'] / $forecast['elapsedHoursInDaySoFar']) * $forecast['hoursLeftToday']
                             );
                         }
 
-                        if ($limit['rule']['duration'] == '1M' && $limit['logCount'] > 0) {
+                        if ('1M' == $limit['rule']['duration'] && $limit['logCount'] > 0) {
                             $pending = floatval(
                                 ($limit['logCount'] / $forecast['currentDayOfMonth']) * $forecast['daysInMonthLeft']
                             );

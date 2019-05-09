@@ -27,17 +27,17 @@ class LeadTimelineSubscriber extends CommonSubscriber
         $sourceEvents = $repo->getEventsByContactId($event->getLeadId());
         foreach ($sourceEvents as $srcEvent) {
             $srcEvent['eventLabel'] = [
-                'label' => 'Contact Source: '. $srcEvent['sourceName'],
+                'label' => 'Contact Source: '.$srcEvent['sourceName'],
                 'href'  => "/s/contactsource/view/{$srcEvent['contactsource_id']}",
             ];
             $srcEvent['event']     = '';
             $srcEvent['eventType'] = ucfirst($srcEvent['type']);
-            $srcEvent['extra'] = [
-                'logs' => $srcEvent['logs'],
+            $srcEvent['extra']     = [
+                'logs'    => $srcEvent['logs'],
                 'message' => $srcEvent['message'],
             ];
             $srcEvent['contentTemplate'] = 'MauticContactSourceBundle:Timeline:sourceevent.html.php';
-            $srcEvent['icon'] = 'fa-plus-square-o contact-source-button';
+            $srcEvent['icon']            = 'fa-plus-square-o contact-source-button';
             $event->addEvent($srcEvent);
         }
     }

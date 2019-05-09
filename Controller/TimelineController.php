@@ -92,7 +92,7 @@ class TimelineController extends CommonController
                     );
                     foreach ($timelineData as $data) {
                         // depracating use of YAML for event logs, but need to be backward compatible
-                        $csvRows = $data['logs'][0] === '{' ?
+                        $csvRows = '{' === $data['logs'][0] ?
                             $this->parseLogJSONBlob(
                                 $data
                             ) :

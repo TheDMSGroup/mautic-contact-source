@@ -104,22 +104,25 @@ $logs    = $event['extra']['logs'];
     </div>
 </dl>
 
-<script defer>
-var $button = mQuery('.contact-source-button');
-$button.on('click', function() { 
-    console.log(':O');
-    var $textarea = mQuery('textarea.codeMirror-json');
-                    CodeMirror.fromTextArea($textarea[0], {
-                        mode: {
-                            name: 'javascript',
-                            json: true
-                        },
-                        theme: 'cc',
-                        gutters: [],
-                        lineNumbers: false,
-                        lineWrapping: true,
-                        readOnly: true
-                    });
-    $textarea.addClass('codemirror-active');
+<script defer> 
+$buttons = mQuery('.contact-source-button').parent().parent();
+$buttons.on('click', function(){ 
+    console.log('lol');
+    mQuery('textarea.codeMirror-json').each(function(i, element){ 
+        if(mQuery(element).is(':visible')) {
+        CodeMirror.fromTextArea(element, {
+            mode: {
+                name: 'javascript',
+                json: true
+            },
+            theme: 'cc',
+            gutters: [],
+            lineNumbers: false,
+            lineWrapping: true,
+            readOnly: true
+        });
+        }
 });
+
+}); 
 </script>

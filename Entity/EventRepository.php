@@ -23,7 +23,6 @@ class EventRepository extends CommonRepository
 {
     use TimelineTrait;
 
-
     /**
      * Fetch the base event data from the database.
      *
@@ -41,10 +40,10 @@ class EventRepository extends CommonRepository
                 'c.contact_id AS contactId',
                 'c.message',
                 'c.date_added AS timestamp',
-                'cs.name sourceName'
+                'cs.name sourceName',
             ])
             ->from(MAUTIC_TABLE_PREFIX.'contactsource_events', 'c')
-        ->join('c', 'contactsource', 'cs','cs.id = c.contactsource_id');
+        ->join('c', 'contactsource', 'cs', 'cs.id = c.contactsource_id');
 
         $expr = $q->expr()->eq('c.contact_id', ':contactId');
         $q->where($expr)

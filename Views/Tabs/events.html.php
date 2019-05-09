@@ -129,7 +129,7 @@
                             <div class="col-md-2 va-m text-right">
                                 <?php $forecastValue = '';
                                 $forecastClass       = 'success'; ?>
-                                <?php if ($limit['rule']['duration'] == 'P1D' && $limit['logCount'] > 0): ?>
+                                <?php if ('P1D' == $limit['rule']['duration'] && $limit['logCount'] > 0): ?>
                                     <?php $pending = floatval(
                                         ($limit['logCount'] / $forecast['elapsedHoursInDaySoFar']) * $forecast['hoursLeftToday']
                                     );
@@ -148,7 +148,7 @@
                                     <span class="label label-<?php echo $forecastClass; ?>"><?php echo $forecastValue; ?></span>
 
                                 <?php endif; ?>
-                                <?php if ($limit['rule']['duration'] == '1M' && $limit['logCount'] > 0): ?>
+                                <?php if ('1M' == $limit['rule']['duration'] && $limit['logCount'] > 0): ?>
                                     <?php $pending = floatval(
                                         ($limit['logCount'] / $forecast['currentDayOfMonth']) * $forecast['daysInMonthLeft']
                                     );
