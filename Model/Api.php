@@ -1290,6 +1290,7 @@ class Api
                     try {
                         $this->emailValidator->validate(
                             $fieldData[$contactField['alias']],
+                            $this->getIntegrationSetting('email_dns_check', false)
                         );
                     } catch (\Exception $exception) {
                         unset($fieldData[$contactField['alias']]);
