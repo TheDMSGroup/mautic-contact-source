@@ -19,20 +19,6 @@ use Mautic\CoreBundle\Entity\CommonRepository;
 class StatRepository extends CommonRepository
 {
     /**
-     * @param int $id contact ID to search by
-     */
-    public function getStatsByContactId($id)
-    {
-        $q    = $this->createQueryBuilder('s');
-        $expr = $q->expr()->andX(
-            $q->expr()->eq('IDENTITY(s.contactsource)', (int) $id),
-            $q->expr()->eq('s.type', ':type')
-        );
-
-        return $q->getQuery()->getArrayResult();
-    }
-
-    /**
      * Fetch the base stat data from the database.
      *
      * @param int  $id

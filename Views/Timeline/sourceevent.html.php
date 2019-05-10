@@ -25,7 +25,6 @@ $logs    = $event['extra']['logs'];
 <script defer> 
 $buttons = mQuery('.contact-source-button').parent().parent();
 $buttons.on('click', function(){ 
-    console.log('lol');
     mQuery('textarea.codeMirror-json').each(function(i, element){ 
         if(mQuery(element).is(':visible')) {
         CodeMirror.fromTextArea(element, {

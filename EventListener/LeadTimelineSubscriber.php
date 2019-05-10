@@ -25,6 +25,7 @@ class LeadTimelineSubscriber extends CommonSubscriber
     {
         $repo         = $this->em->getRepository('MauticContactSourceBundle:Event');
         $sourceEvents = $repo->getEventsByContactId($event->getLeadId());
+
         foreach ($sourceEvents as $srcEvent) {
             $srcEvent['eventLabel'] = [
                 'label' => 'Contact Source: '.$srcEvent['sourceName'],
