@@ -1271,26 +1271,39 @@ class Api
         // Return exception to API if validation fails.
         foreach ($allowedFields as $contactField) {
             if (isset($fieldData[$contactField['alias']])) {
+                // If NULL string provided, treat it as null.
                 if ('NULL' === $fieldData[$contactField['alias']]) {
                     $fieldData[$contactField['alias']] = null;
                     continue;
                 }
+                // Perform standard core field cleaning.
                 try {
                     $this->contactModel->cleanFields($fieldData, $contactField);
-                    if ('email' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
-                        $this->emailValidator->validate($fieldData[$contactField['alias']], false);
-                    } elseif ('tel' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
-                        // Soft normalize the phone numbers before saving so that DNC can be correlated later.
-                        $this->phoneNormalize($fieldData[$contactField['alias']]);
-                    }
                 } catch (\Exception $exception) {
-                    throw new ContactSourceException(
-                        $exception->getMessage(),
-                        Codes::HTTP_BAD_REQUEST,
-                        $exception,
-                        Stat::TYPE_INVALID,
-                        $contactField['alias']
-                    );
+                    unset($fieldData[$contactField['alias']]);
+                    $this->errors[$contactField['alias']] = ucfirst(
+                            $contactField['type']
+                        ).' is invalid and will not be stored.';
+                }
+                // Normalize and validate emails.
+                if ('email' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
+                    try {
+                        $this->emailValidator->validate(
+                            $fieldData[$contactField['alias']],
+                        );
+                    } catch (\Exception $exception) {
+                        unset($fieldData[$contactField['alias']]);
+                        $this->errors[$contactField['alias']] = 'Email is invalid and will not be stored.';
+                    }
+                }
+                // Normalize and validate phone numbers.
+                if ('tel' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
+                    try {
+                        $this->phoneNormalize($fieldData[$contactField['alias']]);
+                    } catch (\Exception $exception) {
+                        unset($fieldData[$contactField['alias']]);
+                        $this->errors[$contactField['alias']] = 'Phone number is invalid and will not be stored.';
+                    }
                 }
                 continue;
             } elseif ($contactField['defaultValue']) {
@@ -1322,12 +1335,9 @@ class Api
             if (!$this->phoneHelper) {
                 $this->phoneHelper = new PhoneNumberHelper();
             }
-            try {
-                $normalized = $this->phoneHelper->format($phone);
-                if (!empty($normalized)) {
-                    $phone = $normalized;
-                }
-            } catch (\Exception $e) {
+            $normalized = $this->phoneHelper->format($phone);
+            if (!empty($normalized)) {
+                $phone = $normalized;
             }
         }
     }
