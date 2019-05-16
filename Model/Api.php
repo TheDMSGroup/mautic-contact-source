@@ -1944,6 +1944,12 @@ class Api
             }
         }
 
+        foreach ($this->getDeviceSetters() as $k => $v) {
+            if (isset($this->fieldsStored[$k])) {
+                $fieldsProvided[$k] = $this->fieldsStored[$k];
+            }
+        }
+
         $this->logs = array_merge(
             $this->logs,
             [
