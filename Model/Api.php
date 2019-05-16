@@ -1940,6 +1940,7 @@ class Api
             $this->logs,
             [
                 'status'         => $this->status,
+                'sourceIP'       => $this->request->getClientIp(),
                 'fieldsProvided' => $this->fieldsProvided,
                 'fieldsStored'   => $this->fieldsStored,
                 'realTime'       => $this->realTime,
