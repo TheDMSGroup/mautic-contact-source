@@ -43,3 +43,6 @@ $buttons.on('click', function(){
 
 }); 
 </script>
+<?php
+    echo $view['assets']->includeStylesheet('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.css');
+?>
