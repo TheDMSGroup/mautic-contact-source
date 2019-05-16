@@ -26,7 +26,7 @@ class LeadTimelineSubscriber extends CommonSubscriber
         $repo         = $this->em->getRepository('MauticContactSourceBundle:Event');
         $sourceEvents = $repo->getEventsByContactId($event->getLeadId());
 
-        if(!is_array($sourceEvents)){ 
+        if (!is_array($sourceEvents)) {
             return;
         }
 
