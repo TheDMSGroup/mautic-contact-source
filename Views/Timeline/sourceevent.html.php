@@ -13,7 +13,7 @@ $message = $event['extra']['message'];
 $logs    = $event['extra']['logs'];
 ?>
 <dl class="dl-horizontal small">
-    <dt>Message:</dt>
+    <dt><?php echo $view['translator']->trans('mautic.contactsource.timeline.logs.message'); ?></dt>
     <dd><?=$message; ?></dd>
     <div class="small" style="max-width: 100%;">
         <strong><?php echo $view['translator']->trans('mautic.contactsource.timeline.logs.heading'); ?></strong>
