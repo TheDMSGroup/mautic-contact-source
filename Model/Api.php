@@ -1936,11 +1936,19 @@ class Api
         );
         $this->em->clear(Stat::class);
 
+        // Add utm/pivot back into fieldsProvided for logging purposes.
+        $fieldsProvided = $this->fieldsProvided;
+        foreach ($this->getUtmSetters() as $k => $v) {
+            if (isset($this->fieldsStored[$k])) {
+                $fieldsProvided[$k] = $this->fieldsStored[$k];
+            }
+        }
+
         $this->logs = array_merge(
             $this->logs,
             [
                 'status'         => $this->status,
-                'fieldsProvided' => $this->fieldsProvided,
+                'fieldsProvided' => $fieldsProvided,
                 'fieldsStored'   => $this->fieldsStored,
                 'realTime'       => $this->realTime,
                 'scrubbed'       => $this->scrubbed,
