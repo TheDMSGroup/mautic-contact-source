@@ -38,7 +38,7 @@ class EventRepository extends CommonRepository
             ->select([
                 'c.*',
                 'c.contact_id AS contactId',
-                'c.message',
+                'c.message AS message',
                 'c.date_added AS timestamp',
                 'cs.name sourceName',
             ])
@@ -62,6 +62,8 @@ class EventRepository extends CommonRepository
             );
             $q->setParameter('type', $eventType);
         }
+
+        $q->setMaxResults(1);
 
         $results = $q->execute()->fetchAll();
 
