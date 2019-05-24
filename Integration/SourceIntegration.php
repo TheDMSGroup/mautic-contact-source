@@ -188,6 +188,21 @@ class SourceIntegration extends AbstractIntegration
                     ],
                 ]
             );
+            $builder->add(
+                'email_dns_check',
+                'yesno_button_group',
+                [
+                    'label'             => 'mautic.contactsource.form.email_dns_check',
+                    'label_attr'        => ['class' => 'control-label'],
+                    'choices_as_values' => true,
+                    'required'          => false,
+                    'data'              => !isset($data['email_dns_check']) ? false : (bool) $data['email_dns_check'],
+                    'attr'              => [
+                        'class'   => 'form-control',
+                        'tooltip' => 'mautic.contactsource.form.email_dns_check.tooltip',
+                    ],
+                ]
+            );
         }
     }
 }
