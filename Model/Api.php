@@ -1965,6 +1965,7 @@ class Api
             $this->logs,
             [
                 'status'         => $this->status,
+                'sourceIP'       => $this->request->getClientIp(),
                 'fieldsProvided' => $fieldsProvided,
                 'fieldsStored'   => $this->fieldsStored,
                 'realTime'       => $this->realTime,
