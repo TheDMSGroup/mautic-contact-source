@@ -1983,6 +1983,7 @@ class Api
                     'id' => $this->contact->getId(),
                 ] : null,
                 'events'         => $this->events,
+                'errors'         => $this->errors,
             ]
         );
 
