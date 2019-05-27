@@ -191,7 +191,7 @@ class ContactSourceSubscriber extends CommonSubscriber
             $event->setQueryTotal($total);
 
             // YAML is being depracated for log storage, but be backwards compatible
-            $log = $row['logs'][0] === '{' ? json_encode(json_decode($row['logs']), JSON_PRETTY_PRINT) : $row['logs'];
+            $log = '{' === $row['logs'][0] ? json_encode(json_decode($row['logs']), JSON_PRETTY_PRINT) : $row['logs'];
 
             if (!$event->isEngagementCount()) {
                 $event->addEvent(

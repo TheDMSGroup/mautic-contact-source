@@ -86,7 +86,7 @@
                                 </div>
                                 <div class="col-md-2 va-m text-right">
                                     <?php $forecastValue = ''; $forecastClass = 'success'; ?>
-                                    <?php if ($limit['rule']['duration'] == 'P1D' && $limit['logCount'] > 0): ?>
+                                    <?php if ('P1D' == $limit['rule']['duration'] && $limit['logCount'] > 0): ?>
                                         <?php $pending       = floatval(($limit['logCount'] / $forecast['elapsedHoursInDaySoFar']) * $forecast['hoursLeftToday']);
                                               $forecastValue = number_format(($pending + $limit['logCount']) / $limit['rule']['quantity'], 2, '.', ',') * 100;
                                               $forecastClass = $forecastValue >= 90 ? 'danger' : 'success';
@@ -96,7 +96,7 @@
                                               <span class="label label-<?php echo $forecastClass; ?>"><?php echo $forecastValue; ?></span>
 
                                     <?php endif; ?>
-                                    <?php if ($limit['rule']['duration'] == '1M' && $limit['logCount'] > 0): ?>
+                                    <?php if ('1M' == $limit['rule']['duration'] && $limit['logCount'] > 0): ?>
                                         <?php $pending     = floatval(($limit['logCount'] / $forecast['currentDayOfMonth']) * $forecast['daysInMonthLeft']);
                                             $forecastValue = number_format(($pending + $limit['logCount']) / $limit['rule']['quantity'], 2, '.', ',') * 100;
                                             $forecastClass = $forecastValue >= 90 ? 'danger' : 'success';
