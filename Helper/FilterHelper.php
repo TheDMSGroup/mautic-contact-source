@@ -195,7 +195,7 @@ class FilterHelper
      *
      * @param $rule
      *
-     * @return mixed|null|string
+     * @return mixed|string|null
      *
      * @throws Exception
      */
@@ -204,7 +204,7 @@ class FilterHelper
         $value = $this->getRuleValue($rule);
 
         if (isset($this->operators[$rule->operator]['accept_values'])
-            && $this->operators[$rule->operator]['accept_values'] === false) {
+            && false === $this->operators[$rule->operator]['accept_values']) {
             return $this->operatorValueWhenNotAcceptingOne($rule);
         }
 
@@ -255,7 +255,7 @@ class FilterHelper
      *
      * @param $rule
      *
-     * @return null|string
+     * @return string|null
      */
     protected function operatorValueWhenNotAcceptingOne($rule)
     {
@@ -361,8 +361,8 @@ class FilterHelper
     /**
      * Take a (potentially nested) field name and get the literal value from the contextual array.
      *
-     * @param   $rule
-     * @param   $context
+     * @param $rule
+     * @param $context
      *
      * @return bool
      */
@@ -386,9 +386,9 @@ class FilterHelper
      * (This used to be part of evaluate, where the name made sense, but I pulled it
      * out to reduce some duplicated code inside JoinSupportingQueryBuilder)
      *
-     * @param   $rule
-     * @param   $contextValue
-     * @param   $ruleValue
+     * @param $rule
+     * @param $contextValue
+     * @param $ruleValue
      *
      * @return bool
      *
