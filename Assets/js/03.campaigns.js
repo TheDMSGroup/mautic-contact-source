@@ -68,7 +68,6 @@ Mautic.contactsourceCampaigns = function () {
                         campaignsJSONEditor.on('change', function (event) {
                             var obj = campaignsJSONEditor.getValue();
                             if (typeof obj === 'object') {
-                                console.log(obj);
                                 var campaignIds = [];
                                 obj.campaigns.forEach(function(cmpn) { 
                                     if(campaignIds.indexOf(cmpn.campaignId) >= 0) {
