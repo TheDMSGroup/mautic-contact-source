@@ -72,10 +72,11 @@ Mautic.contactsourceCampaigns = function () {
                                 var campaignIds = [];
                                 obj.campaigns.forEach(function(cmpn) { 
                                     if(campaignIds.indexOf(cmpn.campaignId) >= 0) {
-                                        alert('STOP RIGHT THERE BUSTER');
+                                        alert("You shouldn't add the same campaign to a Source more than once, create a different campaign instead.");
                                     }
                                     campaignIds.push(cmpn.campaignId);
                                 });
+
 
                                 var raw = JSON.stringify(obj, null, '  ');
                                 if (raw.length) {
