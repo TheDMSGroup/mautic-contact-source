@@ -1271,26 +1271,40 @@ class Api
         // Return exception to API if validation fails.
         foreach ($allowedFields as $contactField) {
             if (isset($fieldData[$contactField['alias']])) {
+                // If NULL string provided, treat it as null.
                 if ('NULL' === $fieldData[$contactField['alias']]) {
                     $fieldData[$contactField['alias']] = null;
                     continue;
                 }
+                // Perform standard core field cleaning.
                 try {
                     $this->contactModel->cleanFields($fieldData, $contactField);
-                    if ('email' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
-                        $this->emailValidator->validate($fieldData[$contactField['alias']], false);
-                    } elseif ('tel' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
-                        // Soft normalize the phone numbers before saving so that DNC can be correlated later.
-                        $this->phoneNormalize($fieldData[$contactField['alias']]);
-                    }
                 } catch (\Exception $exception) {
-                    throw new ContactSourceException(
-                        $exception->getMessage(),
-                        Codes::HTTP_BAD_REQUEST,
-                        $exception,
-                        Stat::TYPE_INVALID,
-                        $contactField['alias']
-                    );
+                    unset($fieldData[$contactField['alias']]);
+                    $this->errors[$contactField['alias']] = ucfirst(
+                            $contactField['type']
+                        ).' is invalid and will not be stored.';
+                }
+                // Normalize and validate emails.
+                if ('email' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
+                    try {
+                        $this->emailValidator->validate(
+                            $fieldData[$contactField['alias']],
+                            $this->getIntegrationSetting('email_dns_check', false)
+                        );
+                    } catch (\Exception $exception) {
+                        unset($fieldData[$contactField['alias']]);
+                        $this->errors[$contactField['alias']] = 'Email is invalid and will not be stored.';
+                    }
+                }
+                // Normalize and validate phone numbers.
+                if ('tel' === $contactField['type'] && !empty($fieldData[$contactField['alias']])) {
+                    try {
+                        $this->phoneNormalize($fieldData[$contactField['alias']]);
+                    } catch (\Exception $exception) {
+                        unset($fieldData[$contactField['alias']]);
+                        $this->errors[$contactField['alias']] = 'Phone number is invalid and will not be stored.';
+                    }
                 }
                 continue;
             } elseif ($contactField['defaultValue']) {
@@ -1322,12 +1336,9 @@ class Api
             if (!$this->phoneHelper) {
                 $this->phoneHelper = new PhoneNumberHelper();
             }
-            try {
-                $normalized = $this->phoneHelper->format($phone);
-                if (!empty($normalized)) {
-                    $phone = $normalized;
-                }
-            } catch (\Exception $e) {
+            $normalized = $this->phoneHelper->format($phone);
+            if (!empty($normalized)) {
+                $phone = $normalized;
             }
         }
     }
@@ -1602,6 +1613,10 @@ class Api
     {
         if (!$this->realTime || !$this->campaign || !$this->contact) {
             return;
+        }
+
+        if (false == defined('MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME')) {
+            define('MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME', true);
         }
 
         $this->campaignExecutioner->execute($this->campaign, [$this->contact->getId()]);
@@ -1936,11 +1951,26 @@ class Api
         );
         $this->em->clear(Stat::class);
 
+        // Add utm/pivot back into fieldsProvided for logging purposes.
+        $fieldsProvided = $this->fieldsProvided;
+        foreach ($this->getUtmSetters() as $k => $v) {
+            if (isset($this->fieldsStored[$k])) {
+                $fieldsProvided[$k] = $this->fieldsStored[$k];
+            }
+        }
+
+        foreach ($this->getDeviceSetters() as $k => $v) {
+            if (isset($this->fieldsStored[$k])) {
+                $fieldsProvided[$k] = $this->fieldsStored[$k];
+            }
+        }
+
         $this->logs = array_merge(
             $this->logs,
             [
                 'status'         => $this->status,
-                'fieldsProvided' => $this->fieldsProvided,
+                'sourceIP'       => $this->request->getClientIp(),
+                'fieldsProvided' => $fieldsProvided,
                 'fieldsStored'   => $this->fieldsStored,
                 'realTime'       => $this->realTime,
                 'scrubbed'       => $this->scrubbed,
@@ -1953,6 +1983,7 @@ class Api
                     'id' => $this->contact->getId(),
                 ] : null,
                 'events'         => $this->events,
+                'errors'         => $this->errors,
             ]
         );
 
