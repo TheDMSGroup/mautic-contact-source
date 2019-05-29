@@ -11,6 +11,16 @@ use Mautic\CampaignBundle\Executioner\ContactFinder\Limiter\ContactLimiter;
 class RealTimeCampaignRepository extends CampaignRepository
 {
     /**
+     * @var bool
+     */
+    private $finished = false;
+
+    /**
+     * @var array
+     */
+    private $completedIDs = [];
+
+    /**
      * @param EntityManager $em
      * @param ClassMetadata $class
      */
@@ -33,8 +43,15 @@ class RealTimeCampaignRepository extends CampaignRepository
      */
     public function getPendingContactIds($campaignId, ContactLimiter $limiter)
     {
-        if (!defined('MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME') || false === MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME) {
+        if (
+            !(defined('MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME') && true === MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME)
+            || !is_null($limiter->getContactId())
+        ) {
             return parent::getPendingContactIds($campaignId, $limiter);
+        }
+
+        if ($this->finished) {
+            return [];
         }
 
         // Honor the parent class...
@@ -43,14 +60,29 @@ class RealTimeCampaignRepository extends CampaignRepository
         }
 
         $contacts = $limiter->getContactIdList();
+        if ($limiter->getContactId()) {
+            $contacts[] = $limiter->getContactId();
+        }
+
         if ($limiter->hasCampaignLimit() && $limiter->getCampaignLimitRemaining() < $limiter->getBatchLimit()) {
-            if (count($contacts) >= $limiter->getCampaignLimitRemaining()) {
-                $contacts = array_slice($contacts, 0, $limiter->getCampaignLimitRemaining());
+            $pulled = [];
+            for ($i = $limiter->getCampaignLimitRemaining();
+            $i > ($limiter->getCampaignLimitRemaining() - $limiter->getBatchLimit());
+            --$i) {
+                $pulled[] = $contacts[$i];
             }
+            $contacts = $pulled;
         }
 
         if ($limiter->hasCampaignLimit()) {
             $limiter->reduceCampaignLimitRemaining(count($contacts));
+        }
+
+        $contacts           = array_diff($contacts, $this->completedIDs);
+        $this->completedIDs = array_merge($contacts, $this->completedIDs);
+
+        if (empty($contacts)) {
+            $this->finished = true;
         }
 
         return $contacts;
