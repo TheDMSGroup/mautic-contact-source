@@ -43,10 +43,8 @@ class RealTimeCampaignRepository extends CampaignRepository
      */
     public function getPendingContactIds($campaignId, ContactLimiter $limiter)
     {
-        if (
-            !(defined('MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME') && true === MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME)
-            || !is_null($limiter->getContactId())
-        ) {
+        if (!(defined('MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME') && true === MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME)
+            && is_null($limiter->getContactId())) {
             return parent::getPendingContactIds($campaignId, $limiter);
         }
 
