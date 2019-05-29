@@ -65,13 +65,9 @@ class RealTimeCampaignRepository extends CampaignRepository
         }
 
         if ($limiter->hasCampaignLimit() && $limiter->getCampaignLimitRemaining() < $limiter->getBatchLimit()) {
-            $pulled = [];
-            for ($i = $limiter->getCampaignLimitRemaining();
-            $i > ($limiter->getCampaignLimitRemaining() - $limiter->getBatchLimit());
-            --$i) {
-                $pulled[] = $contacts[$i];
+            if (count($contacts) >= $limiter->getCampaignLimitRemaining()) {
+                $contacts = array_slice($contacts, 0, $limiter->getCampaignLimitRemaining());
             }
-            $contacts = $pulled;
         }
 
         if ($limiter->hasCampaignLimit()) {
