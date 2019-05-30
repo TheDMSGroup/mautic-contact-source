@@ -1970,7 +1970,7 @@ class Api
             $this->logs,
             [
                 'status'         => $this->status,
-                'sourceIP'       => $this->request->getClientIp(),
+                'sourceIP'       => $this->request ? $this->request->getClientIp() : '127.0.0.1',
                 'fieldsProvided' => $fieldsProvided,
                 'fieldsStored'   => $this->fieldsStored,
                 'realTime'       => $this->realTime,
