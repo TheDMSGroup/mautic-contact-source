@@ -1086,6 +1086,7 @@ class Api
         if (null === $this->utmSetters) {
             $utmSetters = $this->getUtmTag()->getFieldSetterList();
             unset($utmSetters['query']);
+            unset($utmSetters['date_added']);
             $this->utmSetters = $utmSetters;
         }
 
