@@ -111,6 +111,9 @@ class Api
     /** @var array */
     protected $fieldsProvided;
 
+    /** @var float */
+    protected $startTime;
+
     /** @var Request */
     protected $request;
 
@@ -264,6 +267,18 @@ class Api
         $this->session               = $session;
         $this->coreParametersHelper  = $coreParametersHelper;
         $this->pathsHelper           = $pathsHelper;
+    }
+
+    /**
+     * @param float $startTime
+     *
+     * @return $this
+     */
+    public function setStartTime($startTime)
+    {
+        $this->startTime = $startTime;
+
+        return $this;
     }
 
     /**
@@ -1969,6 +1984,7 @@ class Api
         $this->logs = array_merge(
             $this->logs,
             [
+                'duration'       => microtime(true) - $this->startTime,
                 'status'         => $this->status,
                 'sourceIP'       => $this->request ? $this->request->getClientIp() : '127.0.0.1',
                 'fieldsProvided' => $fieldsProvided,
