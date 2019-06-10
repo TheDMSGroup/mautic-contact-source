@@ -1086,6 +1086,7 @@ class Api
         if (null === $this->utmSetters) {
             $utmSetters = $this->getUtmTag()->getFieldSetterList();
             unset($utmSetters['query']);
+            unset($utmSetters['date_added']);
             $this->utmSetters = $utmSetters;
         }
 
@@ -1969,7 +1970,7 @@ class Api
             $this->logs,
             [
                 'status'         => $this->status,
-                'sourceIP'       => $this->request->getClientIp(),
+                'sourceIP'       => $this->request ? $this->request->getClientIp() : '127.0.0.1',
                 'fieldsProvided' => $fieldsProvided,
                 'fieldsStored'   => $this->fieldsStored,
                 'realTime'       => $this->realTime,
