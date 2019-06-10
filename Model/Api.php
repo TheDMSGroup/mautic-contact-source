@@ -447,7 +447,8 @@ class Api
                     'sourceId'
                 );
             }
-            $this->addTrace('contactSourceId', (int) $this->sourceId);
+            $this->addTrace('contactSource', $this->contactSource->getName());
+            $this->addTrace('contactSourceId', $this->contactSource->getId());
         }
 
         return $this;
