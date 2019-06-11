@@ -32,7 +32,7 @@ class EventRepository extends CommonRepository
      *
      * @return array
      */
-    public function getEventsByContactId($contactId, $eventType = null, \DateTime $dateAdded = null)
+    public function getTimelineStats($leadId, $options = [])
     {
         $q = $this->getEntityManager()->getConnection()->createQueryBuilder()
             ->select([
@@ -47,27 +47,16 @@ class EventRepository extends CommonRepository
 
         $expr = $q->expr()->eq('c.contact_id', ':contactId');
         $q->where($expr)
-            ->setParameter('contactId', (int) $contactId);
+            ->setParameter('contactId', (int) $leadId);
 
-        if ($dateAdded) {
-            $expr->add(
-                $q->expr()->gte('c.date_added', ':dateAdded')
+        if (isset($options['search']) && $options['search']) {
+            $query->andWhere(
+                $query->expr()->like('cs.name', $query->expr()->literal('%' . $options['search'] . '%'))
             );
-            $q->setParameter('dateAdded', $dateAdded);
         }
 
-        if ($eventType) {
-            $expr->add(
-                $q->expr()->eq('c.type', ':type')
-            );
-            $q->setParameter('type', $eventType);
-        }
 
-        $q->setMaxResults(1);
-
-        $results = $q->execute()->fetchAll();
-
-        return $results;
+        return $this->getTimelineResults($q, $options, 'cs.name', 'c.date_added', [], ['c.date_added']);
     }
 
     /**
