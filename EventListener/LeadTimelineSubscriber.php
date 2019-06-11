@@ -60,7 +60,7 @@ class LeadTimelineSubscriber extends CommonSubscriber
                                 'href'  => "/s/contactsource/view/{$stat['contactsource_id']}",
                             ],
                             // Translated string displayed in the Event Type column
-                            'eventType'       => $eventTypeName,
+                            'eventType'       => ucfirst($stat['type']),
                             // \DateTime object for the timestamp column
                             'timestamp'       => $stat['date_added'],
                             // Optional details passed through to the contentTemplate
