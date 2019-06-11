@@ -56,7 +56,7 @@ class LeadTimelineSubscriber extends CommonSubscriber
                             'event'           => $eventTypeKey,
                             // Event name/label - can be a string or an array as below to convert to a link
                             'eventLabel'      => [
-                                'label' => $stat['sourceName'],
+                                'label' => 'Source: '.$stat['sourceName'],
                                 'href'  => "/s/contactsource/view/{$stat['contactsource_id']}",
                             ],
                             // Translated string displayed in the Event Type column
@@ -65,8 +65,8 @@ class LeadTimelineSubscriber extends CommonSubscriber
                             'timestamp'       => $stat['date_added'],
                             // Optional details passed through to the contentTemplate
                             'extra'           => [
-                                'stat' => $stat, 
-                                'logs'    => $stat['logs'],
+                                'stat'            => $stat,
+                                'logs'            => $stat['logs'],
                                 'message'         => $stat['message'],
                             ],
                             // Optional template to customize the details of the event in the timeline
@@ -78,6 +78,5 @@ class LeadTimelineSubscriber extends CommonSubscriber
                 }
             }
         }
-
     }
 }
