@@ -51,10 +51,9 @@ class EventRepository extends CommonRepository
 
         if (isset($options['search']) && $options['search']) {
             $query->andWhere(
-                $query->expr()->like('cs.name', $query->expr()->literal('%' . $options['search'] . '%'))
+                $query->expr()->like('cs.name', $query->expr()->literal('%'.$options['search'].'%'))
             );
         }
-
 
         return $this->getTimelineResults($q, $options, 'cs.name', 'c.date_added', [], ['c.date_added']);
     }
