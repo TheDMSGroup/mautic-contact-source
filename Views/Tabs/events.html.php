@@ -14,8 +14,7 @@
         <blockquote>
             <i class="fa fa-info-circle"></i>
             <!--Tab's helper text to explain this tab -->
-            <?php echo $view['translator']->trans('mautic.contactsource.campaign_budgets_tab'); ?>
-
+            <?php echo $view['translator']->trans('mautic.contactsource.campaign_budgets_tab'); ?> 
         </blockquote>
     </div>
 
