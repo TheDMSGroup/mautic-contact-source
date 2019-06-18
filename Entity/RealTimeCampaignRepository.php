@@ -78,6 +78,6 @@ class RealTimeCampaignRepository extends CampaignRepository
             $this->finished = true;
         }
 
-        return $contacts;
+        return array_unique($contacts);
     }
 }
