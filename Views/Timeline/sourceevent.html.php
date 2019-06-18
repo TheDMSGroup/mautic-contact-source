@@ -18,30 +18,74 @@ $logs    = $event['extra']['logs'];
     <div class="small" style="max-width: 100%;">
         <strong><?php echo $view['translator']->trans('mautic.contactsource.timeline.logs.heading'); ?></strong>
         <br/>
-        <textarea class="codeMirror-json"><?php echo $logs; ?></textarea>
+        <textarea class="codeMirror-json"><?php echo json_encode($logs, JSON_PRETTY_PRINT); ?></textarea>
     </div>
 </dl>
 
-<script defer> 
-$buttons = mQuery('.contact-source-button').parent().parent();
-$buttons.on('click', function(){ 
-    mQuery('textarea.codeMirror-json').each(function(i, element){ 
-        if(mQuery(element).is(':visible')) {
-        CodeMirror.fromTextArea(element, {
-            mode: {
-                name: 'javascript',
-                json: true
-            },
-            theme: 'cc',
-            gutters: [],
-            lineNumbers: false,
-            lineWrapping: true,
-            readOnly: true
-        });
+<script defer>
+    var codeMirror = function ($el) {
+        if (!$el.hasClass('codemirror-active')) {
+            var $textarea = $el.find('textarea.codeMirror-json');
+            if ($textarea.length) {
+                CodeMirror.fromTextArea($textarea[0], {
+                    mode: {
+                        name: 'javascript',
+                        json: true
+                    },
+                    theme: 'cc',
+                    gutters: [],
+                    lineNumbers: false,
+                    lineWrapping: true,
+                    readOnly: true
+                });
+            }
+            $el.addClass('codemirror-active');
         }
-});
+    };
+    mQuery('#contact-timeline a[data-activate-details=\'all\']').on('click', function () {
+        if (mQuery(this).find('span').first().hasClass('fa-level-down')) {
+            mQuery('#contact-timeline a[data-activate-details!=\'all\']').each(function () {
+                var detailsId = mQuery(this).data('activate-details'),
+                    $details = mQuery('#timeline-details-' + detailsId);
+                if (detailsId && $details.length) {
+                    $details.removeClass('hide');
+                    codeMirror($details);
+                    mQuery(this).addClass('active');
+                }
+            });
+        }
+        else {
+            mQuery('#contact-timeline a[data-activate-details!=\'all\']').each(function () {
+                var detailsId = mQuery(this).data('activate-details'),
+                    $details = mQuery('#timeline-details-' + detailsId);
+                if (detailsId && $details.length) {
+                    $details.addClass('hide');
+                    mQuery(this).removeClass('active');
+                }
+            });
+        }
+    });
 
-}); 
+mQuery(document).ready(function(){ 
+    $buttons = mQuery('.contact-source-button').parent().parent();
+    $buttons.on('click', function(){ 
+        mQuery('textarea.codeMirror-json').each(function(i, element){ 
+            if(mQuery(element).is(':visible')) {
+            CodeMirror.fromTextArea(element, {
+                mode: {
+                    name: 'javascript',
+                    json: true
+                },
+                theme: 'cc',
+                gutters: [],
+                lineNumbers: false,
+                lineWrapping: true,
+                readOnly: true
+            });
+            }
+    }); 
+    }); 
+});
 </script>
 <?php
     echo $view['assets']->includeStylesheet('plugins/MauticContactSourceBundle/Assets/build/contactsource.min.css');
