@@ -520,8 +520,7 @@ class CacheRepository extends CommonRepository
                 $q->expr()->lt('date_added', 'FROM_UNIXTIME('.$start.')')
             );
             $platform = $conn->getDatabasePlatform();
-            $result   = $conn->executeUpdate($platform->modifyLimitQuery($q->getSQL(), $limit));
-            $rowCount = $result->rowCount();
+            $rowCount = $conn->executeUpdate($platform->modifyLimitQuery($q->getSQL(), $limit));
             if ($rowCount !== $limit) {
                 sleep($delay);
             }
