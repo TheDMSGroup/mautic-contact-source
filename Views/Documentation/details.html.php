@@ -102,7 +102,7 @@
   --header <span class="s1">'Content-Type: application/x-www-form-urlencoded'</span> <span class="se">\</span>
   --header <span class="s1">'content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW'</span> <span class="se">\</span>
   --header <span class="s1">'token: <?php echo $token; ?>'</span> <span class="se">\</span>
-<?php foreach($commonFields as $fieldName => $fieldValue): ?>
+<?php foreach ($commonFields as $fieldName => $fieldValue): ?>
   --form <span class="nv">'<?php echo $fieldName; ?>'</span><span class="o">=</span>'<?php echo $fieldValue; ?>' <span class="se">\</span>
 <?php endforeach; ?>
             </code>
@@ -118,7 +118,7 @@
 
     <span class="cp">//Define Lead Data</span>
     <span class="nv">$fields</span> <span class="k">=</span> <span class="na">array(</span>
-    <?php foreach($commonFields as $fieldName => $fieldValue): ?>
+    <?php foreach ($commonFields as $fieldName => $fieldValue): ?>
     <span class="s1">'<?php echo $fieldName; ?>'</span><span class="k"> => </span><span class="s1">'<?php echo $fieldValue; ?>'</span>,
     <?php endforeach; ?>
 <span class="na">);</span>

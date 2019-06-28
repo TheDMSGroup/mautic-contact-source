@@ -43,7 +43,6 @@ class PublicController extends CommonController
         $object,
         $action
     ) {
-
         $parameters    = [];
         $campaigns     = [];
 
@@ -101,8 +100,8 @@ class PublicController extends CommonController
 
         // Remove fields in Excluded Groups (set in integration settings)
         if (!empty($featureSettings['field_group_exclusions'])) {
-            $excludedGroups = explode(",", $featureSettings['field_group_exclusions']);
-            //die(print_r([$excludedGroups, $parameters['FieldList']], true));
+            $excludedGroups = explode(',', $featureSettings['field_group_exclusions']);
+
             foreach ($parameters['FieldList'] as $fieldIndex => $fieldValues) {
                 if (in_array($fieldValues['group'], $excludedGroups)) {
                     unset($parameters['FieldList'][$fieldIndex]);
