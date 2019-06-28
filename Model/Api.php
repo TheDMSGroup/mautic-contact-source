@@ -1014,6 +1014,7 @@ class Api
                             'type'         => $field['type'],
                             'defaultValue' => $field['defaultValue'],
                             'label'        => $field['label'],
+                            'group'        => $field['group'],
                         ];
                     }
                     // Add IP as an allowed import field.
@@ -1022,6 +1023,7 @@ class Api
                         'type'         => 'text',
                         'defaultValue' => '',
                         'label'        => 'IP Addresses (comma delimited)',
+                        'field_group'  => 'system',
                     ];
 
                     // Get available UTM fields and their setters.
