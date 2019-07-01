@@ -40,7 +40,7 @@ class MaintenanceCommand extends ModeratedCommand
      *
      * @return int|null
      *
-     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\DBAL\DBALException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -57,7 +57,8 @@ class MaintenanceCommand extends ModeratedCommand
                 'mautic.contactsource.maintenance.running'
             ).'</info>'
         );
-        $cacheModel->getRepository()->deleteExpired();
+        $deleted = $cacheModel->getRepository()->deleteExpired();
+        $output->writeln('Deleted '.$deleted.' expired cache entries.');
         $output->writeln(
             '<info>'.$translator->trans(
                 'mautic.contactsource.maintenance.complete'

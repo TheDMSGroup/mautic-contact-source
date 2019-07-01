@@ -89,6 +89,7 @@ class ApiController extends CommonApiController
             /** @var \MauticPlugin\MauticContactSourceBundle\Model\Api $ApiModel */
             $ApiModel = $this->get('mautic.contactsource.model.api');
             $ApiModel
+                ->setStartTime($start)
                 ->setRequest($request)
                 ->setSourceId((int) $sourceId)
                 ->setCampaignId((int) $campaignId)

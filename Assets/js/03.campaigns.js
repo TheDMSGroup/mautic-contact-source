@@ -67,7 +67,19 @@ Mautic.contactsourceCampaigns = function () {
                         // Persist the value to the JSON Editor.
                         campaignsJSONEditor.on('change', function (event) {
                             var obj = campaignsJSONEditor.getValue();
-                            if (typeof obj === 'object') {
+                            if (typeof obj === 'object') { 
+                                var campaignIds = [];
+                                for(var i = 0; i < obj.campaigns.length; i++) { 
+                                    var camp = obj.campaigns[i];
+                                    if(campaignIds.indexOf(camp.campaignId) >= 0) {
+                                        obj.campaigns[i].campaignId = "0"; 
+                                        mQuery('[name="root[campaigns][' + i + '][campaignId]"]').val(0).change();
+                                        campaignsJSONEditor.setValue(obj);
+                                        alert("You shouldn't add the same campaign to a Source more than once, create a different campaign instead.");
+                                    }
+                                    campaignIds.push(camp.campaignId); 
+                                }
+
                                 var raw = JSON.stringify(obj, null, '  ');
                                 if (raw.length) {
                                     // Set the textarea.

@@ -11,6 +11,7 @@
 
 namespace MauticPlugin\MauticContactSourceBundle\Entity;
 
+use Doctrine\DBAL\DBALException;
 use Mautic\CoreBundle\Entity\CommonRepository;
 use Mautic\CoreBundle\Helper\PhoneNumberHelper;
 use Mautic\LeadBundle\Entity\Lead as Contact;
@@ -501,18 +502,34 @@ class CacheRepository extends CommonRepository
     /**
      * Delete all Cache entities that are no longer needed for duplication/exclusivity/limit checks.
      *
-     * @throws \Exception
+     * @param int $limit
+     * @param int $delay
+     *
+     * @return int
+     *
+     * @throws DBALException
      */
-    public function deleteExpired()
+    public function deleteExpired($limit = 10000, $delay = 1)
     {
-        // General expirations. Maximum limiter is 1m.
-        $oldest = new \DateTime('-1 month -1 day');
-        $q      = $this->getEntityManager()->getConnection()->createQueryBuilder();
-        $q->delete(MAUTIC_TABLE_PREFIX.$this->getTableName());
-        $q->where(
-            $q->expr()->lt('date_added', 'FROM_UNIXTIME(:oldest)')
-        );
-        $q->setParameter('oldest', (int) $oldest->getTimestamp());
-        $q->execute();
+        $start    = strtotime('-1 month -1 day');
+        $rowCount = $limit;
+        $deleted  = 0;
+        while ($rowCount === $limit) {
+            $conn = $this->getEntityManager()->getConnection();
+            $q    = $conn->createQueryBuilder();
+            $q->delete(MAUTIC_TABLE_PREFIX.$this->getTableName());
+            $q->where(
+                $q->expr()->isNotNull('contactsource_id'),
+                $q->expr()->lt('date_added', 'FROM_UNIXTIME('.$start.')')
+            );
+            $platform = $conn->getDatabasePlatform();
+            $rowCount = $conn->executeUpdate($platform->modifyLimitQuery($q->getSQL(), $limit));
+            $deleted += $rowCount;
+            if ($rowCount !== $limit) {
+                sleep($delay);
+            }
+        }
+
+        return $deleted;
     }
 }
