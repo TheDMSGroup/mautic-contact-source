@@ -87,8 +87,8 @@ class RealTimeCampaignRepositoryTest extends AbstractMauticTestCase
 
     private function activateRealTimeCampaign()
     {
-        if (!defined('MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME')) {
-            define('MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME', true);
+        if (!defined(RealTimeCampaignRepository::MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME)) {
+            define(RealTimeCampaignRepository::MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME, true);
         }
     }
 }

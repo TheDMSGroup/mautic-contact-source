@@ -11,6 +11,11 @@ use Mautic\CampaignBundle\Executioner\ContactFinder\Limiter\ContactLimiter;
 class RealTimeCampaignRepository extends CampaignRepository
 {
     /**
+     * Constant to be defined to true, when you want to use RealTimeCampaignRepository.
+     */
+    const MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME = 'MAUTIC_PLUGIN_CONTACT_SOURCE_REALTIME';
+
+    /**
      * @var bool
      */
     private $finished = false;
