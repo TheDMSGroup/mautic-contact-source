@@ -72,7 +72,8 @@ class RealTimeCampaignRepository extends CampaignRepository
             $limiter->reduceCampaignLimitRemaining(count($contacts));
         }
 
-        $contacts           = array_diff($contacts, $this->completedIDs);
+        $contacts = array_diff($contacts, $this->completedIDs);
+        $contacts = array_slice($contacts, 0, $limiter->getBatchLimit());
         $this->completedIDs = array_merge($contacts, $this->completedIDs);
 
         if (empty($contacts)) {
