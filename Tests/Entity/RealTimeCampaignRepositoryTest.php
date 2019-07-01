@@ -65,7 +65,7 @@ class RealTimeCampaignRepositoryTest extends AbstractMauticTestCase
     public function it_reduces_the_campaign_limit_after_getting_pending_contact_ids()
     {
         $this->activateRealTimeCampaign();
-        $limiter = new ContactLimiter(1, null, null, null, [1, 2, 3, 4, 5, 6], null, null, 10);
+        $limiter = new ContactLimiter(6, null, null, null, [1, 2, 3, 4, 5, 6], null, null, 10);
         $this->repo->getPendingContactIds(1, $limiter);
         $this->assertEquals(4, $limiter->getCampaignLimitRemaining());
     }
@@ -76,7 +76,7 @@ class RealTimeCampaignRepositoryTest extends AbstractMauticTestCase
         $this->activateRealTimeCampaign();
 
         $contactIds = [1, 2, 3, 4, 5];
-        $limiter = new ContactLimiter(10, null, null, null, $contactIds, null, null, 5);
+        $limiter = new ContactLimiter(5, null, null, null, $contactIds, null, null, 5);
 
         $ids = $this->repo->getPendingContactIds(1, $limiter);
         $this->assertEquals($contactIds, $ids);
