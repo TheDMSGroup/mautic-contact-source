@@ -29,7 +29,7 @@ class RealTimeCampaignRepositoryTest extends AbstractMauticTestCase
     }
 
     /** @test */
-    public function it_doesnt_use_real_time_if_contact_is_not_defined()
+    public function it_doesnt_use_real_time_if_constant_is_not_defined()
     {
         $contactIds = [1, 2, 3, 4, 5];
         $limiter = new ContactLimiter(5, null, null, null, $contactIds, null, null, 5);
