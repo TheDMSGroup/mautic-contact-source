@@ -23,7 +23,7 @@ class RealTimeCampaignRepository extends CampaignRepository
     /**
      * @var array
      */
-    private $completedIDs = [];
+    private $completedIds = [];
 
     /**
      * @param EntityManager $em
@@ -54,38 +54,60 @@ class RealTimeCampaignRepository extends CampaignRepository
             return parent::getPendingContactIds($campaignId, $limiter);
         }
 
-        if ($this->finished) {
+        if ($this->finished || ($limiter->hasCampaignLimit() && 0 === $limiter->getCampaignLimitRemaining())) {
             return [];
         }
 
-        // Honor the parent class...
-        if ($limiter->hasCampaignLimit() && 0 === $limiter->getCampaignLimitRemaining()) {
-            return [];
-        }
+        $contacts = array_diff($limiter->getContactIdList(), $this->completedIds);
 
-        $contacts = $limiter->getContactIdList();
         if ($limiter->getContactId()) {
             $contacts[] = $limiter->getContactId();
         }
 
-        if ($limiter->hasCampaignLimit() && $limiter->getCampaignLimitRemaining() < $limiter->getBatchLimit()) {
-            if (count($contacts) >= $limiter->getCampaignLimitRemaining()) {
-                $contacts = array_slice($contacts, 0, $limiter->getCampaignLimitRemaining());
-            }
-        }
+        $contacts = $this->reduceContactBatch($contacts, $limiter);
 
         if ($limiter->hasCampaignLimit()) {
             $limiter->reduceCampaignLimitRemaining(count($contacts));
         }
 
-        $contacts = array_diff($contacts, $this->completedIDs);
-        $contacts = array_slice($contacts, 0, $limiter->getBatchLimit());
-        $this->completedIDs = array_merge($contacts, $this->completedIDs);
+        $this->completedIds = array_merge($contacts, $this->completedIds);
 
         if (empty($contacts)) {
             $this->finished = true;
         }
 
         return array_unique($contacts);
+    }
+
+    /**
+     * Reduce the $contacts batch size based on the limit.
+     *
+     * @param array          $contacts
+     * @param ContactLimiter $limiter
+     *
+     * @return array
+     */
+    private function reduceContactBatch(array $contacts, ContactLimiter $limiter)
+    {
+        return array_slice($contacts, 0, $this->determineLimit($contacts, $limiter));
+    }
+
+    /**
+     * Determine the amount of contact IDs to return.
+     *
+     * @param ContactLimiter $limiter
+     *
+     * @return int
+     */
+    private function determineLimit(array $contacts, ContactLimiter $limiter)
+    {
+        $limit = $limiter->getBatchLimit();
+        if ($limiter->hasCampaignLimit() && $limiter->getCampaignLimitRemaining() < $limiter->getBatchLimit()) {
+            if (count($contacts) >= $limiter->getCampaignLimitRemaining()) {
+                $limit = $limiter->getCampaignLimitRemaining();
+            }
+        }
+
+        return $limit;
     }
 }

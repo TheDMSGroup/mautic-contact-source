@@ -42,10 +42,20 @@ class RealTimeCampaignRepositoryTest extends AbstractMauticTestCase
     }
 
     /** @test */
+    public function it_limits_the_contact_ids_returned_based_on_the_campaign_limit()
+    {
+        $this->activateRealTimeCampaign();
+        $limiter = new ContactLimiter(5, null, null, null, [1, 2, 3, 4, 5], null, null, 2);
+        $this->assertEquals([1, 2], $this->repo->getPendingContactIds(1, $limiter));
+        $this->assertEmpty($this->repo->getPendingContactIds(1, $limiter));
+        $this->assertEmpty($this->repo->getPendingContactIds(1, $limiter));
+    }
+
+    /** @test */
     public function it_reduces_the_returned_pending_contact_ids_based_on_batch_limit()
     {
         $this->activateRealTimeCampaign();
-        $limiter = new ContactLimiter(2, null, null, null, [1, 2, 3, 4, 5]);
+        $limiter = new ContactLimiter(2, null, null, null, [1, 2, 3, 4, 5], null, null, 6);
         $this->assertEquals([1, 2], $this->repo->getPendingContactIds(1, $limiter));
         $this->assertEquals([3, 4], $this->repo->getPendingContactIds(1, $limiter));
         $this->assertEquals([5], $this->repo->getPendingContactIds(1, $limiter));
@@ -53,7 +63,7 @@ class RealTimeCampaignRepositoryTest extends AbstractMauticTestCase
     }
 
     /** @test */
-    public function it_returns_an_empty_array_when_campaign_limit_remaining_is_zero()
+    public function it_returns_an_empty_array_when_all_contact_ids_have_been_used()
     {
         $this->activateRealTimeCampaign();
         $limiter = new ContactLimiter(4, null, null, null, [1, 2, 3, 4]);
@@ -68,21 +78,6 @@ class RealTimeCampaignRepositoryTest extends AbstractMauticTestCase
         $limiter = new ContactLimiter(6, null, null, null, [1, 2, 3, 4, 5, 6], null, null, 10);
         $this->repo->getPendingContactIds(1, $limiter);
         $this->assertEquals(4, $limiter->getCampaignLimitRemaining());
-    }
-
-    /** @test */
-    public function it_pulls_contact_ids_by_batches()
-    {
-        $this->activateRealTimeCampaign();
-
-        $contactIds = [1, 2, 3, 4, 5];
-        $limiter = new ContactLimiter(5, null, null, null, $contactIds, null, null, 5);
-
-        $ids = $this->repo->getPendingContactIds(1, $limiter);
-        $this->assertEquals($contactIds, $ids);
-
-        $ids = $this->repo->getPendingContactIds(1, $limiter);
-        $this->assertEmpty($ids);
     }
 
     private function activateRealTimeCampaign()
