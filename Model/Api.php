@@ -1814,6 +1814,30 @@ class Api
             return $this;
         }
 
+        $ramRequiredPercent = intval($this->getIntegrationSetting('parallel_ram', 20));
+        if ($ramRequiredPercent > 0) {
+            try {
+                $memInfo = file_get_contents('/proc/meminfo');
+                preg_match('#MemTotal:[\s\t]+([\d]+)\s+kB#', $memInfo, $a);
+                if (isset($a[1])) {
+                    $memTotal = (int) $a[1];
+                    preg_match('#MemAvailable:[\s\t]+([\d]+)\s+kB#', $memInfo, $b);
+                    if (isset($b[1])) {
+                        $memAvailable = (int) $b[1];
+                        if (100 / $memTotal * $memAvailable < $ramRequiredPercent) {
+                            $this->logger->debug('Parallel processing aborted due to low RAM.');
+
+                            return $this;
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                $this->logger->error('Parallel processing could not discern available RAM.');
+
+                return $this;
+            }
+        }
+
         if (!$allowFork || !function_exists('pcntl_fork') || PHP_SAPI !== 'cli') {
             // This appears to be a web request or PCNTL is not enabled.
             if (!function_exists('exec') && !function_exists('popen')) {
