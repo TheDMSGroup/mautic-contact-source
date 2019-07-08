@@ -28,6 +28,7 @@ use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\LeadDevice as ContactDevice;
 use Mautic\LeadBundle\Entity\UtmTag;
+use Mautic\LeadBundle\Entity\UtmTagRepository;
 use Mautic\LeadBundle\Model\FieldModel;
 use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use Mautic\PluginBundle\Entity\IntegrationEntity;
@@ -930,6 +931,9 @@ class Api
 
                 // Apply to the contact for save later.
                 $this->getUtmTag()->setLead($contact);
+                /** @var UtmTagRepository $utmRepo */
+                $utmRepo = $this->em->getRepository('MauticLeadBundle:UtmTag');
+                $utmRepo->saveEntity($this->getUtmTag(), false);
                 $contact->setUtmTags($this->getUtmTag());
             }
 
