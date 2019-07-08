@@ -22,21 +22,21 @@ use MauticPlugin\MauticContactSourceBundle\Helper\UtmSourceHelper;
  */
 class CacheRepository extends CommonRepository
 {
-    const MATCHING_ADDRESS  = 16;
+    const MATCHING_ADDRESS = 16;
 
-    const MATCHING_EMAIL    = 2;
+    const MATCHING_EMAIL = 2;
 
     const MATCHING_EXPLICIT = 1;
 
-    const MATCHING_MOBILE   = 8;
+    const MATCHING_MOBILE = 8;
 
-    const MATCHING_PHONE    = 4;
+    const MATCHING_PHONE = 4;
 
-    const SCOPE_CAMPAIGN    = 1;
+    const SCOPE_CAMPAIGN = 1;
 
-    const SCOPE_CATEGORY    = 2;
+    const SCOPE_CATEGORY = 2;
 
-    const SCOPE_UTM_SOURCE  = 4;
+    const SCOPE_UTM_SOURCE = 4;
 
     /** @var PhoneNumberHelper */
     protected $phoneHelper;
@@ -69,10 +69,10 @@ class CacheRepository extends CommonRepository
     ) {
         $results = [];
         foreach ($rules as $rule) {
-            $filters  = [];
-            $andx     = [];
-            $value    = $rule['value'];
-            $scope    = $rule['scope'];
+            $filters = [];
+            $andx = [];
+            $value = $rule['value'];
+            $scope = $rule['scope'];
             $duration = $rule['duration'];
             $quantity = $rule['quantity'];
 
@@ -109,10 +109,10 @@ class CacheRepository extends CommonRepository
             ];
 
             // Run the query to get the count.
-            $count     = $this->applyFilters($filters, true);
-            $hit       = $count >= $quantity;
-            $percent   = 100 / $quantity * $count;
-            $percent   = round($percent > 100 ? 100 : $percent, 2);
+            $count = $this->applyFilters($filters, true);
+            $hit = $count >= $quantity;
+            $percent = 100 / $quantity * $count;
+            $percent = round($percent > 100 ? 100 : $percent, 2);
             $results[] = [
                 'logCount'   => $count,
                 'hit'        => $hit,
@@ -224,7 +224,7 @@ class CacheRepository extends CommonRepository
                     }
                     $properties = $set['andx'];
                 } else {
-                    $expr       = $query->expr();
+                    $expr = $query->expr();
                     $properties = $set;
                 }
                 if (isset($expr)) {
@@ -270,13 +270,13 @@ class CacheRepository extends CommonRepository
     public function translateRule($rule, $mode = 'limit')
     {
         $quantity = isset($rule['quantity']) ? $rule['quantity'] : 0;
-        $value    = isset($rule['value']) ? $rule['value'] : null;
+        $value = isset($rule['value']) ? $rule['value'] : null;
 
         // Generate scope string.
-        $scope       = isset($rule['scope']) ? $rule['scope'] : 0;
+        $scope = isset($rule['scope']) ? $rule['scope'] : 0;
         $scopeString = '';
         if ($scope) {
-            $scopes       = [
+            $scopes = [
                 self::SCOPE_CAMPAIGN,
                 self::SCOPE_CATEGORY,
                 self::SCOPE_UTM_SOURCE,
@@ -293,10 +293,10 @@ class CacheRepository extends CommonRepository
         }
 
         // Generate matching string.
-        $matching       = isset($rule['matching']) ? $rule['matching'] : 0;
+        $matching = isset($rule['matching']) ? $rule['matching'] : 0;
         $matchingString = '';
         if ($matching) {
-            $matches         = [
+            $matches = [
                 self::MATCHING_ADDRESS,
                 self::MATCHING_EMAIL,
                 self::MATCHING_EXPLICIT,
@@ -320,7 +320,7 @@ class CacheRepository extends CommonRepository
         }
 
         // Generate duration string.
-        $duration       = isset($rule['duration']) ? $rule['duration'] : null;
+        $duration = isset($rule['duration']) ? $rule['duration'] : null;
         $durationString = '';
         if ($duration) {
             $durationString = $this->translator->trans('mautic.contactsource.rule.duration.'.$duration);
@@ -368,9 +368,9 @@ class CacheRepository extends CommonRepository
         // Generate our filters based on the rules provided.
         $filters = [];
         foreach ($rules as $rule) {
-            $orx      = [];
+            $orx = [];
             $matching = $rule['matching'];
-            $scope    = $rule['scope'];
+            $scope = $rule['scope'];
             $duration = $rule['duration'];
 
             // Match explicit
@@ -406,7 +406,7 @@ class CacheRepository extends CommonRepository
             if ($matching & self::MATCHING_ADDRESS) {
                 $address1 = trim(ucwords($contact->getAddress1()));
                 if (!empty($address1)) {
-                    $city    = trim(ucwords($contact->getCity()));
+                    $city = trim(ucwords($contact->getCity()));
                     $zipcode = trim(ucwords($contact->getZipcode()));
 
                     // Only support this level of matching if we have enough for a valid address.
@@ -482,7 +482,7 @@ class CacheRepository extends CommonRepository
     private function phoneValidate($phone)
     {
         $result = null;
-        $phone  = trim($phone);
+        $phone = trim($phone);
         if (!empty($phone)) {
             if (!$this->phoneHelper) {
                 $this->phoneHelper = new PhoneNumberHelper();
@@ -509,19 +509,22 @@ class CacheRepository extends CommonRepository
      *
      * @throws DBALException
      */
-    public function deleteExpired($limit = 10000, $delay = 1)
+    public function deleteExpired(DateTime $from = null, $limit = 10000, $delay = 1)
     {
-        $start    = strtotime('-1 month -1 day');
+        if (is_null($from)) {
+            $from = new DateTime('-1 month -1 day');
+        }
         $rowCount = $limit;
-        $deleted  = 0;
+        $deleted = 0;
         while ($rowCount === $limit) {
             $conn = $this->getEntityManager()->getConnection();
-            $q    = $conn->createQueryBuilder();
+            $q = $conn->createQueryBuilder();
             $q->delete(MAUTIC_TABLE_PREFIX.$this->getTableName());
             $q->where(
                 $q->expr()->isNotNull('contactsource_id'),
-                $q->expr()->lt('date_added', 'FROM_UNIXTIME('.$start.')')
+                $q->expr()->lt('date_added', 'FROM_UNIXTIME(:from)')
             );
+            $q->setParameter('from', $from->format('U'));
             $platform = $conn->getDatabasePlatform();
             $rowCount = $conn->executeUpdate($platform->modifyLimitQuery($q->getSQL(), $limit));
             $deleted += $rowCount;
