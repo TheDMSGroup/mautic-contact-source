@@ -8,6 +8,11 @@ use MauticPlugin\MauticContactSourceBundle\Entity\RealTimeCampaignRepository;
 
 class RealTimeCampaignRepositoryTest extends AbstractMauticTestCase
 {
+    /*
+     * @var RealTimeCampaignRepository
+     */
+    private $repo;
+
     /**
      * {@inheritdoc}
      */
@@ -24,7 +29,7 @@ class RealTimeCampaignRepositoryTest extends AbstractMauticTestCase
     public function it_uses_real_time_when_a_single_contact_id_is_set()
     {
         $this->repo = new RealTimeCampaignRepository($this->em);
-        $limiter = new ContactLimiter(1, 1234);
+        $limiter    = new ContactLimiter(1, 1234);
         $this->assertContains(1234, $this->repo->getPendingContactIds(1, $limiter));
     }
 
@@ -32,7 +37,7 @@ class RealTimeCampaignRepositoryTest extends AbstractMauticTestCase
     public function it_doesnt_use_real_time_if_constant_is_not_defined()
     {
         $contactIds = [1, 2, 3, 4, 5];
-        $limiter = new ContactLimiter(5, null, null, null, $contactIds, null, null, 5);
+        $limiter    = new ContactLimiter(5, null, null, null, $contactIds, null, null, 5);
 
         $ids = $this->repo->getPendingContactIds(1, $limiter);
 
