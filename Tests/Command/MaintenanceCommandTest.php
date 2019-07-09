@@ -22,6 +22,14 @@ class MaintenanceCommandTest extends MauticMysqlTestCase
         $this->em->flush();
         $this->assertEquals($expiredCount, $this->getCacheCount());
 
+        $freshCount = 20;
+        for ($i = 0; $i < $freshCount; ++$i) {
+            $cache = $this->createCache(new DateTime());
+            $this->em->persist($cache);
+        }
+        $this->em->flush();
+        $this->assertEquals(($freshCount + $expiredCount), $this->getCacheCount());
+
         $cmd    =  (new Application(static::$kernel))->find('mautic:contactsource:maintenance');
         $tester = new CommandTester($cmd);
         $tester->execute([
@@ -31,7 +39,7 @@ class MaintenanceCommandTest extends MauticMysqlTestCase
         $output = $tester->getDisplay();
 
         $this->assertContains("Deleted {$expiredCount} expired cache entries", $output);
-        $this->assertEquals(0, $this->getCacheCount());
+        $this->assertEquals($freshCount, $this->getCacheCount());
     }
 
     /**
