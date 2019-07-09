@@ -89,7 +89,7 @@ class ContactSourceModel extends FormModel
      */
     public function getCampaignList(ContactSource $contactSource)
     {
-        $result           = $campaignIds = [];
+        $result           = $campaignIds           = [];
         $campaignSettings = json_decode($contactSource->getCampaignSettings(), true);
         if (!empty($campaignSettings)) {
             foreach ($campaignSettings as $campaignSetting) {
@@ -565,7 +565,7 @@ class ContactSourceModel extends FormModel
             }
         }
 
-        $event   = $this->dispatcher->dispatch(
+        $event = $this->dispatcher->dispatch(
             ContactSourceEvents::TIMELINE_ON_GENERATE,
             new ContactSourceTimelineEvent(
                 $contactSource,
@@ -658,21 +658,24 @@ class ContactSourceModel extends FormModel
             foreach ($campaignSettingsAll->campaigns as $campaign) {
                 // Establish parameters from campaign settings.
                 if (!empty($campaign->limits) && isset($campaign->campaignId)) {
-                    $id                = intval($campaign->campaignId);
-                    $name              = $campaignModel->getEntity($id)->getName();
-                    $limitRules        = new \stdClass();
-                    $limitRules->rules = $campaign->limits;
-                    $limits            = $cacheModel->evaluateLimits($limitRules, $id, false, true);
-                    if ($limits) {
-                        $campaignLimits[] = [
-                            'campaignId' => $id,
-                            'limits'     => $limits,
-                            'name'       => $name,
-                            'link'       => $this->buildUrl(
-                                'mautic_campaign_action',
-                                ['objectAction' => 'view', 'objectId' => $id]
-                            ),
-                        ];
+                    $id       = intval($campaign->campaignId);
+                    $campaign = $campaignModel->getEntity($id);
+                    if (null !== $campaign) {
+                        $name              = $campaign->getName();
+                        $limitRules        = new \stdClass();
+                        $limitRules->rules = $campaign->limits;
+                        $limits            = $cacheModel->evaluateLimits($limitRules, $id, false, true);
+                        if ($limits) {
+                            $campaignLimits[] = [
+                                'campaignId' => $id,
+                                'limits'     => $limits,
+                                'name'       => $name,
+                                'link'       => $this->buildUrl(
+                                    'mautic_campaign_action',
+                                    ['objectAction' => 'view', 'objectId' => $id]
+                                ),
+                            ];
+                        }
                     }
                 }
             }
@@ -734,7 +737,7 @@ class ContactSourceModel extends FormModel
                             'name' => 'Unlimited',
                         ],
                     ];
-                    $campaignLimits[]  = [
+                    $campaignLimits[] = [
                         'sourceId' => $source['id'],
                         'limits'   => $limitsPlaceholder,
                         'name'     => $source['name'],

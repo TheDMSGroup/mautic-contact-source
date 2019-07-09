@@ -114,6 +114,19 @@ class SourceIntegration extends AbstractIntegration
                 ]
             );
             $builder->add(
+                'parallel_ram',
+                'integer',
+                [
+                    'label'      => 'mautic.contactsource.form.parallel_ram',
+                    'data'       => !isset($data['parallel_ram']) ? '20' : $data['parallel_ram'],
+                    'label_attr' => ['class' => 'control-label'],
+                    'attr'       => [
+                        'tooltip' => 'mautic.contactsource.api.parallel_ram.tooltip',
+                    ],
+                    'required'   => true,
+                ]
+            );
+            $builder->add(
                 'parallel_realtime',
                 'yesno_button_group',
                 [
@@ -201,6 +214,19 @@ class SourceIntegration extends AbstractIntegration
                         'class'   => 'form-control',
                         'tooltip' => 'mautic.contactsource.form.email_dns_check.tooltip',
                     ],
+                ]
+            );
+            $builder->add(
+                'field_group_exclusions',
+                'text',
+                [
+                    'label'      => 'mautic.contactsource.field_group.exclusions',
+                    'data'       => isset($data['field_group_exclusions']) ? $data['field_group_exclusions'] : 'system,enhancement',
+                    'label_attr' => ['class' => 'control-label'],
+                    'attr'       => [
+                        'tooltip' => 'mautic.contactsource.field_group_exclusions.tooltip',
+                    ],
+                    'required'   => false,
                 ]
             );
         }

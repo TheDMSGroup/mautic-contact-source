@@ -28,6 +28,7 @@ use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\LeadDevice as ContactDevice;
 use Mautic\LeadBundle\Entity\UtmTag;
+use Mautic\LeadBundle\Entity\UtmTagRepository;
 use Mautic\LeadBundle\Model\FieldModel;
 use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use Mautic\PluginBundle\Entity\IntegrationEntity;
@@ -930,6 +931,9 @@ class Api
 
                 // Apply to the contact for save later.
                 $this->getUtmTag()->setLead($contact);
+                /** @var UtmTagRepository $utmRepo */
+                $utmRepo = $this->em->getRepository('MauticLeadBundle:UtmTag');
+                $utmRepo->saveEntity($this->getUtmTag(), false);
                 $contact->setUtmTags($this->getUtmTag());
             }
 
@@ -1014,6 +1018,7 @@ class Api
                             'type'         => $field['type'],
                             'defaultValue' => $field['defaultValue'],
                             'label'        => $field['label'],
+                            'group'        => $field['group'],
                         ];
                     }
                     // Add IP as an allowed import field.
@@ -1022,6 +1027,7 @@ class Api
                         'type'         => 'text',
                         'defaultValue' => '',
                         'label'        => 'IP Addresses (comma delimited)',
+                        'field_group'  => 'system',
                     ];
 
                     // Get available UTM fields and their setters.
@@ -1812,6 +1818,30 @@ class Api
             $this->logger->error('Parallel processing not available in Windows.');
 
             return $this;
+        }
+
+        $ramRequiredPercent = intval($this->getIntegrationSetting('parallel_ram', 20));
+        if ($ramRequiredPercent > 0) {
+            try {
+                $memInfo = file_get_contents('/proc/meminfo');
+                preg_match('#MemTotal:[\s\t]+([\d]+)\s+kB#', $memInfo, $a);
+                if (isset($a[1])) {
+                    $memTotal = (int) $a[1];
+                    preg_match('#MemAvailable:[\s\t]+([\d]+)\s+kB#', $memInfo, $b);
+                    if (isset($b[1])) {
+                        $memAvailable = (int) $b[1];
+                        if (100 / $memTotal * $memAvailable < $ramRequiredPercent) {
+                            $this->logger->debug('Parallel processing aborted due to low RAM.');
+
+                            return $this;
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                $this->logger->error('Parallel processing could not discern available RAM.');
+
+                return $this;
+            }
         }
 
         if (!$allowFork || !function_exists('pcntl_fork') || PHP_SAPI !== 'cli') {
