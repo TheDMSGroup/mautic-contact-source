@@ -19,6 +19,12 @@ class PublicController extends CommonController
 {
     use ContactSourceAccessTrait;
 
+    const COMMON_FIELDS = [
+        'firstname' => 'Greg',
+        'lastname'  => 'Scott',
+        'email'     => 'gregscott@email.com',
+    ];
+
     /**
      * @param Request $request
      * @param null    $sourceId
@@ -37,10 +43,17 @@ class PublicController extends CommonController
         $object,
         $action
     ) {
+        $parameters    = [];
+        $campaigns     = [];
+
+        $parameters['commonFields'] = self::COMMON_FIELDS;
+
         if (!$this->get('mautic.security')->isAnonymous()) {
             $contactSource = $this->checkContactSourceAccess($sourceId, 'view');
             if ($contactSource instanceof ContactSource) {
-                $request->request->set('token', $contactSource->getToken());
+                $token               = $contactSource->getToken();
+                $parameters['token'] = $token;
+                $request->request->set('token', $token);
             }
         }
 
@@ -54,8 +67,7 @@ class PublicController extends CommonController
             ->handleInputPublic();
 
         $result        = $ApiModel->getResult();
-        $parameters    = [];
-        $campaigns     = [];
+
         $contactSource = $ApiModel->getContactSource();
         if ($contactSource) {
             $contactSourceModel = $this->container->get('mautic.contactsource.model.contactsource');
@@ -83,8 +95,20 @@ class PublicController extends CommonController
         $parameters['global']['domain'] = rtrim('/', $parameters['global']['domain']);
         $parameters['source']           = isset($result['source']) ? $result['source'] : null;
         $parameters['sourceId']         = $sourceId;
-        $parameters['FieldList']        = $ApiModel->getAllowedFields(false);
+        $parameters['FieldList']        = $ApiModel->getAllowedFields(true);
         $parameters['authenticated']    = $result['authenticated'];
+
+        // Remove fields in Excluded Groups (set in integration settings)
+        if (!empty($featureSettings['field_group_exclusions'])) {
+            $excludedGroups = explode(',', $featureSettings['field_group_exclusions']);
+
+            foreach ($parameters['FieldList'] as $fieldIndex => $fieldValues) {
+                if (in_array($fieldValues['group'], $excludedGroups)) {
+                    unset($parameters['FieldList'][$fieldIndex]);
+                }
+            }
+        }
+
         if (!isset($result['campaign']['name']) && isset($result['source']['name'])) {
             // No valid campaign specified, should show the listing of all campaigns.
             $parameters['title'] = $this->translator->trans(

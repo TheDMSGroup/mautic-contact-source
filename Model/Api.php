@@ -28,6 +28,7 @@ use Mautic\EmailBundle\Helper\EmailValidator;
 use Mautic\LeadBundle\Entity\Lead as Contact;
 use Mautic\LeadBundle\Entity\LeadDevice as ContactDevice;
 use Mautic\LeadBundle\Entity\UtmTag;
+use Mautic\LeadBundle\Entity\UtmTagRepository;
 use Mautic\LeadBundle\Model\FieldModel;
 use Mautic\LeadBundle\Model\LeadModel as ContactModel;
 use Mautic\PluginBundle\Entity\IntegrationEntity;
@@ -930,6 +931,9 @@ class Api
 
                 // Apply to the contact for save later.
                 $this->getUtmTag()->setLead($contact);
+                /** @var UtmTagRepository $utmRepo */
+                $utmRepo = $this->em->getRepository('MauticLeadBundle:UtmTag');
+                $utmRepo->saveEntity($this->getUtmTag(), false);
                 $contact->setUtmTags($this->getUtmTag());
             }
 
@@ -1014,6 +1018,7 @@ class Api
                             'type'         => $field['type'],
                             'defaultValue' => $field['defaultValue'],
                             'label'        => $field['label'],
+                            'group'        => $field['group'],
                         ];
                     }
                     // Add IP as an allowed import field.
@@ -1022,6 +1027,7 @@ class Api
                         'type'         => 'text',
                         'defaultValue' => '',
                         'label'        => 'IP Addresses (comma delimited)',
+                        'field_group'  => 'system',
                     ];
 
                     // Get available UTM fields and their setters.
