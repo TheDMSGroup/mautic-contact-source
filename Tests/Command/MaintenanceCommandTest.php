@@ -14,21 +14,13 @@ class MaintenanceCommandTest extends MauticMysqlTestCase
     /** @test */
     public function it_deletes_old_caches_from_one_month_and_one_day_ago_by_default()
     {
-        $expiredCaches = [];
         $expiredCount  = 42;
         for ($i = 0; $i < $expiredCount; ++$i) {
             $cache = $this->createCache(new DateTime('-2 months'));
             $this->em->persist($cache);
         }
         $this->em->flush();
-
-        /** @var CacheRepository $repo */
-        $repo = $this->em->getRepository(Cache::class);
-        $q    = $repo->createQueryBuilder('c')
-                    ->select('COUNT(c.id)')->getQuery();
-        $this->assertEquals($expiredCount, $q->getSingleScalarResult());
-
-        $freshCaches = [];
+        $this->assertEquals($expiredCount, $this->getCacheCount());
 
         $cmd    =  (new Application(static::$kernel))->find('mautic:contactsource:maintenance');
         $tester = new CommandTester($cmd);
@@ -39,7 +31,7 @@ class MaintenanceCommandTest extends MauticMysqlTestCase
         $output = $tester->getDisplay();
 
         $this->assertContains("Deleted {$expiredCount} expired cache entries", $output);
-        $this->assertEquals(0, $q->getSingleScalarResult());
+        $this->assertEquals(0, $this->getCacheCount());
     }
 
     /**
