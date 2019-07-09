@@ -114,6 +114,19 @@ class SourceIntegration extends AbstractIntegration
                 ]
             );
             $builder->add(
+                'parallel_ram',
+                'integer',
+                [
+                    'label'      => 'mautic.contactsource.form.parallel_ram',
+                    'data'       => !isset($data['parallel_ram']) ? '20' : $data['parallel_ram'],
+                    'label_attr' => ['class' => 'control-label'],
+                    'attr'       => [
+                        'tooltip' => 'mautic.contactsource.api.parallel_ram.tooltip',
+                    ],
+                    'required'   => true,
+                ]
+            );
+            $builder->add(
                 'parallel_realtime',
                 'yesno_button_group',
                 [
