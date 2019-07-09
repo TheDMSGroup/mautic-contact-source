@@ -502,6 +502,7 @@ class CacheRepository extends CommonRepository
     /**
      * Delete all Cache entities that are no longer needed for duplication/exclusivity/limit checks.
      *
+     * @param \DateTime $from
      * @param int $limit
      * @param int $delay
      *
@@ -509,10 +510,10 @@ class CacheRepository extends CommonRepository
      *
      * @throws DBALException
      */
-    public function deleteExpired(DateTime $from = null, $limit = 10000, $delay = 1)
+    public function deleteExpired(\DateTime $from = null, $limit = 10000, $delay = 1)
     {
         if (is_null($from)) {
-            $from = new DateTime('-1 month -1 day');
+            $from = new \DateTime('-1 month -1 day');
         }
         $rowCount = $limit;
         $deleted = 0;
@@ -522,9 +523,8 @@ class CacheRepository extends CommonRepository
             $q->delete(MAUTIC_TABLE_PREFIX.$this->getTableName());
             $q->where(
                 $q->expr()->isNotNull('contactsource_id'),
-                $q->expr()->lt('date_added', 'FROM_UNIXTIME(:from)')
+                $q->expr()->lt('date_added', 'FROM_UNIXTIME('. $from->format('U') . ')')
             );
-            $q->setParameter('from', $from->format('U'));
             $platform = $conn->getDatabasePlatform();
             $rowCount = $conn->executeUpdate($platform->modifyLimitQuery($q->getSQL(), $limit));
             $deleted += $rowCount;
