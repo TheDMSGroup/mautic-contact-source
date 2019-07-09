@@ -216,6 +216,19 @@ class SourceIntegration extends AbstractIntegration
                     ],
                 ]
             );
+            $builder->add(
+                'field_group_exclusions',
+                'text',
+                [
+                    'label'      => 'mautic.contactsource.field_group.exclusions',
+                    'data'       => isset($data['field_group_exclusions']) ? $data['field_group_exclusions'] : 'system,enhancement',
+                    'label_attr' => ['class' => 'control-label'],
+                    'attr'       => [
+                        'tooltip' => 'mautic.contactsource.field_group_exclusions.tooltip',
+                    ],
+                    'required'   => false,
+                ]
+            );
         }
     }
 }
