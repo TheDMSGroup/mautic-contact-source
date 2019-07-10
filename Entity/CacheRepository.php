@@ -22,21 +22,21 @@ use MauticPlugin\MauticContactSourceBundle\Helper\UtmSourceHelper;
  */
 class CacheRepository extends CommonRepository
 {
-    const MATCHING_ADDRESS  = 16;
+    const MATCHING_ADDRESS = 16;
 
-    const MATCHING_EMAIL    = 2;
+    const MATCHING_EMAIL = 2;
 
     const MATCHING_EXPLICIT = 1;
 
-    const MATCHING_MOBILE   = 8;
+    const MATCHING_MOBILE = 8;
 
-    const MATCHING_PHONE    = 4;
+    const MATCHING_PHONE = 4;
 
-    const SCOPE_CAMPAIGN    = 1;
+    const SCOPE_CAMPAIGN = 1;
 
-    const SCOPE_CATEGORY    = 2;
+    const SCOPE_CATEGORY = 2;
 
-    const SCOPE_UTM_SOURCE  = 4;
+    const SCOPE_UTM_SOURCE = 4;
 
     /** @var PhoneNumberHelper */
     protected $phoneHelper;
@@ -276,7 +276,7 @@ class CacheRepository extends CommonRepository
         $scope       = isset($rule['scope']) ? $rule['scope'] : 0;
         $scopeString = '';
         if ($scope) {
-            $scopes       = [
+            $scopes = [
                 self::SCOPE_CAMPAIGN,
                 self::SCOPE_CATEGORY,
                 self::SCOPE_UTM_SOURCE,
@@ -296,7 +296,7 @@ class CacheRepository extends CommonRepository
         $matching       = isset($rule['matching']) ? $rule['matching'] : 0;
         $matchingString = '';
         if ($matching) {
-            $matches         = [
+            $matches = [
                 self::MATCHING_ADDRESS,
                 self::MATCHING_EMAIL,
                 self::MATCHING_EXPLICIT,
@@ -502,16 +502,19 @@ class CacheRepository extends CommonRepository
     /**
      * Delete all Cache entities that are no longer needed for duplication/exclusivity/limit checks.
      *
-     * @param int $limit
-     * @param int $delay
+     * @param \DateTime $from
+     * @param int       $limit
+     * @param int       $delay
      *
      * @return int
      *
      * @throws DBALException
      */
-    public function deleteExpired($limit = 10000, $delay = 1)
+    public function deleteExpired(\DateTime $from = null, $limit = 10000, $delay = 1)
     {
-        $start    = strtotime('-1 month -1 day');
+        if (is_null($from)) {
+            $from = new \DateTime('-1 month -1 day');
+        }
         $rowCount = $limit;
         $deleted  = 0;
         while ($rowCount === $limit) {
@@ -520,7 +523,7 @@ class CacheRepository extends CommonRepository
             $q->delete(MAUTIC_TABLE_PREFIX.$this->getTableName());
             $q->where(
                 $q->expr()->isNotNull('contactsource_id'),
-                $q->expr()->lt('date_added', 'FROM_UNIXTIME('.$start.')')
+                $q->expr()->lt('date_added', 'FROM_UNIXTIME('.$from->format('U').')')
             );
             $platform = $conn->getDatabasePlatform();
             $rowCount = $conn->executeUpdate($platform->modifyLimitQuery($q->getSQL(), $limit));
