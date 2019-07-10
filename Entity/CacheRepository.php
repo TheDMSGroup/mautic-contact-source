@@ -69,10 +69,10 @@ class CacheRepository extends CommonRepository
     ) {
         $results = [];
         foreach ($rules as $rule) {
-            $filters = [];
-            $andx = [];
-            $value = $rule['value'];
-            $scope = $rule['scope'];
+            $filters  = [];
+            $andx     = [];
+            $value    = $rule['value'];
+            $scope    = $rule['scope'];
             $duration = $rule['duration'];
             $quantity = $rule['quantity'];
 
@@ -109,10 +109,10 @@ class CacheRepository extends CommonRepository
             ];
 
             // Run the query to get the count.
-            $count = $this->applyFilters($filters, true);
-            $hit = $count >= $quantity;
-            $percent = 100 / $quantity * $count;
-            $percent = round($percent > 100 ? 100 : $percent, 2);
+            $count     = $this->applyFilters($filters, true);
+            $hit       = $count >= $quantity;
+            $percent   = 100 / $quantity * $count;
+            $percent   = round($percent > 100 ? 100 : $percent, 2);
             $results[] = [
                 'logCount'   => $count,
                 'hit'        => $hit,
@@ -224,7 +224,7 @@ class CacheRepository extends CommonRepository
                     }
                     $properties = $set['andx'];
                 } else {
-                    $expr = $query->expr();
+                    $expr       = $query->expr();
                     $properties = $set;
                 }
                 if (isset($expr)) {
@@ -270,10 +270,10 @@ class CacheRepository extends CommonRepository
     public function translateRule($rule, $mode = 'limit')
     {
         $quantity = isset($rule['quantity']) ? $rule['quantity'] : 0;
-        $value = isset($rule['value']) ? $rule['value'] : null;
+        $value    = isset($rule['value']) ? $rule['value'] : null;
 
         // Generate scope string.
-        $scope = isset($rule['scope']) ? $rule['scope'] : 0;
+        $scope       = isset($rule['scope']) ? $rule['scope'] : 0;
         $scopeString = '';
         if ($scope) {
             $scopes = [
@@ -293,7 +293,7 @@ class CacheRepository extends CommonRepository
         }
 
         // Generate matching string.
-        $matching = isset($rule['matching']) ? $rule['matching'] : 0;
+        $matching       = isset($rule['matching']) ? $rule['matching'] : 0;
         $matchingString = '';
         if ($matching) {
             $matches = [
@@ -320,7 +320,7 @@ class CacheRepository extends CommonRepository
         }
 
         // Generate duration string.
-        $duration = isset($rule['duration']) ? $rule['duration'] : null;
+        $duration       = isset($rule['duration']) ? $rule['duration'] : null;
         $durationString = '';
         if ($duration) {
             $durationString = $this->translator->trans('mautic.contactsource.rule.duration.'.$duration);
@@ -368,9 +368,9 @@ class CacheRepository extends CommonRepository
         // Generate our filters based on the rules provided.
         $filters = [];
         foreach ($rules as $rule) {
-            $orx = [];
+            $orx      = [];
             $matching = $rule['matching'];
-            $scope = $rule['scope'];
+            $scope    = $rule['scope'];
             $duration = $rule['duration'];
 
             // Match explicit
@@ -406,7 +406,7 @@ class CacheRepository extends CommonRepository
             if ($matching & self::MATCHING_ADDRESS) {
                 $address1 = trim(ucwords($contact->getAddress1()));
                 if (!empty($address1)) {
-                    $city = trim(ucwords($contact->getCity()));
+                    $city    = trim(ucwords($contact->getCity()));
                     $zipcode = trim(ucwords($contact->getZipcode()));
 
                     // Only support this level of matching if we have enough for a valid address.
@@ -482,7 +482,7 @@ class CacheRepository extends CommonRepository
     private function phoneValidate($phone)
     {
         $result = null;
-        $phone = trim($phone);
+        $phone  = trim($phone);
         if (!empty($phone)) {
             if (!$this->phoneHelper) {
                 $this->phoneHelper = new PhoneNumberHelper();
@@ -503,8 +503,8 @@ class CacheRepository extends CommonRepository
      * Delete all Cache entities that are no longer needed for duplication/exclusivity/limit checks.
      *
      * @param \DateTime $from
-     * @param int $limit
-     * @param int $delay
+     * @param int       $limit
+     * @param int       $delay
      *
      * @return int
      *
@@ -516,14 +516,14 @@ class CacheRepository extends CommonRepository
             $from = new \DateTime('-1 month -1 day');
         }
         $rowCount = $limit;
-        $deleted = 0;
+        $deleted  = 0;
         while ($rowCount === $limit) {
             $conn = $this->getEntityManager()->getConnection();
-            $q = $conn->createQueryBuilder();
+            $q    = $conn->createQueryBuilder();
             $q->delete(MAUTIC_TABLE_PREFIX.$this->getTableName());
             $q->where(
                 $q->expr()->isNotNull('contactsource_id'),
-                $q->expr()->lt('date_added', 'FROM_UNIXTIME('. $from->format('U') . ')')
+                $q->expr()->lt('date_added', 'FROM_UNIXTIME('.$from->format('U').')')
             );
             $platform = $conn->getDatabasePlatform();
             $rowCount = $conn->executeUpdate($platform->modifyLimitQuery($q->getSQL(), $limit));

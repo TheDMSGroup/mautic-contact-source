@@ -54,7 +54,7 @@ class MaintenanceCommand extends ModeratedCommand
         $cacheModel = $container->get('mautic.contactsource.model.cache');
         $output->writeln(
             '<info>'.
-                $translator->trans( 'mautic.contactsource.maintenance.running')
+                $translator->trans('mautic.contactsource.maintenance.running')
             .'</info>'
         );
         $deleted = $cacheModel->getRepository()->deleteExpired();
