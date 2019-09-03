@@ -22,6 +22,8 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
  */
 class Stat
 {
+    use BigIntUnsignedTrait;
+
     /**
      * Real-time:     Indicates that the contact was accepted by one or more clients.
      * Not real-time: Indicates we accepted the contact outright.
@@ -132,7 +134,7 @@ class Stat
         $builder->setTable('contactsource_stats')
             ->setCustomRepositoryClass('MauticPlugin\MauticContactSourceBundle\Entity\StatRepository');
 
-        $builder->addId();
+        self::addBigIntUnsignedIdField($builder);
 
         $builder->createManyToOne('contactSource', 'ContactSource')
             ->addJoinColumn('contactsource_id', 'id', true, false, null)

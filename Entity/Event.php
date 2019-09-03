@@ -20,6 +20,8 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
  */
 class Event
 {
+    use BigIntUnsignedTrait;
+
     /**
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
@@ -83,7 +85,7 @@ class Event
             ->addIndex(['contactsource_id', 'date_added'], 'contactsource_id_date_added')
             ->addIndex(['contact_id'], 'contact_id');
 
-        $builder->addId();
+        self::addBigIntUnsignedIdField($builder);
 
         $builder->createManyToOne('contactSource', 'ContactSource')
             ->addJoinColumn('contactsource_id', 'id', true, false, null)
