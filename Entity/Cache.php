@@ -25,6 +25,8 @@ use Mautic\LeadBundle\Entity\Lead as Contact;
  */
 class Cache
 {
+    use BigIntUnsignedTrait;
+
     /** @var int $id */
     private $id;
 
@@ -88,7 +90,7 @@ class Cache
     {
         $builder = new ClassMetadataBuilder($metadata);
 
-        $builder->addId();
+        self::addBigIntUnsignedIdField($builder);
 
         $builder->setTable('contactsource_cache');
 

@@ -931,7 +931,7 @@ class Api
 
                 // Apply to the contact for save later.
                 $this->getUtmTag()->setLead($contact);
-                /** @var UtmTagRepository $utmRepo */
+                /* @var UtmTagRepository $utmRepo */
                 // Randomly causes Doctrine\ORM\ORMInvalidArgumentException in production.
                 // $utmRepo = $this->em->getRepository('MauticLeadBundle:UtmTag');
                 // $utmRepo->saveEntity($this->getUtmTag(), false);
