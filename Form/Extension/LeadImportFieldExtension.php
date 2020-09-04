@@ -64,6 +64,7 @@ class LeadImportFieldExtension extends AbstractTypeExtension
             'utm_content'  => 'mautic.lead.field.utmcontent',
             'utm_medium'   => 'mautic.lead.field.utmmedium',
             'utm_term'     => 'mautic.lead.field.utmterm',
+            'utm_source'   => 'UTM Source (can be overridden by Source)',
         ];
 
         $importChoiceFields = [
